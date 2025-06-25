@@ -13,6 +13,13 @@ return new class extends Migration
     {
         Schema::create('parking_sessions', function (Blueprint $table) {
             $table->id();
+            $table->date('start_date');
+            $table->date('end_date');
+            $table->integer('rate');
+            $table->integer('duration');
+            $table->string('status');
+            $table->foreing('street_id')->references('id')->on('streets')->onDelete('cascade');
+            $table->foreing('car_id')->references('id')->on('cars')->onDelete('cascade');
             $table->timestamps();
         });
     }
