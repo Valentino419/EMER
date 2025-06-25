@@ -13,6 +13,10 @@ return new class extends Migration
     {
         Schema::create('streets', function (Blueprint $table) {
             $table->id();
+            $table->string('name');
+            $table->integer('start_number');
+            $table->integer('end_number');
+            $table->foreing('zone_id')->references('id')->on('zones')->onDelete('cascade');
             $table->timestamps();
         });
     }
