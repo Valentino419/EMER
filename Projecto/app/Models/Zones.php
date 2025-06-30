@@ -3,8 +3,19 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Zones extends Model
+class Zone extends Model
 {
-    //
+    use HasFactory;
+
+    public function streets()
+    {
+        return $this->hasMany(Streets::class, 'id_zones');
+    }
+
+    public function schedules()
+    {
+        return $this->hasMany(Schedules::class, 'id_zones');
+    }
 }
