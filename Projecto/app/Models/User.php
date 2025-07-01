@@ -12,12 +12,14 @@ class User extends Authenticatable
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
    
+     
+    use hasFactory;
    
     public function inspectors(){
         return $this->hasOne(Inspector::class, 'id_class');
     }
     public function settings(){
-        return $this->hasOne(Setting::class, 'user_id');
+        return $this->hasOne(Settings::class, 'user_id');
     }
     public function payments(){
         return $this->hasMany(Payment::class, 'user_id');
@@ -26,19 +28,8 @@ class User extends Authenticatable
         return $this->hasMany(Car::class, 'user_id');
     }
     public function notifications(){
-        return $this->hasMany(Notification::class, 'user_id');
+        return $this->hasMany(Notifications::class, 'user_id');
     }
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
-    protected $fillable = [
-        'name',
-        'email',
-        'password',
-    ];
-
     /**
      * The attributes that should be hidden for serialization.
      *

@@ -19,3 +19,4 @@ class Zone extends Model
         return $this->hasMany(Schedules::class, 'id_zone');
     }
 }
+
