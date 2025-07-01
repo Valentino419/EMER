@@ -16,6 +16,6 @@ class ParkingSession extends Model
 
     public function streets()
     {
-        return $this->belongsTo(Streets::class, 'id_street');
+        return $this->belongsTo(Street::class, 'id_street');
     }
 }
