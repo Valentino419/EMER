@@ -11,11 +11,11 @@ class ParkingSession extends Model
 
     public function cars()
     {
-        return $this->belongsTo(Cars::class, 'id_cars');
+        return $this->belongsTo(Car::class, 'id_car');
     }
 
     public function streets()
     {
-        return $this->belongsTo(Streets::class, 'id_streets');
+        return $this->belongsTo(Streets::class, 'id_street');
     }
 }

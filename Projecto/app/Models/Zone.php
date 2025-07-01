@@ -11,11 +11,11 @@ class Zone extends Model
 
     public function streets()
     {
-        return $this->hasMany(Streets::class, 'id_zones');
+        return $this->hasMany(Streets::class, 'id_zone');
     }
 
     public function schedules()
     {
-        return $this->hasMany(Schedules::class, 'id_zones');
+        return $this->hasMany(Schedules::class, 'id_zone');
     }
 }

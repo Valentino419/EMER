@@ -5,16 +5,16 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Cars extends Model
+class Car extends Model
 {
     use HasFactory;
     
     public function user(){
-        return $this->belongsTo(Users::class, 'id_user');
+        return $this->belongsTo(User::class, 'id_user');
     }
 
     public function infractions(){
-        return $this->hasMany(Infractions::class, 'id_cars');
+        return $this->hasMany(Infraction::class, 'id_cars');
     }
 
     public function parking_sessions(){

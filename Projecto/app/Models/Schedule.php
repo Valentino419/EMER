@@ -5,12 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Payment extends Model
+class Schedules extends Model
 {
     use HasFactory;
 
-    public function users()
-    {
-        return $this->belongsTo(Users::class, 'id_users');
+    public function zones(){
+        return $this->belongsTo(Zone::class, 'id_zone');
     }
 }

@@ -11,7 +11,23 @@ class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
-
+   
+   
+    public function inspectors(){
+        return $this->hasOne(Inspector::class, 'id_class');
+    }
+    public function settings(){
+        return $this->hasOne(Setting::class, 'user_id');
+    }
+    public function payments(){
+        return $this->hasMany(Payment::class, 'user_id');
+    }
+    public function cars(){
+        return $this->hasMany(Car::class, 'user_id');
+    }
+    public function notifications(){
+        return $this->hasMany(Notification::class, 'user_id');
+    }
     /**
      * The attributes that are mass assignable.
      *
@@ -45,4 +61,5 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
 }

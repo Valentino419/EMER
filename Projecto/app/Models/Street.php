@@ -11,11 +11,11 @@ class Street extends Model
 
     public function zones()
     {
-        return $this->belongsTo(Zones::class, 'id_zones');
+        return $this->belongsTo(Zone::class, 'id_zone');
     }
 
     public function parking_Sessions()
     {
-        return $this->hasMany(Parking_Session::class, 'id_streets');
+        return $this->hasMany(Parking_Session::class, 'id_street');
     }
 }

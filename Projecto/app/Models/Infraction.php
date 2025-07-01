@@ -5,15 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Infractions extends Model
+class Infraction extends Model
 {
    use HasFactory;
 
     public function inspectors(){
-        return $this->belongsTo(Inspectors::class, 'id_inspector');
+        return $this->belongsTo(Inspector::class, 'id_inspector');
     }
 
     public function cars(){
-        return $this->belongsTo(Cars::class, 'id_cars');
+        return $this->belongsTo(Car::class, 'id_car');
     }
 }
