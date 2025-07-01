@@ -10,6 +10,6 @@ class Schedules extends Model
     use HasFactory;
 
     public function zones(){
-        return $this->belongsTo(Zones::class, 'id_zone');
+        return $this->belongsTo(Zone::class, 'id_zone');
     }
 }
