@@ -11,7 +11,7 @@ class Zone extends Model
 
     public function streets()
     {
-        return $this->hasMany(Streets::class, 'id_zone');
+        return $this->hasMany(Street::class, 'id_zone');
     }
 
     public function schedules()

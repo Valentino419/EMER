@@ -9,7 +9,7 @@ class Schedules extends Model
 {
     use HasFactory;
 
-    public function zones(){
+    public function zone(){
         return $this->belongsTo(Zone::class, 'id_zone');
     }
 }
