@@ -13,11 +13,10 @@ return new class extends Migration
     {
         Schema::create('cars', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->string('car_plate');
-            $table->unsignedBingInteger('id_user');
+            $table->unsingnedBingInteger('id_user');
             $table->timestamps();
-
-            $table->foreign('id_user')->references('id')->on('users')->onDelete('cascade');
         });
     }
 

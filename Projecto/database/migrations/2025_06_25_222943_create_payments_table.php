@@ -16,7 +16,8 @@ return new class extends Migration
             $table->date('payment_date');
             $table->integer('amount');
             $table->string('description');
-            $table->foreing('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+           
             $table->timestamps();
         });
     }
