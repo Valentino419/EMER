@@ -18,8 +18,9 @@ return new class extends Migration
             $table->integer('rate');
             $table->integer('duration');
             $table->string('status');
-            $table->foreing('street_id')->references('id')->on('streets')->onDelete('cascade');
-            $table->foreing('car_id')->references('id')->on('cars')->onDelete('cascade');
+             $table->foreignId('street_id')->constrained()->onDelete('cascade');
+             $table->foreignId('car_id')->constrained()->onDelete('cascade');
+          
             $table->timestamps();
         });
     }

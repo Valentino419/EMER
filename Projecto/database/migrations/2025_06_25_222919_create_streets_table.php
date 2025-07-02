@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('name');
             $table->integer('start_number');
             $table->integer('end_number');
-            $table->foreing('zone_id')->references('id')->on('zones')->onDelete('cascade');
+            $table->foreignId('zone_id')->constrained()->onDelete('cascade');
             $table->timestamps();
         });
     }
