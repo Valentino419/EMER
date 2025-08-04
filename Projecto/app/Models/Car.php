@@ -8,9 +8,14 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Car extends Model
 {
     use HasFactory;
+
+    protected $fillable = [
+        'car_plate',
+        'user_id',
+    ];
     
     public function user(){
-        return $this->belongsTo(User::class, 'id_user');
+        return $this->belongsTo(User::class);
     }
 
     public function infractions(){

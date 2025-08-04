@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->string('car_plate');
-            $table->unsingnedBingInteger('id_user');
+            $table->unsignedBigInteger('id_user');
             $table->timestamps();
         });
     }
