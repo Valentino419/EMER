@@ -1,64 +1,64 @@
 <?php
+
 namespace App\Http\Controllers;
 
-use App\Models\Car;
-use App\Models\User;
 use Illuminate\Http\Request;
 
 class CarController extends Controller
 {
+    /**
+     * Display a listing of the resource.
+     */
     public function index()
     {
-        $cars = Car::with('user')->get();
-        $users = User::all();
-
-        return view('cars.index', compact('cars','users'));
+        //
     }
 
-    
+    /**
+     * Show the form for creating a new resource.
+     */
     public function create()
     {
-        $users = User::all(); // Para seleccionar el dueño del auto
-        return view('cars.create', compact('users'));
+        //
     }
 
-   
+    /**
+     * Store a newly created resource in storage.
+     */
     public function store(Request $request)
     {
-        $request->validate([
-            'car_plate' => 'required|string|max:10',
-            'user_id' => 'required|exists:users,id'
-        ]);
-
-        Car::create($request->only('car_plate', 'user_id'));
-
-        return redirect()->route('cars.index')->with('success', 'Auto creado correctamente.');
+        //
     }
 
-   
-    public function edit(Car $car)
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
     {
-        $users = User::all();
-        return view('cars.edit', compact('car', 'users'));
+        //
     }
 
-   
-    public function update(Request $request, Car $car)
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
     {
-        $request->validate([
-            'car_plate' => 'required|string|max:10',
-            'user_id' => 'required|exists:users,id'
-        ]);
-
-        $car->update($request->only('car_plate', 'user_id'));
-
-        return redirect()->route('cars.index')->with('success', 'Auto actualizado.');
+        //
     }
 
-   
-    public function destroy(Car $car)
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
     {
-        $car->delete();
-        return redirect()->route('cars.index')->with('success', 'Auto eliminado.');
+        //
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id)
+    {
+        //
     }
 }
