@@ -13,7 +13,7 @@
     @endif
 
     <a href="{{ route('cars.create') }}">Registrar nuevo auto</a>
-
+    @csrf
     <table border="1" cellpadding="5" cellspacing="0">
         <thead>
             <tr>
