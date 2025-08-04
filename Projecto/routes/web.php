@@ -3,6 +3,9 @@
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\CarController;
+
+Route::resource('cars', CarController::class);
 
 Route::get('/', function () {
     return Inertia::render('welcome');
