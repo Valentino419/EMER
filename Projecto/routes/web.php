@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use App\Http\Controllers\UserController;
 
 Route::get('/', function () {
     return Inertia::render('welcome');
@@ -12,6 +13,20 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return Inertia::render('dashboard');
     })->name('dashboard');
 });
+
+Route::resource('users', UserController::class)->names([
+    'index' => 'user.index',
+    'create' => 'user.create',
+    'store' => 'user.store',
+    'edit' => 'user.edit',
+    'update' => 'user.update',
+    'destroy' => 'user.destroy',
+]);
+
+Route::fallback(function () {
+    return view('app');
+});
+
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';
