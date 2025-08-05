@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\CarController;
+use App\Http\Controllers\ZoneController;
 
 Route::resource('cars', CarController::class);
 
@@ -25,6 +26,16 @@ Route::resource('users', UserController::class)->names([
     'update' => 'user.update',
     'destroy' => 'user.destroy',
 ]);
+
+Route::resource('zones', ZoneController::class)->names([
+    'index' => 'zone.index',
+    'create' => 'zone.create',
+    'store' => 'zone.store',
+    'edit' => 'zone.edit',
+    'update' => 'zone.update',
+    'destroy' => 'zone.destroy',
+]);
+
 
 Route::fallback(function () {
     return view('app');
