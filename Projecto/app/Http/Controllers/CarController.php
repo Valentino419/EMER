@@ -2,63 +2,63 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Car;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class CarController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    // Mostrar todos los autos
     public function index()
     {
-        
+        //
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
+    // Mostrar el formulario de creación
     public function create()
     {
-        //
+        $users = User::all();
+        return view('cars.create', compact('users'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+    // Guardar un nuevo auto
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'car_plate' => 'required|string|max:255',
+            'user_id' => 'required|exists:users,id',
+        ]);
+
+        Car::create($request->only('car_plate', 'user_id'));
+
+        return redirect()->route('cars.index')->with('success', 'Auto creado correctamente.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    // Mostrar el formulario de edición
+    public function edit(Car $car)
     {
-        //
+        $users = User::all();
+        return view('cars.edit', compact('car', 'users'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    // Actualizar un auto
+    public function update(Request $request, Car $car)
     {
-        //
+        $request->validate([
+            'car_plate' => 'required|string|max:255',
+            'user_id' => 'required|exists:users,id',
+        ]);
+
+        $car->update($request->only('car_plate', 'user_id'));
+
+        return redirect()->route('cars.index')->with('success', 'Auto actualizado correctamente.');
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    // Eliminar un auto
+    public function destroy(Car $car)
     {
-        //
-    }
+        $car->delete();
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        return redirect()->route('cars.index')->with('success', 'Auto eliminado correctamente.');
     }
 }
