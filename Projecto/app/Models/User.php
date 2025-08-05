@@ -11,23 +11,28 @@ class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
-   
-     
+
+
     use hasFactory;
-   
-    public function inspectors(){
+
+    public function inspectors()
+    {
         return $this->hasOne(Inspector::class, 'id_class');
     }
-    public function settings(){
+    public function settings()
+    {
         return $this->hasOne(Setting::class, 'user_id');
     }
-    public function payments(){
+    public function payments()
+    {
         return $this->hasMany(Payment::class, 'user_id');
     }
-    public function cars(){
+    public function cars()
+    {
         return $this->hasMany(Car::class, 'user_id');
     }
-    public function notifications(){
+    public function notifications()
+    {
         return $this->hasMany(Notification::class, 'user_id');
     }
     /**
@@ -39,7 +44,14 @@ class User extends Authenticatable
         'password',
         'remember_token',
     ];
+    protected $fillable = [
+        'name',
+        'surname',
+        'email',
+        'dni',
+        'password',
 
+    ];
     /**
      * Get the attributes that should be cast.
      *
@@ -52,5 +64,4 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
-
 }

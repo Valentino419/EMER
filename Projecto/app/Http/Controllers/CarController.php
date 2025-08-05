@@ -11,7 +11,8 @@ class CarController extends Controller
     // Mostrar todos los autos
     public function index()
     {
-        //
+        $cars = Car::with('user')->get();
+        return view('cars.index',compact('cars'));
     }
 
     // Mostrar el formulario de creación
