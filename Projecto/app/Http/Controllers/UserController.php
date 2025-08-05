@@ -12,7 +12,7 @@ class UserController extends Controller
      */
     public function index()
     {
-        $users= User::all();
+        $users = User::all();
         return view('User.index', compact('users'));
     }
 
@@ -21,7 +21,7 @@ class UserController extends Controller
      */
     public function create()
     {
-        $users= User::all();
+        $users = User::all();
         return view('User.create', compact('users'));
     }
 
@@ -30,13 +30,13 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        $user= User::create([
-            'name'=>$request->type->name,
-            'surname'=>$request->type->surname,
-            'dni'=>$request->type->dni,
-            'dni'=>$request->type->dni,
-            'email'=>$request->type->email,
-            'password'=>$request->type->password,
+        $user = User::create([
+            'name' => $request->type->name,
+            'surname' => $request->type->surname,
+            'dni' => $request->type->dni,
+            'dni' => $request->type->dni,
+            'email' => $request->type->email,
+            'password' => $request->type->password,
         ]);
 
         return redirect()->route('user.index');
@@ -45,17 +45,14 @@ class UserController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
-    {
-        
-    }
+    public function show(string $id) {}
 
     /**
      * Show the form for editing the specified resource.
      */
     public function edit(string $id)
     {
-        $user= User::findOrFail($id);
+        $user = User::findOrFail($id);
         return view('user.edit', compact('user'));
     }
 
@@ -64,26 +61,25 @@ class UserController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $request->validate([
-            'name' => 'required',
-            'surname' => 'required',
-            'dni' => 'required',
-            'email' => 'required|max:255',
-            
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'surname' => 'required|string|max:255',
+            'dni' => 'required|string|unique:users,dni,' . $id,
+            'email' => 'required|email|max:255|unique:users,email,' . $id,
         ]);
 
-       $user = User::find($id);
-       $user->update($request->all());
-       return redirect()->route('user.index');
+        $user = User::find($id);
+        $user->update($validated);
+        return redirect()->route('user.index');
     }
-    
+
 
     /**
      * Remove the specified resource from storage.
      */
     public function destroy(string $id)
     {
-        $user= User::findOrFail($id);
+        $user = User::findOrFail($id);
         $user->delete();
 
         return redirect()->route('user.index');
