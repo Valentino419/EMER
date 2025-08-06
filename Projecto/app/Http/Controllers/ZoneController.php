@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Zone;
 
 class ZoneController extends Controller
 {
@@ -11,7 +12,8 @@ class ZoneController extends Controller
      */
     public function index()
     {
-        //
+        $zones= Zone::all();
+        return view('Zone.index', compact('zones'));
     }
 
     /**
@@ -19,7 +21,8 @@ class ZoneController extends Controller
      */
     public function create()
     {
-        //
+        $zones= Zone::all();
+        return view('Zone.create', compact('zones'));
     }
 
     /**
@@ -27,7 +30,12 @@ class ZoneController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $zone= Zone::create([
+            'name'=>$request->type->name,
+            'numeration'=>$request->type->numeration, 
+        ]);
+
+        return redirect()->route('zone.index');
     }
 
     /**
@@ -43,7 +51,8 @@ class ZoneController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $zone= Zone::findOrFail($id);
+        return view('zone.edit', compact('zone'));
     }
 
     /**
@@ -51,7 +60,13 @@ class ZoneController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $request->validate([
+            'name' => 'required',
+            'numeration' => 'required|max:255',
+        ]);
+       $zone = Zone::find($id);
+       $zone->update($request->all());
+       return redirect()->route('zone.index');
     }
 
     /**
@@ -59,6 +74,9 @@ class ZoneController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $zone= Zone::findOrFail($id);
+        $zone->delete();
+
+        return redirect()->route('zone.index');
     }
 }
