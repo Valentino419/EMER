@@ -4,6 +4,9 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\CarController;
+use App\Http\Controllers\InfractionController;
+
+Route::resource('infractions', InfractionController::class);
 
 Route::resource('cars', CarController::class);
 
