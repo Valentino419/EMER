@@ -5,6 +5,9 @@ use Inertia\Inertia;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\CarController;
 use App\Http\Controllers\InfractionController;
+use App\Http\Controllers\InspectorController;
+
+Route::resource('inspectors', InspectorController::class);
 
 Route::resource('infractions', InfractionController::class);
 
