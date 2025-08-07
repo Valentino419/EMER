@@ -10,10 +10,10 @@ class Infraction extends Model
    use HasFactory;
 
     public function inspectors(){
-        return $this->belongsTo(Inspector::class, 'id_inspector');
+        return $this->belongsTo(Inspector::class, 'inspector_id');
     }
 
     public function cars(){
-        return $this->belongsTo(Car::class, 'id_car');
+        return $this->belongsTo(Car::class, 'car_id');
     }
 }

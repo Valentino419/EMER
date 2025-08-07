@@ -2,63 +2,67 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Infraction;
+use App\Models\Inspector;
+use App\Models\Car;
 use Illuminate\Http\Request;
 
 class InfractionController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        $infractions = Infraction::with(['inspector', 'car'])->get();
+        return view('infractions.index', compact('infractions'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        $inspectors = Inspector::all();
+        $cars = Car::all();
+        return view('infractions.create', compact('inspectors', 'cars'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'inspector_id' => 'required|exists:inspectors,id',
+            'car_id' => 'required|exists:cars,id',
+            'fine' => 'required|integer|min:0',
+            'date' => 'required|date',
+            'status' => 'required|string|max:255',
+        ]);
+
+        Infraction::create($request->all());
+
+        return redirect()->route('infractions.index')->with('success', 'Infracción registrada correctamente.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function edit(Infraction $infraction)
     {
-        //
+        $inspectors = Inspector::all();
+        $cars = Car::all();
+        return view('infractions.edit', compact('infraction', 'inspectors', 'cars'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function update(Request $request, Infraction $infraction)
     {
-        //
+        $request->validate([
+            'inspector_id' => 'required|exists:inspectors,id',
+            'car_id' => 'required|exists:cars,id',
+            'fine' => 'required|integer|min:0',
+            'date' => 'required|date',
+            'status' => 'required|string|max:255',
+        ]);
+
+        $infraction->update($request->all());
+
+        return redirect()->route('infractions.index')->with('success', 'Infracción actualizada correctamente.');
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function destroy(Infraction $infraction)
     {
-        //
-    }
+        $infraction->delete();
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        return redirect()->route('infractions.index')->with('success', 'Infracción eliminada correctamente.');
     }
 }
