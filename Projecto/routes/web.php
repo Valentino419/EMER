@@ -14,7 +14,10 @@ use App\Http\Controllers\ParkingSessionController;
 Route::resource('infractions', InfractionController::class);
 
 
->>>>>>> f5e8bc3fb561ca1f612b3f7ed074daab0b55f092
+=========
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\ParkingSessionController;
+>>>>>>>>> Temporary merge branch 2
 Route::resource('cars', CarController::class);
 
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
