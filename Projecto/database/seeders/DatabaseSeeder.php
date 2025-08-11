@@ -5,8 +5,10 @@ namespace Database\Seeders;
 //use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Database\Seeders\ZoneSeeder;
+use Database\Seeders\CarSeeder;
 use App\Models\User;
 use App\Models\Zone;
+use App\Models\Car;
 class DatabaseSeeder extends Seeder
 {
     /**
@@ -21,5 +23,6 @@ class DatabaseSeeder extends Seeder
         //     'email' => 'test@example.com',
         //  ]);
         $this->call(ZoneSeeder::class);
+        $this->call(CarSeeder::class);
     }
 }

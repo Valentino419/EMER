@@ -6,10 +6,9 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\CarController;
 use App\Http\Controllers\InfractionController;
 use App\Http\Controllers\ZoneController;
-
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\ParkingSessionController;
-
 
 Route::resource('infractions', InfractionController::class);
 Route::resource('cars', CarController::class);
@@ -54,6 +53,6 @@ Route::fallback(function () {
     return view('app');
 });
 
-
+Route::get('/dashboard', [DashboardController::class, 'index'])->middleware('auth')->name('dashboard');
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';
