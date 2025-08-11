@@ -10,7 +10,7 @@ class InspectorController extends Controller
 {
     public function index()
     {
-        $inspectors = Inspectors::with('users')->get();
+        $inspectors = Inspectors::with('user')->get();
         return view('inspectors.index', compact('inspectors'));
     }
 
