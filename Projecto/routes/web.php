@@ -10,7 +10,6 @@ use App\Http\Controllers\ZoneController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\ParkingSessionController;
 
-
 Route::resource('infractions', InfractionController::class);
 Route::resource('cars', CarController::class);
 
