@@ -2,63 +2,58 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Inspectors;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class InspectorController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        $inspectors = Inspectors::with('user')->get();
+        return view('inspectors.index', compact('inspectors'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        $users = User::all();
+        return view('inspectors.create', compact('users'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'badge_number' => 'required|string|max:255',
+        ]);
+
+        Inspectors::create($request->all());
+
+        return redirect()->route('inspectors.index')->with('success', 'Inspector creado correctamente.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function edit(Inspectors $inspector)
     {
-        //
+        $usuarios = User::all();
+        return view('inspectors.edit', compact('inspector', 'usuarios'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function update(Request $request, Inspectors $inspector)
     {
-        //
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'badge_number' => 'required|string|max:255',
+        ]);
+
+        $inspector->update($request->all());
+
+        return redirect()->route('inspectors.index')->with('success', 'Inspector actualizado correctamente.');
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function destroy(Inspectors $inspector)
     {
-        //
-    }
+        $inspector->delete();
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        return redirect()->route('inspectors.index')->with('success', 'Inspector eliminado correctamente.');
     }
 }
