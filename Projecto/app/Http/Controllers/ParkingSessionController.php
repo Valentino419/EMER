@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Car;
+use App\Models\Zone;
 
-class Parking_SessionController extends Controller
+class ParkingSessionController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -19,7 +21,10 @@ class Parking_SessionController extends Controller
      */
     public function create()
     {
-        //
+        $cars = Car::all();
+        $zones = Zone::all();
+
+        return view('parking.create', compact('cars', 'zones'));
     }
 
     /**
@@ -27,7 +32,21 @@ class Parking_SessionController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'car_id' => 'required|exists:cars,id',
+            'zone_id' => 'required|exists:zones,id',
+            'estimated_minutes' => 'required|integer|min:15',
+        ]);
+
+        ParkingSession::create([
+            'car_id' => $request->car_id,
+            'zone_id' => $request->zone_id,
+            'start_time' => now(),
+            'estimated_end_time' => now()->addMinutes($request->estimated_minutes),
+            'status' => 'active',
+        ]);
+
+        return redirect()->back()->with('success', '¡Estacionamiento iniciado correctamente!');
     }
 
     /**

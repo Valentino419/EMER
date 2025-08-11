@@ -8,22 +8,27 @@ use App\Http\Controllers\InfractionController;
 use App\Http\Controllers\InspectorController;
 use App\Http\Controllers\ZoneController;
 
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\ParkingSessionController;
+
 Route::resource('inspectors', InspectorController::class);
 
 Route::resource('infractions', InfractionController::class);
-
-
 Route::resource('cars', CarController::class);
+
+Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [LoginController::class, 'login']);
+Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 Route::get('/', function () {
     return Inertia::render('welcome');
 })->name('home');
 
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('dashboard', function () {
-        return Inertia::render('dashboard');
-    })->name('dashboard');
-});
+// Route::middleware(['auth', 'verified'])->group(function () {
+//     Route::get('dashboard', function () {
+//         return Inertia::render('dashboard');
+//     })->name('dashboard');
+// });
 
 Route::resource('users', UserController::class)->names([
     'index' => 'user.index',
@@ -42,6 +47,9 @@ Route::resource('zones', ZoneController::class)->names([
     'update' => 'zone.update',
     'destroy' => 'zone.destroy',
 ]);
+
+Route::get('/parking/create', [ParkingSessionController::class, 'create'])->name('parking.create');
+Route::post('/parking', [ParkingSessionController::class, 'store'])->name('parking.store');
 
 
 Route::fallback(function () {
