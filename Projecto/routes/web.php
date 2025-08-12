@@ -7,13 +7,20 @@ use App\Http\Controllers\CarController;
 use App\Http\Controllers\InfractionController;
 use App\Http\Controllers\InspectorController;
 use App\Http\Controllers\ZoneController;
-
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\ParkingSessionController;
+use App\Http\Controllers\NotificationController;
+
+
+
+Route::get('notifications/{notification}/delete', [NotificationController::class, 'delete'])->name('notifications.delete');
+Route::resource('notifications', NotificationController::class)->except(['edit', 'update', 'show']);
+
 
 Route::resource('inspectors', InspectorController::class);
 
 Route::resource('infractions', InfractionController::class);
+
 Route::resource('cars', CarController::class);
 
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
