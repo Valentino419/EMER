@@ -38,20 +38,18 @@
 
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" /> -->
-
 </html>
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <title>EMER</title>
     <meta charset="UTF-8">
     <title>User Login</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    @routes
-    @viteReactRefresh
-    @vite(['resources/js/app.tsx', "resources/js/pages/{$page['component']}.tsx"])
-    @inertiaHead
+        @routes
+        @viteReactRefresh
+        @vite(['resources/js/app.tsx', "resources/js/pages/{$page['component']}.tsx"])
+        @inertiaHead
     <style>
         body {
             background-color: #f4f5fa;
@@ -73,8 +71,7 @@
             width: 350px;
         }
 
-        .login-container::before,
-        .login-container::after {
+        .login-container::before, .login-container::after {
             content: '';
             position: absolute;
             top: 50%;
@@ -120,14 +117,12 @@
             margin-bottom: 30px;
         }
 
-        input[type="text"],
-        input[type="password"] {
+        input[type="text"], input[type="password"] {
             width: 100%;
             padding: 12px 15px;
             margin: 10px 0;
             border-radius: 8px;
             border: 1px solid #ccc;
-            color: #333;
             font-size: 14px;
         }
 
@@ -158,9 +153,9 @@
             text-decoration: underline;
             cursor: pointer;
         }
+
     </style>
 </head>
-
 <body>
     <div class="login-container">
         <div class="icon">
@@ -168,33 +163,17 @@
         </div>
         <h2>USER LOGIN</h2>
         <p class="subtitle">Welcome to the website</p>
-
         <form method="POST" action="{{ route('login') }}">
-            @if (session('status'))
-                <div style="color: green; margin-bottom: 10px;">
-                    {{ session('status') }}
-                </div>
-            @endif
-            @if ($errors->any())
-                <div style="color: red; margin-bottom: 10px;">
-                    <ul>
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
             @csrf
-            <input type="text" name="email" placeholder="E-mail" value="{{ old('email') }}" autocomplete="email"
-                required>
-            <input type="password" name="password" placeholder="Password" autocomplete="current-password" required>
+            <input type="text" name="email" placeholder="USERNAME" required>
+            <input type="password" name="password" placeholder="PASSWORD" required>
+
             <div class="remember">
                 <input type="checkbox" id="remember" name="remember" style="margin-right: 8px;">
                 <label for="remember">remember me</label>
             </div>
 
             <button type="submit">LOGIN</button>
-
         </form>
 
         <div class="forgot">
@@ -202,5 +181,4 @@
         </div>
     </div>
 </body>
-
 </html>
