@@ -10,12 +10,7 @@ use Carbon\Carbon;
 
 class PaymentController extends Controller
 {
-    public function __construct()
-    {
-        // Middleware para verificar que el usuario tiene el rol adecuado
-        $this->middleware('role:inspector|admin');
-    }
-
+   
     /**
      * Display a listing of the resource.
      */
