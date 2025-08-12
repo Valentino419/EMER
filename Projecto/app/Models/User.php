@@ -16,10 +16,6 @@ class User extends Authenticatable
 
     use hasFactory;
 
-    public function inspectors()
-    {
-        return $this->hasOne(Inspector::class, 'id_class');
-    }
     public function settings()
     {
         return $this->hasOne(Setting::class, 'user_id');
@@ -35,6 +31,14 @@ class User extends Authenticatable
     public function notifications()
     {
         return $this->hasMany(Notification::class, 'user_id');
+    }
+      public function role()
+    {
+        return $this->belongsTo(Role::class,'id_role');
+    } 
+    public function infractions()
+    {
+        return $this->hasMany(Infraction::class, 'id_user');
     }
     /**
      * The attributes that should be hidden for serialization.

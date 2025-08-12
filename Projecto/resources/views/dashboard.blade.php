@@ -1,55 +1,13 @@
-<!-- <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" @class(['dark' => ($appearance ?? 'system') == 'dark'])>
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-
-        {{-- Inline script to detect system dark mode preference and apply it immediately --}}
-        <script>
-            (function() {
-                const appearance = '{{ $appearance ?? 'system' }}';
-
-                if (appearance === 'system') {
-                    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-
-                    if (prefersDark) {
-                        document.documentElement.classList.add('dark');
-                    }
-                }
-            })();
-        </script>
-
-        {{-- Inline style to set the HTML background color based on our theme in app.css --}}
-        <style>
-            html {
-                background-color: oklch(1 0 0);
-            }
-
-            html.dark {
-                background-color: oklch(0.145 0 0);
-            }
-        </style>
-
-        <title inertia>{{ config('app.name', 'Laravel') }}</title>
-
-        <link rel="icon" href="/favicon.ico" sizes="any">
-        <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" /> -->
 </html>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <title>EMER</title>
     <meta charset="UTF-8">
     <title>User Login</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        @routes
-        @viteReactRefresh
-        @vite(['resources/js/app.tsx', "resources/js/pages/{$page['component']}.tsx"])
-        @inertiaHead
+     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
     <style>
         body {
             background-color: #f4f5fa;
@@ -71,7 +29,8 @@
             width: 350px;
         }
 
-        .login-container::before, .login-container::after {
+        .login-container::before,
+        .login-container::after {
             content: '';
             position: absolute;
             top: 50%;
@@ -117,12 +76,14 @@
             margin-bottom: 30px;
         }
 
-        input[type="text"], input[type="password"] {
+        input[type="text"],
+        input[type="password"] {
             width: 100%;
             padding: 12px 15px;
             margin: 10px 0;
             border-radius: 8px;
             border: 1px solid #ccc;
+            color: #333;
             font-size: 14px;
         }
 
@@ -153,32 +114,53 @@
             text-decoration: underline;
             cursor: pointer;
         }
-
     </style>
 </head>
+
 <body>
-    <div class="login-container">
-        <div class="icon">
-            👤
-        </div>
-        <h2>USER LOGIN</h2>
-        <p class="subtitle">Welcome to the website</p>
-        <form method="POST" action="{{ route('login') }}">
-            @csrf
-            <input type="text" name="email" placeholder="USERNAME" required>
-            <input type="password" name="password" placeholder="PASSWORD" required>
 
-            <div class="remember">
-                <input type="checkbox" id="remember" name="remember" style="margin-right: 8px;">
-                <label for="remember">remember me</label>
-            </div>
+<div>
+    <!-- Nothing in life is to be feared, it is only to be understood. Now is the time to understand more, so that we may fear less. - Marie Curie -->
 
-            <button type="submit">LOGIN</button>
-        </form>
-
-        <div class="forgot">
-            Forgot password?
-        </div>
+    <h1>Welcome, {{ Auth::user()->name }}!</h1>
+    <p>This is your dashboard. You are now logged in.</p>
+    <!-- Add widgets, links, or other content here -->
+    <a href="{{ route('logout') }}">Logout</a>
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#">Navbar</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link active" aria-current="page" href="#">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">Link</a>
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Dropdown
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="#">Action</a></li>
+            <li><a class="dropdown-item" href="#">Another action</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="#">Something else here</a></li>
+          </ul>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link disabled" aria-disabled="true">Disabled</a>
+        </li>
+      </ul>
+      <form class="d-flex" role="search">
+        <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search"/>
+        <button class="btn btn-outline-success" type="submit">Search</button>
+      </form>
     </div>
+  </div>
+</nav>
+</div>
 </body>
-</html>
