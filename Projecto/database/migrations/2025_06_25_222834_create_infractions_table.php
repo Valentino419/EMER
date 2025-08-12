@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('infractions', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
-            $table->foreignId('inspector_id')->constrained()->onDelete('cascade');
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('car_id')->constrained()->onDelete('cascade');
             $table->integer('fine');
             $table->date('date');

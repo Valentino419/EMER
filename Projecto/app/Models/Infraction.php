@@ -9,11 +9,11 @@ class Infraction extends Model
 {
    use HasFactory;
 
-    public function inspectors(){
-        return $this->belongsTo(Inspector::class, 'inspector_id');
+    public function inspector(){
+        return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function cars(){
+    public function car(){
         return $this->belongsTo(Car::class, 'car_id');
     }
 }

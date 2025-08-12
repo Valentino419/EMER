@@ -14,10 +14,7 @@ class Setting extends Model
        return $this->belongsTo(User::class,'id_user');        
     }
 
-    public function rolers()
-    {
-        return $this->belongsTo(Roles::class,'id_role');
-    }
+  
 
 }
 
