@@ -8,8 +8,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Car extends Model
 {
     use HasFactory;
-    
-    protected $fillable = ['car_plate', 'user_id'];
+
+    protected $table = 'cars';
+
+    protected $fillable = [
+        'car_plate',
+        'id_user',
+    ];
 
     public function user(){
         return $this->belongsTo(User::class, );

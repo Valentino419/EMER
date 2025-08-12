@@ -3,23 +3,30 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\ParkingSession;
+use App\Models\Payment;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class PaymentController extends Controller
 {
+    public function __construct()
+    {
+        // Middleware para verificar que el usuario tiene el rol adecuado
+        $this->middleware('role:inspector|admin');
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        //
-    }
+        // Listar sesiones de estacionamiento activas con sus autos y usuarios
+        $carsConSesion = ParkingSession::where('status', true)
+            ->with(['car', 'car.user']) // Cargar relaciones
+            ->get();
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
+        return view('payment.index', compact('carsConSesion'));
     }
 
     /**
@@ -27,38 +34,49 @@ class PaymentController extends Controller
      */
     public function store(Request $request)
     {
-        //
-    }
+        $validated = $request->validate([
+            'id_car' => 'required|integer|exists:cars,id',
+            'metodo_pago' => 'required|string|in:efectivo,tarjeta,mercadopago,transferencia',
+        ]);
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
+        try {
+            // Buscar sesión activa del auto
+            $sesion = ParkingSession::where('id_car', $validated['id_car'])
+                ->where('status', true)
+                ->with('car')
+                ->first();
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
+            if (!$sesion) {
+                return redirect()->route('payment.index')->with('error', 'No se encontró una sesión activa para este vehículo.');
+            }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
+            // Calcular duración en minutos
+            $duracion = Carbon::parse($sesion->start_time)->diffInMinutes(Carbon::now());
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+            // Calcular monto (rate es tarifa por minuto)
+            $monto = $duracion * $sesion->rate;
+
+            DB::transaction(function () use ($sesion, $monto, $validated) {
+                // Registrar pago
+                Payment::create([
+                    'id_user' => $sesion->car->id_user,
+                    'amount' => $monto,
+                    'payment_date' => Carbon::now(),
+                    'description' => 'Cobro por estacionamiento',
+                    'metodo_pago' => $validated['metodo_pago'],
+                ]);
+
+                // Finalizar sesión
+                $sesion->update([
+                    'end_time' => Carbon::now(),
+                    'duration' => $duracion,
+                    'status' => false,
+                ]);
+            });
+
+            return redirect()->route('payment.index')->with('success', "Cobro realizado: $monto");
+        } catch (\Exception $e) {
+            return redirect()->route('payment.index')->with('error', 'Error al procesar el cobro: ' . $e->getMessage());
+        }
     }
 }

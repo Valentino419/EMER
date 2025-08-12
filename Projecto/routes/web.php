@@ -6,6 +6,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\CarController;
 use App\Http\Controllers\InfractionController;
 use App\Http\Controllers\ZoneController;
+use App\Http\Controllers\PaymentController;
 
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\ParkingSessionController;
@@ -13,6 +14,15 @@ use App\Http\Controllers\ParkingSessionController;
 Route::resource('infractions', InfractionController::class);
 Route::resource('cars', CarController::class);
 
+// Rutas protegidas por autenticación y roles
+// Route::middleware(['auth'])->group(function () {
+//     // Rutas para el recurso Payment (solo inspectores y admins)
+//     Route::middleware(['role:inspector,admin'])->group(function () {
+//     });
+// });
+Route::resource('payment', PaymentController::class)->only([
+        'index', 'store', 'show', 'edit', 'update', 'destroy'
+]);
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login']);
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');

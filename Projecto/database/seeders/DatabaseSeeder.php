@@ -6,6 +6,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Database\Seeders\ZoneSeeder;
 use Database\Seeders\CarSeeder;
+use Database\Seeders\RoleSeeder;
 use App\Models\User;
 use App\Models\Zone;
 use App\Models\Car;
@@ -22,7 +23,8 @@ class DatabaseSeeder extends Seeder
         //     'name' => 'Test User',
         //     'email' => 'test@example.com',
         //  ]);
-        $this->call(ZoneSeeder::class);
-        $this->call(CarSeeder::class);
+        // $this->call(ZoneSeeder::class);
+        // $this->call(CarSeeder::class);
+        $this->call(RoleSeeder::class);
     }
 }
