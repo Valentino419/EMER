@@ -19,6 +19,7 @@ class LoginController extends Controller
     // Procesar el login
     public function login(Request $request)
     {
+         dd('llego');
         // Validación
         $request->validate([
             'email' => 'required|string|email',
