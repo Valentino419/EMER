@@ -70,5 +70,13 @@ Route::fallback(function () {
 });
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->middleware('auth')->name('dashboard');
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/dashboard-admin', fn() => view('dashboard-admin'))->name('dashboard.admin');
+    Route::get('/dashboard-inspector', fn() => view('dashboard-inspector'))->name('dashboard.inspector');
+    Route::get('/dashboard-user', fn() => view('dashboard-user'))->name('dashboard.user');
+});
+
+
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';

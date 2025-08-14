@@ -14,8 +14,6 @@ class User extends Authenticatable
 
     protected $table = 'users';
 
-    use hasFactory;
-
     public function settings()
     {
         return $this->hasOne(Setting::class, 'user_id');
