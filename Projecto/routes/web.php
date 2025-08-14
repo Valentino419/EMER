@@ -11,10 +11,18 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\ParkingSessionController;
+use App\Http\Controllers\NotificationController;
+
+
+
+Route::get('notifications/{notification}/delete', [NotificationController::class, 'delete'])->name('notifications.delete');
+Route::resource('notifications', NotificationController::class)->except(['edit', 'update', 'show']);
+
 
 Route::resource('inspectors', InspectorController::class);
 
 Route::resource('infractions', InfractionController::class);
+
 Route::resource('cars', CarController::class);
 
 // Rutas protegidas por autenticación y roles
@@ -34,11 +42,6 @@ Route::get('/', function () {
     return Inertia::render('welcome');
 })->name('home');
 
-// Route::middleware(['auth', 'verified'])->group(function () {
-//     Route::get('dashboard', function () {
-//         return Inertia::render('dashboard');
-//     })->name('dashboard');
-// });
 
 Route::resource('users', UserController::class)->names([
     'index' => 'user.index',
