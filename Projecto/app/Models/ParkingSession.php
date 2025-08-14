@@ -9,6 +9,18 @@ class ParkingSession extends Model
 {
     use HasFactory;
 
+    protected $table = 'parking_session';
+
+    protected $fillable = [
+        'id_car',
+        'id_street',
+        'start_time',
+        'end_time',
+        'rate',
+        'duration',
+        'status',
+    ];
+
     public function cars()
     {
         return $this->belongsTo(Car::class, 'id_car');
