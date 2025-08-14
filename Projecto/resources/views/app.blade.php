@@ -124,6 +124,8 @@
             border-radius: 8px;
             border: 1px solid #ccc;
             font-size: 14px;
+            color: #010000ff
+
         }
 
         .remember {
