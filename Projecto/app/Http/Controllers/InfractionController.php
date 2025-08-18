@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Infraction;
-use App\Models\Inspector;
+use App\Models\Inspectors;
 use App\Models\Car;
 use Illuminate\Http\Request;
 
@@ -17,7 +17,7 @@ class InfractionController extends Controller
 
     public function create()
     {
-        $inspectors = Inspector::all();
+        $inspectors = Inspectors::all();
         $cars = Car::all();
         return view('infractions.create', compact('inspectors', 'cars'));
     }
@@ -39,7 +39,7 @@ class InfractionController extends Controller
 
     public function edit(Infraction $infraction)
     {
-        $inspectors = Inspector::all();
+        $inspectors = Inspectors::all();
         $cars = Car::all();
         return view('infractions.edit', compact('infraction', 'inspectors', 'cars'));
     }

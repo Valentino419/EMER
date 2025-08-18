@@ -174,12 +174,8 @@
                     </td>
                 </tr>
                 @empty
-                <tr>
-                    <td colspan="5">No hay sesiones activas</td>
-                </tr>
                 @endforelse
             </tbody>
         </table>
     </div>
 </div>
-@endsection

@@ -130,9 +130,7 @@
             <button type="submit">LOGIN</button>
         </form>
 
-        <div class="forgot">
-            Forgot password?
-        </div>
+        <a href="{{ route('', $notification->id) }}" class="btn btn-danger btn-sm">Eliminar</a>
     </div>
 </body>
 </html>
