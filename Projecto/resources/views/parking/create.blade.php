@@ -8,8 +8,8 @@
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
 
-    .custom-container {
-        max-width: 500px;
+    .custom-card {
+        max-width: 900px;
         margin: 40px auto;
         padding: 30px;
         background-color: #ffffff;
@@ -20,8 +20,7 @@
     h2 {
         color: #1a3c6d;
         font-weight: 700;
-        margin-bottom: 25px;
-        text-align: center;
+        margin-bottom: 20px;
     }
 
     label {
@@ -31,7 +30,7 @@
         display: block;
     }
 
-    select, input[type="number"] {
+    select, input[type="number"], input[type="text"] {
         width: 100%;
         padding: 10px 12px;
         border: 1px solid #ced4da;
@@ -41,39 +40,60 @@
         transition: border-color 0.3s;
     }
 
-    select:focus, input[type="number"]:focus {
+    select:focus, input:focus {
         border-color: #007bff;
         outline: none;
     }
 
-    .btn-submit {
+    .btn-blue {
         background-color: #007bff;
         color: white;
         font-weight: 600;
         padding: 10px 20px;
         border: none;
-        border-radius: 6px;
+        border-radius: 8px;
         cursor: pointer;
         transition: background-color 0.3s, transform 0.2s;
     }
 
-    .btn-submit:hover {
+    .btn-blue:hover {
         background-color: #0056b3;
         transform: translateY(-2px);
     }
 
-    .alert-success {
-        background-color: #d4edda;
-        color: #155724;
-        padding: 15px;
-        border-radius: 8px;
+    .form-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
         margin-bottom: 20px;
-        border-left: 5px solid #28a745;
+    }
+
+    .form-header h2 {
+        margin: 0;
+    }
+
+    .form-section {
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .form-section .form-title {
+        background-color: #007bff;
+        color: #fff;
+        padding: 12px;
+        font-weight: 600;
+        font-size: 16px;
+    }
+
+    .form-section .form-body {
+        padding: 20px;
     }
 </style>
 
-<div class="container mx-auto max-w-md mt-10">
-    <h2 class="text-2xl font-bold mb-6">Estacionamiento medido</h2>
+<div class="custom-card">
+    <div class="form-header">
+        <h2>Registrar Estacionamiento</h2>
+    </div>
 
     @if (session('success'))
         <div class="bg-green-100 text-green-800 p-4 rounded mb-4">
@@ -81,44 +101,45 @@
         </div>
     @endif
 
-    <form action="{{ route('parking.store') }}" method="POST" class="bg-white p-6 rounded shadow">
+    <form action="{{ route('parking.store') }}" method="POST">
         @csrf
 
-        <!-- Patente del auto -->
-        <div class="mb-4">
-            <label for="car_id" class="block text-gray-700 font-semibold mb-1">Vehículo (Patente)</label>
-            <select name="car_id" id="car_id" class="w-full border border-gray-300 rounded px-3 py-2" required>
-                <option value="">Seleccioná un vehículo</option>
-                @foreach($cars as $car)
-                    <option value="{{ $car->id }}">{{ $car->car_plate }}</option>
-                @endforeach
-            </select>
-        </div>
+        <div class="form-section">
+            <div class="form-title">Datos del Estacionamiento</div>
+            <div class="form-body">
+                
+                <!-- Patente -->
+                <div class="mb-4">
+                    <label for="car_id">Vehículo (Patente)</label>
+                    <input type="text" name="car_id" id="car_id" placeholder="Ingrese la patente sin espacios ni puntos" required>
+                </div>
 
-        <!-- Zona -->
-        <div class="mb-4">
-            <label for="zone_id" class="block text-gray-700 font-semibold mb-1">Zona</label>
-            <select name="zone_id" id="zone_id" class="w-full border border-gray-300 rounded px-3 py-2" required>
-                <option value="">Seleccioná una zona</option>
-                @foreach($zones as $zone)
-                    <option value="{{ $zone->id }}">{{ $zone->name }}</option>
-                @endforeach
-            </select>
-        </div>
+                <!-- Zona -->
+                <div class="mb-4">
+                    <label for="zone_id">Zona</label>
+                    <select name="zone_id" id="zone_id" required>
+                        <option value="">Seleccioná una zona</option>
+                        @foreach($zones as $zone)
+                            <option value="{{ $zone->id }}">{{ $zone->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
 
-        <!-- Tiempo estimado -->
-        <div class="mb-4">
-            <label for="estimated_minutes" class="block text-gray-700 font-semibold mb-1">Tiempo estimado (minutos)</label>
-            <input type="number" name="estimated_minutes" id="estimated_minutes" min="15" step="15"
-                   class="w-full border border-gray-300 rounded px-3 py-2" required>
-        </div>
+                <!-- Tiempo -->
+                <div class="mb-4">
+                    <label for="estimated_minutes">Tiempo estimado (minutos)</label>
+                    <input type="time" name="estimated_minutes" id="estimated_minutes" min="15" step="15" required>
+                </div>
+                <br>
+                
+                <!-- Botón -->
+                <div class="flex justify-end">
+                    <button type="submit" class="btn-blue">Iniciar Estacionamiento</button>
+                </div>
 
-        <!-- Botón -->
-        <div class="flex justify-end">
-            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
-                Iniciar Estacionamiento
-            </button>
+            </div>
         </div>
     </form>
 </div>
+
 @endsection

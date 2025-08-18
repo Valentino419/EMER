@@ -7,20 +7,15 @@ use App\Http\Controllers\CarController;
 use App\Http\Controllers\InfractionController;
 use App\Http\Controllers\InspectorController;
 use App\Http\Controllers\ZoneController;
-<<<<<<<<< Temporary merge branch 1
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\ParkingSessionController;
 use App\Http\Controllers\PaymentController;
 
 
-Route::resource('inspectors', InspectorController::class);
-
-Route::resource('infractions', InfractionController::class);
 Route::resource('cars', CarController::class);
 
 Route::resource('payment', PaymentController::class);
-
 
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login']);
@@ -30,11 +25,24 @@ Route::get('/', function () {
     return Inertia::render('welcome');
 })->name('home');
 
-// Route::middleware(['auth', 'verified'])->group(function () {
-//     Route::get('dashboard', function () {
-//         return Inertia::render('dashboard');
-//     })->name('dashboard');
-// });
+
+Route::resource('infractions', InfractionController::class)->names([
+    'index' => 'infractions.index',
+    'create' => 'infractions.create',
+    'store' => 'infractions.store',
+    'edit' => 'infractions.edit',
+    'update' => 'infractions.update',
+    'destroy' => 'infractions.destroy',
+]);;
+
+Route::resource('inspectors', InspectorController::class)->names([
+    'index' => 'inspectors.index',
+    'create' => 'inspectors.create',
+    'store' => 'inspectors.store',
+    'edit' => 'inspectors.edit',
+    'update' => 'inspectors.update',
+    'destroy' => 'inspectors.destroy',
+]);
 
 Route::resource('users', UserController::class)->names([
     'index' => 'user.index',
