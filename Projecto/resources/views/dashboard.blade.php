@@ -1,166 +1,110 @@
-</html>
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <title>EMER</title>
     <meta charset="UTF-8">
-    <title>User Login</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
+    <title>EMER - Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
             background-color: #f4f5fa;
-            font-family: 'Segoe UI', sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
         }
-
-        .login-container {
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            padding: 40px 30px;
-            text-align: center;
-            position: relative;
-            width: 350px;
-        }
-
-        .login-container::before,
-        .login-container::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            height: 200px;
-            width: 200px;
-            background: linear-gradient(90deg, #00c6ff, #0072ff);
-            z-index: -1;
-            border-radius: 30px;
-            opacity: 0.4;
-        }
-
-        .login-container::before {
-            left: -120px;
-        }
-
-        .login-container::after {
-            right: -120px;
-        }
-
-        .icon {
-            background: linear-gradient(135deg, #00c6ff, #0072ff);
+        .sidebar {
+            min-height: 100vh;
+            background: linear-gradient(180deg, #0072ff, #00c6ff);
             color: white;
-            border-radius: 50%;
-            width: 70px;
-            height: 70px;
-            margin: -60px auto 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 32px;
+            padding-top: 20px;
         }
-
-        h2 {
-            margin-bottom: 10px;
-            font-size: 24px;
-            color: #333;
-        }
-
-        p.subtitle {
-            color: #aaa;
-            font-size: 14px;
-            margin-bottom: 30px;
-        }
-
-        input[type="text"],
-        input[type="password"] {
-            width: 100%;
-            padding: 12px 15px;
-            margin: 10px 0;
-            border-radius: 8px;
-            border: 1px solid #ccc;
-            color: #333;
-            font-size: 14px;
-        }
-
-        .remember {
-            display: flex;
-            align-items: center;
-            justify-content: left;
-            font-size: 14px;
-            margin: 15px 0;
-            color: #555;
-        }
-
-        button {
-            background: linear-gradient(135deg, #00c6ff, #0072ff);
+        .sidebar a {
             color: white;
-            border: none;
-            padding: 12px 20px;
-            width: 100%;
+            text-decoration: none;
+            display: block;
+            padding: 10px 15px;
             border-radius: 8px;
-            font-size: 16px;
-            cursor: pointer;
+            margin: 5px 0;
         }
-
-        .forgot {
-            margin-top: 20px;
-            font-size: 14px;
-            color: #888;
-            text-decoration: underline;
-            cursor: pointer;
+        .sidebar a:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        .content {
+            padding: 20px;
+        }
+        .navbar {
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
     </style>
 </head>
-
 <body>
 
-<div>
-    <!-- Nothing in life is to be feared, it is only to be understood. Now is the time to understand more, so that we may fear less. - Marie Curie -->
+<div class="container-fluid">
+    <div class="row">
 
-    <h1>Welcome, {{ Auth::user()->name }}!</h1>
-    <p>This is your dashboard. You are now logged in.</p>
-    <!-- Add widgets, links, or other content here -->
-    <a href="{{ route('logout') }}">Logout</a>
-    <nav class="navbar navbar-expand-lg bg-body-tertiary">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="#">Navbar</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-        <li class="nav-item">
-          <a class="nav-link active" aria-current="page" href="#">Home</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#">Link</a>
-        </li>
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            Dropdown
-          </a>
-          <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="#">Action</a></li>
-            <li><a class="dropdown-item" href="#">Another action</a></li>
-            <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item" href="#">Something else here</a></li>
-          </ul>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link disabled" aria-disabled="true">Disabled</a>
-        </li>
-      </ul>
-      <form class="d-flex" role="search">
-        <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search"/>
-        <button class="btn btn-outline-success" type="submit">Search</button>
-      </form>
+        <!-- Sidebar -->
+        <div class="col-md-2 sidebar">
+            <h4 class="text-center mb-4">Menú</h4>
+            <a href="{{ route('dashboard') }}">🏠 Inicio</a>
+            <a href="{{ route('cars.index') }}">🚗 Autos</a>
+            <a href="{{ route('inspectors.index') }}">🕵️ Inspectores</a>
+            <a href="{{ route('infractions.index') }}">⚠️ Infracciones</a>
+            <a href="{{ route('logout') }}">🚪 Cerrar sesión</a>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-10">
+            <!-- Navbar -->
+            <nav class="navbar navbar-light justify-content-between px-4">
+                <span class="navbar-text">
+                    Bienvenido, <strong>{{ Auth::user()->name ?? 'Invitado' }}</strong>
+                </span>
+                <form action="{{ route('logout') }}" method="POST">
+                    @csrf
+                    <button class="btn btn-outline-danger btn-sm">Cerrar sesión</button>
+                </form>
+            </nav>
+
+            <!-- Page Content -->
+            <div class="content">
+                <h1 class="mb-4">Dashboard</h1>
+                <p>Bienvenido a tu panel de control. Desde aquí puedes navegar por todas las secciones del sistema.</p>
+                <!-- Aquí puedes poner tarjetas, gráficos, etc. -->
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="card shadow-sm">
+                            <div class="card-body">
+                                <h5 class="card-title">Autos</h5>
+                                <p class="card-text">Gestiona todos los autos registrados.</p>
+                                <a href="{{ route('cars.index') }}" class="btn btn-primary">Ver</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="card shadow-sm">
+                            <div class="card-body">
+                                <h5 class="card-title">Inspectores</h5>
+                                <p class="card-text">Administra la lista de inspectores.</p>
+                                <a href="{{ route('inspectors.index') }}" class="btn btn-primary">Ver</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="card shadow-sm">
+                            <div class="card-body">
+                                <h5 class="card-title">Infracciones</h5>
+                                <p class="card-text">Consulta y gestiona las infracciones.</p>
+                                <a href="{{ route('infractions.index') }}" class="btn btn-primary">Ver</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
-  </div>
-</nav>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+</html>
