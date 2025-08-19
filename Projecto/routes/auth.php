@@ -9,6 +9,38 @@ use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\DashboardController;
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/dashboard/admin', [DashboardController::class, 'index'])
+        ->middleware('role:admin')
+        ->name('dashboard.admin');
+    Route::get('/dashboard/inspector', [DashboardController::class, 'index'])
+        ->middleware('role:inspector')
+        ->name('dashboard.inspector');
+    Route::get('/dashboard/user', [DashboardController::class, 'index'])
+        ->middleware('role:user')
+        ->name('dashboard.user');
+
+    Route::get('/admin/users', fn() => view('admin.users'))
+        ->middleware('role:admin')
+        ->name('admin.users');
+    Route::get('/admin/reports', fn() => view('admin.reports'))
+        ->middleware('role:admin')
+        ->name('admin.reports');
+    Route::get('/inspector/inspections', fn() => view('inspector.inspections'))
+        ->middleware('role:inspector')
+        ->name('inspector.inspections');
+    Route::get('/inspector/schedule', fn() => view('inspector.schedule'))
+        ->middleware('role:inspector')
+        ->name('inspector.schedule');
+    Route::get('/user/profile', fn() => view('user.profile'))
+        ->middleware('role:user')
+        ->name('user.profile');
+    Route::get('/user/orders', fn() => view('user.orders'))
+        ->middleware('role:user')
+        ->name('user.orders');
+});
 
 Route::middleware('guest')->group(function () {
     Route::get('register', [RegisteredUserController::class, 'create'])

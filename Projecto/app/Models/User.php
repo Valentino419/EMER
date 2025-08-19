@@ -30,10 +30,11 @@ class User extends Authenticatable
     {
         return $this->hasMany(Notification::class, 'user_id');
     }
-      public function role()
+ 
+    public function role()
     {
-        return $this->belongsTo(Role::class,'id_role');
-    } 
+        return $this->belongsTo(Role::class);
+    }
     public function infractions()
     {
         return $this->hasMany(Infraction::class, 'id_user');
