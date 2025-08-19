@@ -12,31 +12,39 @@ class LoginController extends Controller
     // Mostrar el formulario de login
     public function showLoginForm()
     {
-        dd('test');
-        return view('auth.login');
+        return view('auth.login'); // tu vista de login
     }
 
     // Procesar el login
     public function login(Request $request)
     {
-         dd('llego');
-        // Validación
+        // Validación del formulario
         $request->validate([
             'email' => 'required|string|email',
             'password' => 'required|string',
         ]);
 
-        // Intentar autenticación
         $credentials = $request->only('email', 'password');
         $remember = $request->filled('remember');
 
         if (Auth::attempt($credentials, $remember)) {
+            // Regenerar sesión para seguridad
             $request->session()->regenerate();
 
-            return redirect()->intended('/dashboard'); // o donde quieras redirigir
+            // Detectar el rol del usuario
+            $role = Auth::user()->role->name; // Asegúrate que el campo "name" existe en la tabla roles
+
+            // Redirigir según rol
+            if ($role === 'admin') {
+                return redirect()->route('dashboard-admin');
+            } elseif ($role === 'inspector') {
+                return redirect()->route('dashboard-inspector');
+            } else {
+                return redirect()->route('dashboarduser');
+            }
         }
 
-        // Si falla
+        // Si las credenciales no coinciden
         throw ValidationException::withMessages([
             'email' => __('Las credenciales no son correctas.'),
         ]);
@@ -49,6 +57,6 @@ class LoginController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/login');
+        return redirect()->route('login');
     }
 }
