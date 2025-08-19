@@ -11,7 +11,8 @@ class InspectorController extends Controller
     public function index()
     {
         $inspectors = Inspectors::with('user')->get();
-        return view('inspectors.index', compact('inspectors'));
+        $users = User::orderBy('name')->get();
+        return view('inspectors.index', compact('inspectors','users'));
     }
 
     public function create()
