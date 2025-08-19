@@ -7,33 +7,16 @@ use App\Http\Controllers\CarController;
 use App\Http\Controllers\InfractionController;
 use App\Http\Controllers\InspectorController;
 use App\Http\Controllers\ZoneController;
-use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\ParkingSessionController;
-use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\PaymentController;
 
-
-
-Route::get('notifications/{notification}/delete', [NotificationController::class, 'delete'])->name('notifications.delete');
-Route::resource('notifications', NotificationController::class)->except(['edit', 'update', 'show']);
-
-
-Route::resource('inspectors', InspectorController::class);
-
-Route::resource('infractions', InfractionController::class);
 
 Route::resource('cars', CarController::class);
 
-// Rutas protegidas por autenticación y roles
-// Route::middleware(['auth'])->group(function () {
-//     // Rutas para el recurso Payment (solo inspectores y admins)
-//     Route::middleware(['role:inspector,admin'])->group(function () {
-//     });
-// });
-Route::resource('payment', PaymentController::class)->only([
-        'index', 'store', 'show', 'edit', 'update', 'destroy'
-]);
+Route::resource('payment', PaymentController::class);
+
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login']);
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
@@ -42,6 +25,24 @@ Route::get('/', function () {
     return Inertia::render('welcome');
 })->name('home');
 
+
+Route::resource('infractions', InfractionController::class)->names([
+    'index' => 'infractions.index',
+    'create' => 'infractions.create',
+    'store' => 'infractions.store',
+    'edit' => 'infractions.edit',
+    'update' => 'infractions.update',
+    'destroy' => 'infractions.destroy',
+]);;
+
+Route::resource('inspectors', InspectorController::class)->names([
+    'index' => 'inspectors.index',
+    'create' => 'inspectors.create',
+    'store' => 'inspectors.store',
+    'edit' => 'inspectors.edit',
+    'update' => 'inspectors.update',
+    'destroy' => 'inspectors.destroy',
+]);
 
 Route::resource('users', UserController::class)->names([
     'index' => 'user.index',

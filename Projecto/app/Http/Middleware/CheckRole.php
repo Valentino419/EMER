@@ -13,10 +13,8 @@ class CheckRole
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-    public function handle(Request $request, Closure $next): Response
+    public function handle(Request $request, Closure $next, $roles): Response
     {
-        return $next($request);
-
         //Verificar si el usuario esta autenticado
         if(!Auth::check()){
             return redirect('login')->with('error', 'Debes iniciar sesion');
@@ -24,12 +22,12 @@ class CheckRole
         $user= Auth::user();
 
         //verificar si el usuario tiene una config y rol asignado:
-        if(!$user->setting ||!$user->settings->role){
+        if(!$user->setting ||!$user->role){
             abort(403, 'No tienes un rol asignado.');
         }
 
         // Obtener el nombre del rol
-        $userRole = $user->settings->role->name;
+        $userRole = $user->role->name;
 
         // Verificar si el rol del usuario está en la lista de roles permitidos
         if (!in_array($userRole, $roles)) {

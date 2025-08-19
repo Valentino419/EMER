@@ -9,7 +9,7 @@ class ParkingSession extends Model
 {
     use HasFactory;
 
-    protected $table = 'parking_session';
+    //protected $table = 'Parkingsession';
 
     protected $fillable = [
         'id_car',

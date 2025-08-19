@@ -33,11 +33,15 @@ class AuthenticatedSessionController extends Controller
         });
     }
 
-    public function destroy(Request $request): RedirectResponse
-    {
-        Auth::logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-        return redirect()->route('login');
+    
+    /**
+     * Destroy an authenticated session.
+     */
+   public function destroy(Request $request): RedirectResponse
+   {
+    Auth::logout();
+    $request->session()->invalidate();
+    $request->session()->regenerateToken();
+    return redirect()->route('login')->with('status', 'You have been logged out!');
     }
 }

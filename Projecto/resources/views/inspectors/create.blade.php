@@ -5,21 +5,38 @@
     <title>Crear Inspector</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
+
+    <style>
+        body {
+            background-color: #f0f4f8;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .container {
+            max-width: 600px;
+            margin-top: 50px;
+            padding: 30px;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            color: #1a3c6d;
+            font-weight: 700;
+            margin-bottom: 25px;
+        }
+    </style>
 <body>
-<div class="container mt-5">
-    <h1 class="mb-4">Crear Nuevo Inspector</h1>
+<div class="container">
+    <h2 class="mb-4">Nuevo Inspector</h2>
 
     <form action="{{ route('inspectors.store') }}" method="POST">
         @csrf
 
         <div class="mb-3">
             <label for="user_id" class="form-label">Usuario</label>
-            <select name="user_id" id="user_id" class="form-select" required>
-                <option value="">Seleccionar usuario</option>
-                @foreach($users as $user)
-                    <option value="{{ $user->id }}">{{ $user->name }} - {{ $user->email }}</option>
-                @endforeach
-            </select>
+            <input name="user_id" id="user_id" class="form-select" required>
         </div>
 
         <div class="mb-3">
@@ -27,7 +44,7 @@
             <input type="text" name="badge_number" id="badge_number" class="form-control" required>
         </div>
 
-        <button type="submit" class="btn btn-success">Guardar</button>
+        <button type="submit" class="btn btn-primary">Guardar</button>
         <a href="{{ route('inspectors.index') }}" class="btn btn-secondary">Cancelar</a>
     </form>
 </div>
