@@ -1,6 +1,5 @@
 <?php
 namespace App\Http\Controllers\Auth;
-namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
@@ -11,12 +10,31 @@ use Illuminate\Support\Facades\Route;
 
 class AuthenticatedSessionController extends Controller
 {
+    
+    
     public function create(Request $request)
     {
-        return view('auth.login', [
+        
+    if (Auth::check()) {
+        $user = Auth::user();
+        $role = $user->role ? $user->role->name : 'user';
+        $redirectRoute = match ($role) {
+            'admin' => 'dashboard.admin',
+            'inspector' => 'dashboard.inspector',
+            default => 'dashboard',
+        };
+       
+        if (!Route::has($redirectRoute)) {
+          
+            return redirect()->route('dashboard.user');
+        }
+        return redirect()->route($redirectRoute);
+    }
+     return view('auth.login', [
             'canResetPassword' => Route::has('password.request'),
             'status' => $request->session()->get('status'),
         ]);
+    
     }
 
     public function store(LoginRequest $request): RedirectResponse
@@ -25,6 +43,7 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerate();
         $user = Auth::user();
         $role = $user->role ? $user->role->name : 'user';
+       
 
         return redirect()->route(match ($role) {
             'admin' => 'dashboard.admin',
@@ -33,15 +52,11 @@ class AuthenticatedSessionController extends Controller
         });
     }
 
-    
-    /**
-     * Destroy an authenticated session.
-     */
-   public function destroy(Request $request): RedirectResponse
-   {
-    Auth::logout();
-    $request->session()->invalidate();
-    $request->session()->regenerateToken();
-    return redirect()->route('login')->with('status', 'You have been logged out!');
+    public function destroy(Request $request): RedirectResponse
+    {
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        return redirect()->route('login')->with('status', 'You have been logged out.');
     }
 }
