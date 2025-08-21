@@ -11,6 +11,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\ParkingSessionController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 
 Route::get('register', [RegisteredUserController::class, 'create'])->name('register');
@@ -21,13 +22,12 @@ Route::resource('cars', CarController::class);
 
 Route::resource('payment', PaymentController::class);
 
-Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [LoginController::class, 'login']);
-Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
-Route::get('/', function () {
-    return Inertia::render('welcome');
-})->name('home');
+
+
+//Route::get('/', function () {
+//    return Inertia::render('welcome');
+//})->name('home');
 
 
 Route::resource('infractions', InfractionController::class)->names([
@@ -73,8 +73,6 @@ Route::post('/parking', [ParkingSessionController::class, 'store'])->name('parki
 Route::fallback(function () {
     return view('app');
 });
-
-//Route::get('/dashboard', [DashboardController::class, 'index'])->middleware('auth')->name('dashboard');
 
 
 

@@ -9,6 +9,8 @@ use Illuminate\Validation\ValidationException;
 
 class LoginController extends Controller
 {
+    protected $redirectTo = '/dashboard';
+
     // Mostrar el formulario de login
     public function showLoginForm()
     {
@@ -36,11 +38,11 @@ class LoginController extends Controller
 
             // Redirigir según rol
             if ($role === 'admin') {
-                return redirect()->route('dashboard-admin');
+                return redirect()->route('dashboard.admin');
             } elseif ($role === 'inspector') {
-                return redirect()->route('dashboard-inspector');
+                return redirect()->route('dashboard.inspector');
             } else {
-                return redirect()->route('dashboarduser');
+                return redirect()->route('dashboard.user');
             }
         }
 
