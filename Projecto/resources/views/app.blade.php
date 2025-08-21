@@ -135,6 +135,13 @@
 
             <button type="submit">LOGIN</button>
         </form>
+         
+        <div class="register">
+            <a href="{{ route('register') }}" 
+            class="btn btn-outline-primary w-100">
+            Registrarse
+            </a>
+        </div>
 
         <div class="forgot">
             Forgot password?

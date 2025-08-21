@@ -10,29 +10,26 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
-use Inertia\Inertia;
-use Inertia\Response;
 
 class RegisteredUserController extends Controller
 {
     /**
-     * Show the registration page.
+     * Mostrar formulario de registro (Blade).
      */
-    public function create(): Response
+    public function create()
     {
-        return Inertia::render('auth/register');
+        return view('register');
     }
 
+
     /**
-     * Handle an incoming registration request.
-     *
-     * @throws \Illuminate\Validation\ValidationException
+     * Guardar un nuevo usuario en la base de datos.
      */
     public function store(Request $request): RedirectResponse
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
+            'email' => 'required|string|lowercase|email|max:255|unique:users,email',
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
@@ -40,12 +37,13 @@ class RegisteredUserController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'role_id' => 2, // 👈 acá podés asignar un rol por defecto (ej: usuario normal)
         ]);
 
         event(new Registered($user));
 
-        Auth::login($user);
+        Auth::login($user); // inicia sesión automáticamente
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        return redirect()->route('dashboard'); // redirige al dashboard
     }
 }

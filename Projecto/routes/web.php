@@ -11,6 +11,10 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\ParkingSessionController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\Auth\RegisteredUserController;
+
+Route::get('register', [RegisteredUserController::class, 'create'])->name('register');
+Route::post('register', [RegisteredUserController::class, 'store']);
 
 
 Route::resource('cars', CarController::class);

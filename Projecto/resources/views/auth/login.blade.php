@@ -128,9 +128,10 @@
             </div>
 
             <button type="submit">LOGIN</button>
-        </form>
+       
 
         <a href="{{ route('', $notification->id) }}" class="btn btn-danger btn-sm">Eliminar</a>
+     </form>
     </div>
 </body>
 </html>
