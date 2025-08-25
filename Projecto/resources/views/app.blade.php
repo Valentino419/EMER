@@ -136,9 +136,7 @@
             <button type="submit">LOGIN</button>
         </form>
 
-        <div class="forgot">
-            Forgot password?
-        </div>
-    </div>
+        <a href="{{ route('password.request') }}">Forgot password?</a>
+        
 </body>
 </html>

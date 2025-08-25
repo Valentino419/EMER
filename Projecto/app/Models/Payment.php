@@ -19,7 +19,7 @@ class Payment extends Model
         'metodo_pago',
     ];
 
-    public function users()
+    public function user()
     {
         return $this->belongsTo(User::class, 'id_user');
     }

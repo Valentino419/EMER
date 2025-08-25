@@ -1,42 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EMER - Dashboard</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body {
-            background-color: #f4f5fa;
-        }
-        .sidebar {
-            min-height: 100vh;
-            background: linear-gradient(180deg, #0072ff, #00c6ff);
-            color: white;
-            padding-top: 20px;
-        }
-        .sidebar a {
-            color: white;
-            text-decoration: none;
-            display: block;
-            padding: 10px 15px;
-            border-radius: 8px;
-            margin: 5px 0;
-        }
-        .sidebar a:hover {
-            background-color: rgba(255, 255, 255, 0.2);
-        }
-        .content {
-            padding: 20px;
-        }
-        .navbar {
-            background-color: white;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-    </style>
+    <title>Test Dashboard</title>
 </head>
 <body>
-
 <div class="container-fluid">
     <div class="row">
 
@@ -117,5 +84,6 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
 </html>

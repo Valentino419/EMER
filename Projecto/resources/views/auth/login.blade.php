@@ -5,7 +5,7 @@
     <title>User Login</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body {
+         body {
             background-color: #f4f5fa;
             font-family: 'Segoe UI', sans-serif;
             display: flex;
@@ -38,13 +38,8 @@
             opacity: 0.4;
         }
 
-        .login-container::before {
-            left: -120px;
-        }
-
-        .login-container::after {
-            right: -120px;
-        }
+        .login-container::before { left: -120px; }
+        .login-container::after { right: -120px; }
 
         .icon {
             background: linear-gradient(135deg, #00c6ff, #0072ff);
@@ -59,17 +54,9 @@
             font-size: 32px;
         }
 
-        h2 {
-            margin-bottom: 10px;
-            font-size: 24px;
-            color: #333;
-        }
+        h2 { margin-bottom: 10px; font-size: 24px; color: #333; }
 
-        p.subtitle {
-            color: #aaa;
-            font-size: 14px;
-            margin-bottom: 30px;
-        }
+        p.subtitle { color: #aaa; font-size: 14px; margin-bottom: 30px; }
 
         input[type="text"], input[type="password"] {
             width: 100%;
@@ -100,14 +87,19 @@
             cursor: pointer;
         }
 
-        .forgot {
+        .links {
             margin-top: 20px;
             font-size: 14px;
-            color: #888;
-            text-decoration: underline;
-            cursor: pointer;
+            color: #555;
         }
 
+        .links a {
+            color: #0072ff;
+            text-decoration: underline;
+            margin: 0 5px;
+        }
+        .hidden { display: none; }
+        
     </style>
 </head>
 <body>
@@ -116,7 +108,7 @@
             👤
         </div>
         <h2>USER LOGIN</h2>
-        <p class="subtitle">Welcome to the website</p>
+        <p class="subtitle"></p>
         <form method="POST" action="{{ route('login') }}">
             @csrf
             <input type="text" name="email" placeholder="USERNAME" required>
@@ -128,9 +120,32 @@
             </div>
 
             <button type="submit">LOGIN</button>
+            <a href="{{ route('password.request') }}">Forgot password?</a>
         </form>
 
-        <a href="{{ route('', $notification->id) }}" class="btn btn-danger btn-sm">Eliminar</a>
+        <!-- <div class="links"> 
+            <a href="{{ route('password.request') }}">Forgot password?</a> |
+            <a href="{{ route('register') }}">Create account</a>
+        </div> -->
+
+        {{-- REGISTER --}}
+        <div id="form-register" class="hidden">
+            <h2>REGISTER</h2>
+        <p class="subtitle">Create your account</p>
+            <form method="POST" action="{{ route('register') }}">
+                @csrf
+                <input type="text" name="name" placeholder="FULL NAME" required>
+                <input type="email" name="email" placeholder="EMAIL" required>
+                <input type="password" name="password" placeholder="PASSWORD" required>
+                <input type="password" name="password_confirmation" placeholder="CONFIRM PASSWORD" required>
+
+                <button type="submit">REGISTER</button>
+            </form>
+        <div class="links">
+                <a onclick="showForm('form-login')">Back to login</a>
+            </div>
+    </div>
+
     </div>
 </body>
 </html>
