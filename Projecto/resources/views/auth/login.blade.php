@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>User Login</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EMER - User Login</title>
     <style>
-         body {
-            background-color: #f4f5fa;
+        body {
+            background-color: #03040cff;
             font-family: 'Segoe UI', sans-serif;
             display: flex;
             justify-content: center;
@@ -58,13 +58,14 @@
 
         p.subtitle { color: #aaa; font-size: 14px; margin-bottom: 30px; }
 
-        input[type="text"], input[type="password"] {
+        input[type="email"], input[type="password"] {
             width: 100%;
             padding: 12px 15px;
             margin: 10px 0;
             border-radius: 8px;
             border: 1px solid #ccc;
             font-size: 14px;
+            color: #010000ff;
         }
 
         .remember {
@@ -98,8 +99,19 @@
             text-decoration: underline;
             margin: 0 5px;
         }
-        .hidden { display: none; }
-        
+
+        .error, .status {
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .error {
+            color: #d9534f;
+        }
+
+        .status {
+            color: #5cb85c;
+        }
     </style>
 </head>
 <body>
@@ -108,44 +120,39 @@
             👤
         </div>
         <h2>USER LOGIN</h2>
-        <p class="subtitle"></p>
+        <p class="subtitle">Welcome to the EMER website</p>
+
+        @if (session('status'))
+            <div class="status">{{ session('status') }}</div>
+        @endif
+
+        @if ($errors->any())
+            <div class="error">
+                @foreach ($errors->all() as $error)
+                    <p>{{ $error }}</p>
+                @endforeach
+            </div>
+        @endif
+
         <form method="POST" action="{{ route('login') }}">
             @csrf
-            <input type="text" name="email" placeholder="USERNAME" required>
-            <input type="password" name="password" placeholder="PASSWORD" required>
+            <input type="email" name="email" placeholder="Email Address" value="{{ old('email') }}" required>
+            <input type="password" name="password" placeholder="Password" required>
 
             <div class="remember">
                 <input type="checkbox" id="remember" name="remember" style="margin-right: 8px;">
-                <label for="remember">remember me</label>
+                <label for="remember">Remember me</label>
             </div>
 
             <button type="submit">LOGIN</button>
             <a href="{{ route('password.request') }}">Forgot password?</a>
         </form>
 
-        <!-- <div class="links"> 
-            <a href="{{ route('password.request') }}">Forgot password?</a> |
-            <a href="{{ route('register') }}">Create account</a>
-        </div> -->
-
-        {{-- REGISTER --}}
-        <div id="form-register" class="hidden">
-            <h2>REGISTER</h2>
-        <p class="subtitle">Create your account</p>
-            <form method="POST" action="{{ route('register') }}">
-                @csrf
-                <input type="text" name="name" placeholder="FULL NAME" required>
-                <input type="email" name="email" placeholder="EMAIL" required>
-                <input type="password" name="password" placeholder="PASSWORD" required>
-                <input type="password" name="password_confirmation" placeholder="CONFIRM PASSWORD" required>
-
-                <button type="submit">REGISTER</button>
-            </form>
-        <div class="links">
-                <a onclick="showForm('form-login')">Back to login</a>
-            </div>
-    </div>
-
+        @if (Route::has('password.request'))
+            <a href="{{ route('password.request') }}" class="forgot">Forgot password?</a>
+        @else
+            <div class="forgot">Forgot password?</div>
+        @endif
     </div>
 </body>
 </html>
