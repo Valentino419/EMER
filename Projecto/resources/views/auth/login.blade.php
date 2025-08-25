@@ -38,13 +38,8 @@
             opacity: 0.4;
         }
 
-        .login-container::before {
-            left: -120px;
-        }
-
-        .login-container::after {
-            right: -120px;
-        }
+        .login-container::before { left: -120px; }
+        .login-container::after { right: -120px; }
 
         .icon {
             background: linear-gradient(135deg, #00c6ff, #0072ff);
@@ -59,17 +54,9 @@
             font-size: 32px;
         }
 
-        h2 {
-            margin-bottom: 10px;
-            font-size: 24px;
-            color: #333;
-        }
+        h2 { margin-bottom: 10px; font-size: 24px; color: #333; }
 
-        p.subtitle {
-            color: #aaa;
-            font-size: 14px;
-            margin-bottom: 30px;
-        }
+        p.subtitle { color: #aaa; font-size: 14px; margin-bottom: 30px; }
 
         input[type="email"], input[type="password"] {
             width: 100%;
@@ -101,12 +88,16 @@
             cursor: pointer;
         }
 
-        .forgot {
+        .links {
             margin-top: 20px;
             font-size: 14px;
-            color: #888;
+            color: #555;
+        }
+
+        .links a {
+            color: #0072ff;
             text-decoration: underline;
-            cursor: pointer;
+            margin: 0 5px;
         }
 
         .error, .status {
@@ -154,6 +145,7 @@
             </div>
 
             <button type="submit">LOGIN</button>
+            <a href="{{ route('password.request') }}">Forgot password?</a>
         </form>
 
         @if (Route::has('password.request'))
