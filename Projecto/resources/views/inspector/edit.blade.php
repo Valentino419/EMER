@@ -27,12 +27,20 @@
         }
     </style>
 <body>
-<div class="container mt-5">
-    <h2 class="mb-4">Editar Inspector</h2>
-    <hr>
-    <form action="{{ route('inspectors.update', $inspector) }}" method="POST">
+<div class="modal fade" id="editInspectorModal{{ $inspector->id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            
+        <div class="modal-header">
+            <h5 class="modal-title">Editar Inspector</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        
+        
+        <form action="{{ route('inspectors.update', $inspector) }}" method="POST">
         @csrf
         @method('PUT')
+        <div class="modal-body">
 
         <div class="mb-3">
             <label for="user_id" class="form-label">Usuario</label>
@@ -44,6 +52,12 @@
                 @endforeach
             </select>
         </div>
+       
+        <div class="mb-3">
+            <label for="email" class="form-label">Email</label>
+            <input type="text" name="email" id="email" class="form-control"
+                   value="{{ $inspector->email }}" required>
+        </div>
 
         <div class="mb-3">
             <label for="badge_number" class="form-label">Número de Placa</label>
@@ -51,8 +65,10 @@
                    value="{{ $inspector->badge_number }}" required>
         </div>
 
-        <button type="submit" class="btn btn-primary">Actualizar</button>
-        <a href="{{ route('inspectors.index') }}" class="btn btn-secondary">Cancelar</a>
+        <div class="modal-footer">
+            <button type="submit" class="btn btn-primary">Actualizar</button>
+            <a href="{{ route('inspectors.index') }}" class="btn btn-secondary">Cancelar</a>
+    </div>
     </form>
 </div>
 </body>

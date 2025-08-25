@@ -12,7 +12,8 @@ class CarController extends Controller
     public function index()
     {
         $cars = Car::with('user')->get();
-        return view('cars.index',compact('cars'));
+        $users = User::orderBy('name')->get();
+        return view('cars.index',compact('cars','users'));
     }
 
     // Mostrar el formulario de creación

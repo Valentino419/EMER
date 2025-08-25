@@ -12,7 +12,7 @@
             <h4 class="text-center mb-4">Menú</h4>
             <a href="{{ route('dashboard') }}">🏠 Inicio</a>
             <a href="{{ route('cars.index') }}">🚗 Autos</a>
-            <a href="{{ route('inspectors.index') }}">🕵️ Inspectores</a>
+            <!-- <a href="{{ route('inspectors.index') }}">🕵️ Inspectores</a> -->
             <a href="{{ route('infractions.index') }}">⚠️ Infracciones</a>
             <a href="{{ route('payment.index') }}"> Registrar Estacionamiento </a>
             <a href="{{ route('logout') }}">🚪 Cerrar sesión</a>
@@ -47,7 +47,7 @@
                         </div>
                     </div>
 
-                    <div class="col-md-4">
+                    <!-- <div class="col-md-4">
                         <div class="card shadow-sm">
                             <div class="card-body">
                                 <h5 class="card-title">Inspectores</h5>
@@ -55,7 +55,7 @@
                                 <a href="{{ route('inspectors.index') }}" class="btn btn-primary">Ver</a>
                             </div>
                         </div>
-                    </div>
+                    </div> -->
 
                     <div class="col-md-4">
                         <div class="card shadow-sm">
