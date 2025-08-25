@@ -156,6 +156,14 @@
             <button type="submit">LOGIN</button>
         </form>
 
+            <div class="text-center mt-3">
+            <p>¿No tienes cuenta?</p>
+            <a href="{{ route('register') }}" 
+            class="btn btn-outline-primary w-100">
+            Registrarse
+            </a>
+            </div>
+                
         @if (Route::has('password.request'))
             <a href="{{ route('password.request') }}" class="forgot">Forgot password?</a>
         @else

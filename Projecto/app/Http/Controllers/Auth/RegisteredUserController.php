@@ -18,32 +18,39 @@ class RegisteredUserController extends Controller
      */
     public function create()
     {
-        return view('register');
+        return view('auth.register');
     }
-
 
     /**
      * Guardar un nuevo usuario en la base de datos.
      */
     public function store(Request $request): RedirectResponse
     {
+        // Validación de todos los campos
         $request->validate([
             'name' => 'required|string|max:255',
+            'surname' => 'required|string|max:255',
+            'dni' => 'required|integer|unique:users,dni',
             'email' => 'required|string|lowercase|email|max:255|unique:users,email',
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
+        // Crear usuario con rol por defecto (3 = usuario normal)
         $user = User::create([
             'name' => $request->name,
+            'surname' => $request->surname,
+            'dni' => $request->dni,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role_id' => 2, // 👈 acá podés asignar un rol por defecto (ej: usuario normal)
+            'role_id' => 3, 
         ]);
 
         event(new Registered($user));
 
-        Auth::login($user); // inicia sesión automáticamente
+        // Iniciar sesión automáticamente
+        Auth::login($user);
 
-        return redirect()->route('dashboard'); // redirige al dashboard
+        // Redirigir al dashboard del usuario
+        return redirect()->route('dashboard.user');
     }
 }

@@ -162,12 +162,8 @@
 
             <button type="submit">LOGIN</button>
         </form>
-         
-        <div class="register">
-            <a href="{{ route('register') }}" 
-            class="btn btn-outline-primary w-100">
-            Registrarse
-            </a>
+        <div class="text-center mt-3">¿No tienes cuenta?<a href="{{ route('register') }}" 
+        class="btn btn-outline-primary w-100">Registrarse</a>
         </div>
 
         <div class="forgot">

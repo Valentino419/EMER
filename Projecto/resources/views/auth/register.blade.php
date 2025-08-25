@@ -42,6 +42,7 @@
         <form method="POST" action="{{ route('register') }}">
             @csrf
 
+            {{-- Nombre --}}
             <div class="mb-3">
                 <label for="name" class="form-label">Nombre</label>
                 <input id="name" type="text" class="form-control @error('name') is-invalid @enderror" 
@@ -51,6 +52,27 @@
                 @enderror
             </div>
 
+            {{-- Apellido --}}
+            <div class="mb-3">
+                <label for="surname" class="form-label">Apellido</label>
+                <input id="surname" type="text" class="form-control @error('surname') is-invalid @enderror" 
+                       name="surname" value="{{ old('surname') }}" required>
+                @error('surname')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
+
+            {{-- DNI --}}
+            <div class="mb-3">
+                <label for="dni" class="form-label">DNI</label>
+                <input id="dni" type="number" class="form-control @error('dni') is-invalid @enderror" 
+                       name="dni" value="{{ old('dni') }}" required>
+                @error('dni')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
+
+            {{-- Correo --}}
             <div class="mb-3">
                 <label for="email" class="form-label">Correo electrónico</label>
                 <input id="email" type="email" class="form-control @error('email') is-invalid @enderror" 
@@ -60,6 +82,7 @@
                 @enderror
             </div>
 
+            {{-- Contraseña --}}
             <div class="mb-3">
                 <label for="password" class="form-label">Contraseña</label>
                 <input id="password" type="password" class="form-control @error('password') is-invalid @enderror" 
@@ -69,6 +92,7 @@
                 @enderror
             </div>
 
+            {{-- Confirmar Contraseña --}}
             <div class="mb-3">
                 <label for="password_confirmation" class="form-label">Confirmar contraseña</label>
                 <input id="password_confirmation" type="password" class="form-control" 
@@ -79,7 +103,7 @@
 
             <div class="text-center mt-3">
                 <p>¿Ya tienes cuenta?</p>
-                <a href="{{ route('app') }}" class="btn btn-outline-secondary w-100">
+                <a href="{{ route('login') }}" class="btn btn-outline-secondary w-100">
                     Iniciar Sesión
                 </a>
             </div>
