@@ -20,9 +20,6 @@ Route::resource('cars', CarController::class);
 
 Route::resource('payment', PaymentController::class);
 
-
-
-
 //Route::get('/', function () {
 //    return Inertia::render('welcome');
 //})->name('home');
