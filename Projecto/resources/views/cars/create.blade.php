@@ -40,27 +40,52 @@
             </div>
         @endif
 
-        <form action="{{ route('cars.store') }}" method="POST">
-            @csrf
-
-            <div class="mb-3">
-                <label for="car_plate" class="form-label">Patente</label>
-                <input type="text" class="form-control" id="car_plate" name="car_plate" required>
-            </div>
-
-            <div class="mb-3">
-                <label for="user_id" class="form-label">Dueño</label>
-                <select name="user_id" id="user_id" class="form-select" required>
-                    <option value="">Seleccione un usuario</option>
-                    @foreach ($users as $user)
-                        <option value="{{ $user->id }}">{{ $user->name }}</option>
-                    @endforeach
-                </select>
-            </div>
-
-            <button type="submit" class="btn btn-primary">Guardar</button>
-            <a href="{{ route('cars.index') }}" class="btn btn-secondary">Cancelar</a>
-        </form>
+       <form action="{{ route('cars.store') }}" method="POST">
+    @csrf
+    <div class="modal-header">
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
     </div>
+
+    <div class="modal-body">
+        <div class="mb-3">
+            <label for="brand" class="form-label">Marca</label>
+            <input type="text" name="brand" class="form-control" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="model" class="form-label">Modelo</label>
+            <input type="text" name="model" class="form-control" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="owner_id" class="form-label">Dueño</label>
+            <select name="owner_id" class="form-select" required>
+                <option value="">Seleccione un dueño</option>
+                @foreach($users as $user)
+                    <option value="{{ $user->id }}">{{ $user->name }}</option>
+                @endforeach
+            </select>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Guardar</button>
+    </div>
+    <script>
+    document.getElementById("btnCreate").addEventListener("click", function() {
+    // Llamamos a la ruta del create
+    fetch("{{ route('cars.create') }}")
+        .then(response => response.text())
+        .then(html => {
+            document.getElementById("createContent").innerHTML = html;
+        })
+        .catch(err => {
+            document.getElementById("createContent").innerHTML = 
+              '<div class="p-3 text-danger">Error al cargar el formulario</div>';
+            console.error(err);
+        });
+});
+</script>
+</form>
 </body>
 </html>
