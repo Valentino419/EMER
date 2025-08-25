@@ -34,9 +34,9 @@ Route::middleware('auth')->group(function () {
     Route::post('confirm-password', [ConfirmablePasswordController::class, 'store']);
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 
-    Route::get('/dashboard/admin', [DashboardController::class, 'index'])->middleware('role:admin')->name('dashboard.admin');
-    Route::get('/dashboard/inspector', [DashboardController::class, 'index'])->middleware('role:inspector')->name('dashboard.inspector');
-    Route::get('/dashboard', [DashboardController::class, 'index'])->middleware('role:user')->name('dashboard.user');
+    // Route::get('/dashboard/admin', [DashboardController::class, 'index'])->middleware('role:admin')->name('dashboard.admin');
+    // Route::get('/dashboard/inspector', [DashboardController::class, 'index'])->middleware('role:inspector')->name('dashboard.inspector');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::get('/admin/users', fn() => view('admin.users'))->middleware('role:admin')->name('admin.users');
     Route::get('/admin/reports', fn() => view('admin.reports'))->middleware('role:admin')->name('admin.reports');
