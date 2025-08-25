@@ -5,7 +5,7 @@
 @section('sidebar')
     <div class="col-md-2 sidebar">
         <h4 class="text-center mb-4">Menú</h4>
-        <a href="{{ route('dashboard.user') }}"><i class="fas fa-home"></i> Inicio</a>
+        <a href="{{ route('dashboard') }}"><i class="fas fa-home"></i> Inicio</a>
         <a href="{{ route('cars.index') }}"><i class="fas fa-car"></i> Autos</a>
         <a href="{{ route('inspectors.index') }}"><i class="fas fa-user-shield"></i> Inspectores</a>
         <a href="{{ route('infractions.index') }}"><i class="fas fa-exclamation-triangle"></i> Infracciones</a>

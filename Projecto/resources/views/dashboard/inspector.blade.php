@@ -5,7 +5,7 @@
 @section('sidebar')
     <div class="col-md-2 sidebar">
         <h4 class="text-center mb-4">Menú Inspector</h4>
-        <a href="{{ route('dashboard.inspector') }}">🏠 Inicio</a>
+        <a href="{{ route('dashboard') }}">🏠 Inicio</a>
         <a href="{{ route('infractions.index') }}">⚠️ Infracciones</a>
         <a href="{{ route('cars.index') }}">🚗 Autos</a>
     </div>
