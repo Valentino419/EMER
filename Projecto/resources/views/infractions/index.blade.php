@@ -139,7 +139,17 @@
                 <td>{{ $infraction->date }}</td>
                 <td>{{ $infraction->status }}</td>
                 <td>
-                    <a href="{{ route('infractions.edit', $infraction) }}" class="btn btn-sm btn-warning">Editar</a>
+                   
+                    <button class="btn btn-primary editBtn"
+                            data-id="{{ $infraction->id }}"
+                            data-inspector="{{ $infraction->inspector->name }}"
+                            data-car="{{ $infraction->car->car_plate }}"
+                            data-fine="{{ $infraction->fine }}"
+                            data-date="{{ $infraction->date }}"
+                            data-status="{{ $infraction->status }}">
+                        Editar
+                    </button>
+
                     <form action="{{ route('infractions.destroy', $infraction) }}" method="POST" class="d-inline">
                         @csrf @method('DELETE')
                         <button type="submit" class="btn btn-sm btn-danger"
@@ -151,5 +161,70 @@
         </tbody>
     </table>
 </div>
+
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <form id="editForm" method="POST">
+        @csrf
+        @method('PUT')
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editModalLabel">Editar Infracción</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="fine" class="form-label">Multa</label>
+                    <input type="number" class="form-control" id="fine" name="fine">
+                </div>
+                <div class="mb-3">
+                    <label for="date" class="form-label">Fecha</label>
+                    <input type="date" class="form-control" id="date" name="date">
+                </div>
+                <div class="mb-3">
+                    <label for="status" class="form-label">Estado</label>
+                    <select class="form-control" id="status" name="status">
+                        <option value="pendiente">Pendiente</option>
+                        <option value="pagada">Pagada</option>
+                        <option value="anulada">Anulada</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+            </div>
+        </div>
+    </form>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const editModal = new bootstrap.Modal(document.getElementById('editModal'));
+    const form = document.getElementById('editForm');
+
+    document.querySelectorAll('.editBtn').forEach(button => {
+        button.addEventListener('click', () => {
+            const id = button.getAttribute('data-id');
+            const fine = button.getAttribute('data-fine');
+            const date = button.getAttribute('data-date');
+            const status = button.getAttribute('data-status');
+
+            // Rellenar inputs
+            document.getElementById('fine').value = fine;
+            document.getElementById('date').value = date;
+            document.getElementById('status').value = status;
+
+            // Cambiar la action del formulario
+            form.action = `/infractions/${id}`;
+
+            // Mostrar modal
+            editModal.show();
+        });
+    });
+});
+</script>
 </body>
 </html>

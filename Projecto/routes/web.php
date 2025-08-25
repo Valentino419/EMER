@@ -8,10 +8,13 @@ use App\Http\Controllers\InfractionController;
 use App\Http\Controllers\InspectorController;
 use App\Http\Controllers\ZoneController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\ParkingSessionController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\Auth\NewPasswordController;;
 
 Route::resource('cars', CarController::class);
 
@@ -63,6 +66,22 @@ Route::resource('zones', ZoneController::class)->names([
 
 Route::get('/parking/create', [ParkingSessionController::class, 'create'])->name('parking.create');
 Route::post('/parking', [ParkingSessionController::class, 'store'])->name('parking.store');
+
+// 1. Mostrar formulario "olvidé mi contraseña"
+Route::get('/forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])
+    ->name('password.request');
+
+// 2. Enviar email con link de reseteo
+Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])
+    ->name('password.email');
+
+// 3. Mostrar formulario para crear nueva contraseña (el link del email apunta acá)
+Route::get('/reset-password/{token}', [NewPasswordController::class, 'create'])
+    ->name('password.reset');
+
+// 4. Guardar nueva contraseña en la BD
+Route::post('/reset-password', [NewPasswordController::class, 'store'])
+    ->name('password.store');
 
 
 Route::fallback(function () {
