@@ -145,7 +145,7 @@
             </div>
 
             <button type="submit">LOGIN</button>
-            <a href="{{ route('password.request') }}">Forgot password?</a>
+           
         </form>
 
         @if (Route::has('password.request'))
