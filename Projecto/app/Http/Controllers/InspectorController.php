@@ -12,13 +12,13 @@ class InspectorController extends Controller
     {
         $inspectors = Inspectors::with('user')->get();
         $users = User::orderBy('name')->get();
-        return view('inspectors.index', compact('inspectors','users'));
+        return view('inspector.index', compact('inspectors','users'));
     }
 
     public function create()
     {
         $users = User::all();
-        return view('inspectors.create', compact('users'));
+        return view('inspector.create', compact('users'));
     }
 
     public function store(Request $request)
@@ -36,7 +36,7 @@ class InspectorController extends Controller
     public function edit(Inspectors $inspector)
     {
         $users = User::all();
-        return view('inspectors.edit', compact('inspector', 'users'));
+        return view('inspector.edit', compact('inspector', 'users'));
     }
 
     public function update(Request $request, Inspectors $inspector)
