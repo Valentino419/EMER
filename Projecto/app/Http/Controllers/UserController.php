@@ -37,6 +37,7 @@ class UserController extends Controller
             'dni' => $request->type->dni,
             'email' => $request->type->email,
             'password' => $request->type->password,
+            'role'=>$request->type->role
         ]);
 
         return redirect()->route('user.index');
