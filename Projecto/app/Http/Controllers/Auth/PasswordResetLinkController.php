@@ -8,19 +8,20 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
 use Inertia\Inertia;
 use Inertia\Response;
+;
+
 
 class PasswordResetLinkController extends Controller
 {
     /**
      * Show the password reset link request page.
      */
-    public function create(Request $request): Response
-    {
-        return Inertia::render('auth/forgot-password', [
-            'status' => $request->session()->get('status'),
-        ]);
-    }
-
+  public function create(Request $request)
+{
+    return view('auth.forgot-password', [
+        'status' => $request->session()->get('status'),
+    ]);
+}
     /**
      * Handle an incoming password reset link request.
      *
