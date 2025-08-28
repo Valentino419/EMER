@@ -134,7 +134,7 @@
                 <td>{{ $inspector->badge_number }}</td>
                 <td>
                     
-                <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#modalEditarInspector{{ $inspector->id }}"> Editar</button>
+                <button type="button" class="btn btn-sm btn-primary"> Editar</button>
                     <form action="{{ route('inspectors.destroy', $inspector) }}" method="POST" class="d-inline"
                           onsubmit="return confirm('¿Estás seguro de eliminar este inspector?');">
                         @csrf
@@ -147,61 +147,6 @@
         </tbody>
     </table>
 </div>
-
-@foreach ($inspectors as $inspector)
-<div class="modal fade" id="modalEditarInspector{{ $inspector->id }}" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-
-      <div class="modal-header">
-        <h5 class="modal-title">Editar Inspector #{{ $inspector->id }}</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-      </div>
-
-      <form action="{{ route('inspectors.update', $inspector->id) }}" method="POST">
-        @csrf
-        @method('PUT')
-
-        <div class="modal-body">
-
-          <!-- Usuario -->
-          <div class="mb-3">
-            <label class="form-label">Usuario</label>
-            <select name="user_id" class="form-select" required>
-              @foreach($users as $user)
-                <option value="{{ $user->id }}" {{ $user->id == $inspector->user_id ? 'selected' : '' }}>
-                  {{ $user->name }} — {{ $user->email }}
-                </option>
-              @endforeach
-            </select>
-          </div>
-
-          <!-- Email (del usuario asociado) -->
-          <div class="mb-3">
-            <label class="form-label">Email</label>
-            <input type="email" name="email" class="form-control"
-                   value="{{ old('email', $inspector->user->email) }}" required>
-          </div>
-
-          <!-- Número de placa -->
-          <div class="mb-3">
-            <label class="form-label">Número de Placa</label>
-            <input type="text" name="badge_number" class="form-control"
-                   value="{{ old('badge_number', $inspector->badge_number) }}" required>
-          </div>
-
-        </div>
-
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-          <button type="submit" class="btn btn-primary">Actualizar</button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
-@endforeach
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
 

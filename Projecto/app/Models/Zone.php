@@ -8,7 +8,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Zone extends Model
 {
     use HasFactory;
-
+    
+    protected $fillable = [
+        'name',
+        'numeration',
+    ];
     public function streets()
     {
         return $this->hasMany(Street::class, 'id_zone');
@@ -18,5 +22,6 @@ class Zone extends Model
     {
         return $this->hasMany(Schedules::class, 'id_zone');
     }
+    
 }
 

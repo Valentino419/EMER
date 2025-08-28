@@ -30,9 +30,14 @@ class ZoneController extends Controller
      */
     public function store(Request $request)
     {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'numeration' => 'required|string|max:255',
+        ]);
+        
         $zone= Zone::create([
-            'name'=>$request->type->name,
-            'numeration'=>$request->type->numeration, 
+            'name'=>$request->name,
+            'numeration'=>$request->numeration, 
         ]);
 
         return redirect()->route('zone.index');

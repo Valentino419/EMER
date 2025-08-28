@@ -7,6 +7,7 @@
         <h4 class="text-center mb-4">Menú Admin</h4>
         <a href="{{ route('dashboard') }}">🏠 Inicio</a>
         <a href="{{ route('cars.index') }}">🚗 Autos</a>
+        <a href="{{ route('zone.index') }}">📌 Zonas </a>
         <a href="{{ route('inspectors.index') }}">🕵️ Inspectores</a>
         <a href="{{ route('infractions.index') }}">⚠️ Infracciones</a>
         <a href="{{ route('logout') }}">🚪 Cerrar sesión</a>
