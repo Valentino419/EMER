@@ -144,6 +144,8 @@
     </style>
 </head>
 <body>
+            <div class="card shadow">
+                <div class="card-body">
     <div class="login-container">
         <div class="icon">
             👤

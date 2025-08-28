@@ -115,11 +115,22 @@
     </style>
 </head>
 <body>
+    <div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-4">
+
+            <div class="text-center mb-4">
+                <img src="{{ asset('imagen/logo-EMER.png') }}" alt="Logo EMER" width="150">
+                <h3 class="mt-2">Bienvenido a EMER</h3>
+            </div>
+
+            <div class="card shadow">
+                <div class="card-body">
     <div class="login-container">
         <div class="icon">
-            👤
+    
         </div>
-        <h2>USER LOGIN</h2>
+       
         <p class="subtitle">Welcome to the EMER website</p>
 
         @if (session('status'))
@@ -161,6 +172,7 @@
         @else
             <div class="forgot">Forgot password?</div>
         @endif
+    
     </div>
 </body>
 </html>
