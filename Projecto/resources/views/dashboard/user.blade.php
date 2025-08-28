@@ -6,40 +6,62 @@
     <title>EMER - Dashboard Usuario</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body { background-color: #f4f5fa; }
-        .sidebar { min-height: 100vh; background: linear-gradient(180deg, #0072ff, #00c6ff); color: white; padding-top: 20px; }
-        .sidebar a { color: white; text-decoration: none; display: block; padding: 10px 15px; border-radius: 8px; margin: 5px 0; }
-        .sidebar a:hover { background-color: rgba(255, 255, 255, 0.2); }
-        .content { padding: 20px; }
-        .navbar { background-color: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        body { background-color: #f4f5fa; font-family: 'Segoe UI', sans-serif; }
+        .navbar { background: linear-gradient(90deg, #00c6ff, #0072ff); color: white; }
+        .navbar .navbar-text, .navbar strong { color: white !important; }
+        .card-menu {
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transition: transform 0.2s ease;
+        }
+        .card-menu:hover { transform: translateY(-5px); }
+        .card-menu .card-body {
+            text-align: center;
+            padding: 30px;
+        }
+        .card-menu i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #0072ff;
+        }
     </style>
+    <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
 </head>
 <body>
 
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-md-2 sidebar">
-            <h4 class="text-center mb-4">Menú Usuario</h4>
-            <a href="{{ route('dashboard.user') }}">🏠 Inicio</a>
-            <a href="{{ route('cars.index') }}">🚗 Mis Autos</a>
-            <a href="{{ route('payment.index') }}">💳 Pagos</a>
-            <a href="{{ route('logout') }}">🚪 Cerrar sesión</a>
+<nav class="navbar px-4">
+    <span class="navbar-text">
+        Bienvenido, <strong>{{ Auth::user()->name ?? 'Usuario' }}</strong>
+    </span>
+    <form action="{{ route('logout') }}" method="POST" class="mb-0">
+        @csrf
+        <button class="btn btn-light btn-sm">Cerrar sesión</button>
+    </form>
+</nav>
+
+<div class="container my-5">
+    <h1 class="text-center mb-4">Dashboard Usuario</h1>
+    <p class="text-center text-muted mb-5">Consulta y gestiona tus autos, pagos y notificaciones.</p>
+
+    <div class="row g-4 justify-content-center">
+        <div class="col-md-4">
+            <div class="card card-menu">
+                <div class="card-body">
+                    <i class="fas fa-car"></i>
+                    <h5 class="card-title">Mis Autos</h5>
+                    <a href="{{ route('cars.index') }}" class="btn btn-primary mt-3">Ver Autos</a>
+                </div>
+            </div>
         </div>
-
-        <div class="col-md-10">
-            <nav class="navbar navbar-light justify-content-between px-4">
-                <span class="navbar-text">
-                    Bienvenido, <strong>{{ Auth::user()->name ?? 'Usuario' }}</strong>
-                </span>
-                <form action="{{ route('logout') }}" method="POST">
-                    @csrf
-                    <button class="btn btn-outline-danger btn-sm">Cerrar sesión</button>
-                </form>
-            </nav>
-
-            <div class="content">
-                <h1 class="mb-4">Dashboard Usuario</h1>
-                <p>Panel de control para usuarios. Consulta tus autos, pagos y notificaciones.</p>
+        
+        <div class="col-md-4">
+            <div class="card card-menu">
+                <div class="card-body">
+                    <i class="fas fa-credit-card"></i>
+                    <h5 class="card-title">Pagos</h5>
+                    <a href="{{ route('payment.index') }}" class="btn btn-success mt-3">Gestionar Pagos</a>
+                </div>
             </div>
         </div>
     </div>

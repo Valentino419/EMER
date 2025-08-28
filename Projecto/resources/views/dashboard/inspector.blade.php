@@ -7,41 +7,56 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body { background-color: #f4f5fa; }
-        .sidebar { min-height: 100vh; background: linear-gradient(180deg, #0072ff, #00c6ff); color: white; padding-top: 20px; }
-        .sidebar a { color: white; text-decoration: none; display: block; padding: 10px 15px; border-radius: 8px; margin: 5px 0; }
-        .sidebar a:hover { background-color: rgba(255, 255, 255, 0.2); }
-        .content { padding: 20px; }
         .navbar { background-color: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .dashboard-title { font-weight: bold; }
+        .card-option {
+            transition: transform 0.2s;
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+        }
+        .card-option:hover {
+            transform: scale(1.05);
+        }
+        .icon {
+            font-size: 2.5rem;
+        }
     </style>
 </head>
 <body>
 
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-md-2 sidebar">
-            <h4 class="text-center mb-4">Menú Inspector</h4>
-            <a href="{{ route('dashboard.inspector') }}">🏠 Inicio</a>
-            <a href="{{ route('infractions.index') }}">⚠️ Infracciones</a>
-            <a href="{{ route('cars.index') }}">🚗 Autos</a>
-            <a href="{{ route('logout') }}">🚪 Cerrar sesión</a>
+<nav class="navbar navbar-light justify-content-between px-4">
+    <span class="navbar-text">
+        Bienvenido, <strong>{{ Auth::user()->name ?? 'Inspector' }}</strong>
+    </span>
+    <form action="{{ route('logout') }}" method="POST">
+        @csrf
+        <button class="btn btn-outline-danger btn-sm">Cerrar sesión</button>
+    </form>
+</nav>
+
+<div class="container py-5">
+    <h1 class="dashboard-title text-center mb-5">Panel de Inspector</h1>
+    <div class="row g-4 justify-content-center">
+        
+        <div class="col-md-4">
+            <a href="{{ route('infractions.index') }}" class="text-decoration-none text-dark">
+                <div class="card card-option text-center p-4">
+                    <div class="icon">⚠️</div>
+                    <h5 class="mt-3">Gestionar Infracciones</h5>
+                </div>
+            </a>
         </div>
 
-        <div class="col-md-10">
-            <nav class="navbar navbar-light justify-content-between px-4">
-                <span class="navbar-text">
-                    Bienvenido, <strong>{{ Auth::user()->name ?? 'Inspector' }}</strong>
-                </span>
-                <form action="{{ route('logout') }}" method="POST">
-                    @csrf
-                    <button class="btn btn-outline-danger btn-sm">Cerrar sesión</button>
-                </form>
-            </nav>
-
-            <div class="content">
-                <h1 class="mb-4">Dashboard Inspector</h1>
-                <p>Panel de control para inspectores. Gestiona y revisa infracciones y autos asignados.</p>
-            </div>
+        <div class="col-md-4">
+            <a href="{{ route('cars.index') }}" class="text-decoration-none text-dark">
+                <div class="card card-option text-center p-4">
+                    <div class="icon">🚗</div>
+                    <h5 class="mt-3">Ver Autos</h5>
+                </div>
+            </a>
         </div>
+
     </div>
 </div>
 
