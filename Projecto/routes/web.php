@@ -16,7 +16,7 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\NewPasswordController;;
 
-Route::resource('cars', CarController::class);
+
 
 Route::resource('payment', PaymentController::class);
 
@@ -24,7 +24,10 @@ Route::resource('payment', PaymentController::class);
 //    return Inertia::render('welcome');
 //})->name('home');
 
-
+Route::resource('cars', CarController::class)->names([
+    'create' => 'cars.create',
+    'edit' => 'cars.edit',
+]);
 Route::resource('infractions', InfractionController::class)->names([
     'index' => 'infractions.index',
     'create' => 'infractions.create',

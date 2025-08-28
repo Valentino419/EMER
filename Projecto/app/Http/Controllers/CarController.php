@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Car;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class CarController extends Controller
 {
@@ -20,7 +21,13 @@ class CarController extends Controller
     public function create()
     {
         $users = User::all();
-        return view('cars.create', compact('users'));
+         if (Auth::user()->role === 'admin') {
+            // Vista para administradores
+            return view('cars.admin.create', compact('users'));
+        };
+         // Vista para usuarios comunes
+        //     return view('cars.createtUser', compact('users'));
+        // };
     }
 
     // Guardar un nuevo auto
@@ -40,7 +47,14 @@ class CarController extends Controller
     public function edit(Car $car)
     {
         $users = User::all();
-        return view('cars.edit', compact('car', 'users'));
+        
+        if (Auth::user()->role === 'admin') {
+            // Vista para administradores
+            return view('cars.admin.edit');
+        } else {
+        // Vista para usuarios comunes
+        return view('cars.editUser');
+        };
     }
 
     // Actualizar un auto
