@@ -24,10 +24,9 @@ class CarController extends Controller
          if (Auth::user()->role === 'admin') {
             // Vista para administradores
             return view('cars.admin.create', compact('users'));
-        };
+        }
+        else return view('cars.createUser', compact('users'));
          // Vista para usuarios comunes
-        //     return view('cars.createtUser', compact('users'));
-        // };
     }
 
     // Guardar un nuevo auto

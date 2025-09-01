@@ -35,7 +35,7 @@ Route::resource('infractions', InfractionController::class)->names([
     'edit' => 'infractions.edit',
     'update' => 'infractions.update',
     'destroy' => 'infractions.destroy',
-]);;
+]);
 
 Route::resource('inspectors', InspectorController::class)->names([
     'index' => 'inspectors.index',
