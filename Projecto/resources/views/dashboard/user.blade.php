@@ -43,23 +43,45 @@
 
 <div class="container my-5">
     <h1 class="text-center mb-4">Dashboard Usuario</h1>
-    <p class="text-center text-muted mb-5">Consulta y gestiona tus autos, pagos y notificaciones.</p>
+    <p class="text-center text-muted mb-5">Consulta y gestiona tus autos, pagos e infracciones.</p>
 
-    <div class="row g-4 justify-content-center">
-        <div class="col-md-4">
-            <div class="card card-menu">
-                <div class="card-body">
-                    <i class="fas fa-car"></i>
-                    <h5 class="card-title">Mis Autos</h5>
-                    <a href="{{ route('cars.index') }}" class="btn btn-primary mt-3">Ver Autos</a>
-                </div>
+   <div class="row text-center">
+
+    <!-- Tarjeta Autos -->
+    <div class="col-md-4">
+        <div class="card card-menu">
+            <div class="card-body">
+                <i class="fas fa-car text-info"></i>
+                <h5 class="card-title">Autos</h5>
+                <a href="{{ route('cars.index') }}" class="btn btn-info mt-3 w-100">Ver Autos</a>
             </div>
         </div>
-        
-        <div class="col-md-4">
-            <div class="card card-menu">
-                <div class="card-body">
-                    <i class="fas fa-credit-card"></i>
-                    <h5 class="card-title">Pagos</h5>
-                    <a href="{{ route('payment.index') }}" class="btn btn-success mt-3">Gestionar Pagos</a>
-                </div>
+    </div>
+
+    <!-- Tarjeta Pagos -->
+    <div class="col-md-4">
+        <div class="card card-menu">
+            <div class="card-body">
+                <i class="fas fa-credit-card text-success"></i>
+                <h5 class="card-title">Pagos</h5>
+                <a href="{{ route('payment.index') }}" class="btn btn-success mt-3 w-100">Ver Pagos</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tarjeta Infracciones -->
+    <div class="col-md-4">
+        <div class="card card-menu">
+            <div class="card-body">
+                <i class="fas fa-exclamation-triangle text-danger"></i>
+                <h5 class="card-title">Infracciones</h5>
+                <a href="{{ route('infractions.index') }}" class="btn btn-danger mt-3 w-100">Ver Infracciones</a>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+
+      

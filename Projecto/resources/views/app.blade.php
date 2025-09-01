@@ -3,119 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Dashboard')</title>
-    <!-- Include Bootstrap for basic styling (optional, can be removed if not needed) -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Custom CSS -->
-    <style>
-        body {
-            background-color: #f8f9fa;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin-top: 40px;
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-
-        h2 {
-            color: #343a40;
-            font-weight: 600;
-            margin-bottom: 20px;
-        }
-
-        .table {
-            border-radius: 8px;
-            overflow: hidden;
-            border: 1px solid #dee2e6;
-        }
-
-        .table th {
-            background-color: #007bff;
-            color: white;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            padding: 15px;
-        }
-
-        .table td {
-            padding: 15px;
-            vertical-align: middle;
-        }
-
-        .table-striped tbody tr:nth-of-type(odd) {
-            background-color: #f8f9fa;
-        }
-
-        .table-hover tbody tr:hover {
-            background-color: #e9ecef;
-            transition: background-color 0.2s ease;
-        }
-
-        .btn-primary {
-            background-color: #007bff;
-            border: none;
-            padding: 8px 16px;
-            font-weight: 500;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-        }
-
-        .btn-primary:hover {
-            background-color: #0056b3;
-            transform: translateY(-2px);
-        }
-
-        .btn-danger {
-            background-color: #dc3545;
-            border: none;
-            padding: 8px 16px;
-            font-weight: 500;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-        }
-
-        .btn-danger:hover {
-            background-color: #b02a37;
-            transform: translateY(-2px);
-        }
-
-        .alert-success {
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .table {
-                display: block;
-                overflow-x: auto;
-                white-space: nowrap;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        @yield('content')
-    </div>
-    <!-- Include Bootstrap JS for interactivity (optional) -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
-
-</html>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <title>EMER</title>
-    <meta charset="UTF-8">
-    <title>User Login</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      
+    <title>EMER - User Login</title>
     <style>
         body {
             background-color: #03040cff;
@@ -133,11 +21,12 @@
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
             padding: 40px 30px;
             text-align: center;
-            position: relative;
             width: 350px;
+            position: relative;
         }
 
-        .login-container::before, .login-container::after {
+        .login-container::before,
+        .login-container::after {
             content: '';
             position: absolute;
             top: 50%;
@@ -150,48 +39,33 @@
             opacity: 0.4;
         }
 
-        .login-container::before {
-            left: -120px;
+        .login-container::before { left: -120px; }
+        .login-container::after { right: -120px; }
+
+        .logo {
+            margin-bottom: 20px;
         }
 
-        .login-container::after {
-            right: -120px;
-        }
-
-        .icon {
-            background: linear-gradient(135deg, #00c6ff, #0072ff);
-            color: white;
-            border-radius: 50%;
-            width: 70px;
-            height: 70px;
-            margin: -60px auto 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 32px;
-        }
-
-        h2 {
+        h3 {
             margin-bottom: 10px;
-            font-size: 24px;
+            font-size: 22px;
             color: #333;
         }
 
         p.subtitle {
             color: #aaa;
             font-size: 14px;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
         }
 
-        input[type="text"], input[type="password"] {
+        input[type="email"], input[type="password"] {
             width: 100%;
             padding: 12px 15px;
             margin: 10px 0;
             border-radius: 8px;
             border: 1px solid #ccc;
             font-size: 14px;
-            color: #010000ff
-
+            color: #010000ff;
         }
 
         .remember {
@@ -214,44 +88,75 @@
             cursor: pointer;
         }
 
-        .forgot {
+        .links {
             margin-top: 20px;
             font-size: 14px;
-            color: #888;
-            text-decoration: underline;
-            cursor: pointer;
+            color: #555;
         }
 
+        .links a {
+            color: #0072ff;
+            text-decoration: underline;
+            margin: 0 5px;
+        }
+
+        .error, .status {
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .error { color: #d9534f; }
+        .status { color: #5cb85c; }
     </style>
 </head>
 <body>
-            <div class="card shadow">
-                <div class="card-body">
+
     <div class="login-container">
-        <div class="icon">
-            👤
+        <!-- Logo centrado -->
+        <div class="logo">
+            <img src="{{ asset('imagen/logo-EMER.png') }}" alt="Logo EMER" width="150">
         </div>
-        <h2>USER LOGIN</h2>
-        <p class="subtitle">Welcome to the website</p>
+        <h3>Bienvenido a EMER</h3>
+        <p class="subtitle">Accede con tus credenciales</p>
+
+        @if (session('status'))
+            <div class="status">{{ session('status') }}</div>
+        @endif
+
+        @if ($errors->any())
+            <div class="error">
+                @foreach ($errors->all() as $error)
+                    <p>{{ $error }}</p>
+                @endforeach
+            </div>
+        @endif
+
         <form method="POST" action="{{ route('login') }}">
             @csrf
-            <input type="text" name="email" placeholder="USERNAME" required>
-            <input type="password" name="password" placeholder="PASSWORD" required>
+            <input type="email" name="email" placeholder="Email Address" value="{{ old('email') }}" required>
+            <input type="password" name="password" placeholder="Password" required>
 
             <div class="remember">
                 <input type="checkbox" id="remember" name="remember" style="margin-right: 8px;">
-                <label for="remember">remember me</label>
+                <label for="remember">Recuérdame</label>
             </div>
 
             <button type="submit">LOGIN</button>
         </form>
-        <div class="text-center mt-3">¿No tienes cuenta?<a href="{{ route('register') }}" 
-        class="btn btn-outline-primary w-100">Registrarse</a>
+
+        <div class="text-center mt-3">
+            <p>¿No tienes cuenta?
+            <a href="{{ route('register') }}" class="btn btn-outline-primary w-100">
+                Registrarse
+            </a></p>
         </div>
 
-        <div class="forgot">
-            Forgot password?
-        </div>
+        @if (Route::has('password.request'))
+            <div class="links mt-3">
+                <a href="{{ route('password.request') }}">¿Olvidaste tu contraseña?</a>
+            </div>
+        @endif
     </div>
+
 </body>
 </html>
