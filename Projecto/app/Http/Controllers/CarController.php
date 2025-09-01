@@ -19,13 +19,12 @@ class CarController extends Controller
 
     // Mostrar el formulario de creación
     public function create()
-    {
+    {   
         $users = User::all();
-         if (Auth::user()->role === 'admin') {
+        if (Auth::user()->role->name == 'admin') {
             // Vista para administradores
             return view('cars.admin.create', compact('users'));
-        }
-        else return view('cars.createUser', compact('users'));
+        }else return view('cars.createUser', compact('users'));;
          // Vista para usuarios comunes
     }
 
