@@ -27,6 +27,7 @@ Route::resource('payment', PaymentController::class);
 Route::resource('cars', CarController::class)->names([
     'create' => 'cars.create',
     'edit' => 'cars.edit',
+    'update'=> 'cars.update',
 ]);
 Route::resource('infractions', InfractionController::class)->names([
     'index' => 'infractions.index',

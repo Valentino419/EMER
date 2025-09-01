@@ -10,42 +10,47 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
-use Inertia\Inertia;
-use Inertia\Response;
 
 class RegisteredUserController extends Controller
 {
     /**
-     * Show the registration page.
+     * Mostrar formulario de registro (Blade).
      */
-    public function create(): Response
+    public function create()
     {
-        return Inertia::render('auth/register');
+        return view('auth.register');
     }
 
     /**
-     * Handle an incoming registration request.
-     *
-     * @throws \Illuminate\Validation\ValidationException
+     * Guardar un nuevo usuario en la base de datos.
      */
     public function store(Request $request): RedirectResponse
     {
+        // Validación de todos los campos
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
+            'surname' => 'required|string|max:255',
+            'dni' => 'required|integer|unique:users,dni',
+            'email' => 'required|string|lowercase|email|max:255|unique:users,email',
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
+        // Crear usuario con rol por defecto (3 = usuario normal)
         $user = User::create([
             'name' => $request->name,
+            'surname' => $request->surname,
+            'dni' => $request->dni,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'role_id' => 3, 
         ]);
 
         event(new Registered($user));
 
+        // Iniciar sesión automáticamente
         Auth::login($user);
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        // Redirigir al dashboard del usuario
+        return redirect()->route('dashboard.user');
     }
 }

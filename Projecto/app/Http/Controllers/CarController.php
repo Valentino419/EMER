@@ -46,14 +46,13 @@ class CarController extends Controller
     public function edit(Car $car)
     {
         $users = User::all();
-        
+
         if (Auth::user()->role === 'admin') {
             // Vista para administradores
-            return view('cars.admin.edit');
-        } else {
+            return view('cars.admin.edit', compact('users','car'));
+
+        } else return view('cars.editUser', compact('users', 'car'));
         // Vista para usuarios comunes
-        return view('cars.editUser');
-        };
     }
 
     // Actualizar un auto

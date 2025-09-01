@@ -136,13 +136,9 @@
                         <td>{{ $car->car_plate }}</td>
                         <td>{{ $car->user->name ?? 'Sin usuario' }}</td>
                         <td>
-                            <button class="btn btn-primary editBtn"
-                                data-id="{{ $car->id }}"
-                                data-id="{{ $car->car_plate }}"
-                                data-id="{{ $car->user->name }}">
-                                  Editar
-                            </button>
-                            <form action="{{ route('cars.destroy', $car->id) }}" method="POST" class="d-inline" onsubmit="return confirm('¿Estás seguro de eliminar este auto?');">
+                           
+                        <a href="{{ route('cars.edit' , $car->id)}}" class="btn btn-primary btn-sm">Editar</a>   
+                        <form action="{{ route('cars.destroy', $car->id) }}" method="POST" class="d-inline" onsubmit="return confirm('¿Estás seguro de eliminar este auto?');">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>

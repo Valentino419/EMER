@@ -49,37 +49,19 @@
             </div>
 
             <div class="mb-3">
-                <label for="brand" class="form-label">Marca</label>
-                <input type="text" name="brand" class="form-control" required>
-            </div>
-
-            <div class="mb-3">
-                <label for="model" class="form-label">Modelo</label>
-                <input type="text" name="model" class="form-control" required>
-            </div>
-
-            
-            <label for="dueño" class="form-label">Dueño</label>
-            <input list="users" name="dueño" id="dueño" class="form-control" required>
-            <datalist id="users">
-                foreach($users as $user)
-                    <option value="{{ $user->name }}">
-                @endforeach
-            </datalist>
+            <label for="user_id" class="form-label"> Dueño</label>
+            <select name="user_id" id="user_id" class="form-control">
+                 <option value=""> Seleccione un dueño</option>
+                    @foreach($users as $user) 
+                    <option value="{{ $user->id }}">>{{ $user->name }}</option>
+                 @endforeach
+             </select><br>
             
             <div class="d-flex justify-content-end">
                 <a href="{{ route('cars.index') }}" class="btn btn-secondary me-2">Cancelar</a>
                 <button type="submit" class="btn btn-primary">Guardar</button>
             </div>
             
-            <!-- <div class="mb-3">
-            <label for="user_id" class="form-label" hidden>>Dueño</label>
-             <select name="user_id" id="user_id" class="form-select" hidden>
-            <option value="" hidden>Seleccione un dueño</option>
-                @foreach($users as $user) 
-             <option value="{{ $user->id }}" hidden>>{{ $user->name }}</option>
-            @endforeach
-        </select> -->
         </form>
     </div>
 </div>

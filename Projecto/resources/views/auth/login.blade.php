@@ -21,11 +21,12 @@
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
             padding: 40px 30px;
             text-align: center;
-            position: relative;
             width: 350px;
+            position: relative;
         }
 
-        .login-container::before, .login-container::after {
+        .login-container::before,
+        .login-container::after {
             content: '';
             position: absolute;
             top: 50%;
@@ -41,22 +42,21 @@
         .login-container::before { left: -120px; }
         .login-container::after { right: -120px; }
 
-        .icon {
-            background: linear-gradient(135deg, #00c6ff, #0072ff);
-            color: white;
-            border-radius: 50%;
-            width: 70px;
-            height: 70px;
-            margin: -60px auto 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 32px;
+        .logo {
+            margin-bottom: 20px;
         }
 
-        h2 { margin-bottom: 10px; font-size: 24px; color: #333; }
+        h3 {
+            margin-bottom: 10px;
+            font-size: 22px;
+            color: #333;
+        }
 
-        p.subtitle { color: #aaa; font-size: 14px; margin-bottom: 30px; }
+        p.subtitle {
+            color: #aaa;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
 
         input[type="email"], input[type="password"] {
             width: 100%;
@@ -105,22 +105,19 @@
             margin-bottom: 15px;
         }
 
-        .error {
-            color: #d9534f;
-        }
-
-        .status {
-            color: #5cb85c;
-        }
+        .error { color: #d9534f; }
+        .status { color: #5cb85c; }
     </style>
 </head>
 <body>
+
     <div class="login-container">
-        <div class="icon">
-            👤
+        <!-- Logo centrado -->
+        <div class="logo">
+            <img src="{{ asset('imagen/logo-EMER.png') }}" alt="Logo EMER" width="150">
         </div>
-        <h2>USER LOGIN</h2>
-        <p class="subtitle">Welcome to the EMER website</p>
+        <h3>Bienvenido a EMER</h3>
+        <p class="subtitle">Accede con tus credenciales</p>
 
         @if (session('status'))
             <div class="status">{{ session('status') }}</div>
@@ -141,18 +138,25 @@
 
             <div class="remember">
                 <input type="checkbox" id="remember" name="remember" style="margin-right: 8px;">
-                <label for="remember">Remember me</label>
+                <label for="remember">Recuérdame</label>
             </div>
 
             <button type="submit">LOGIN</button>
-           
         </form>
 
+        <div class="text-center mt-3">
+            <p>¿No tienes cuenta?
+            <a href="{{ route('register') }}" class="btn btn-outline-primary w-100">
+                Registrarse
+            </a></p>
+        </div>
+
         @if (Route::has('password.request'))
-            <a href="{{ route('password.request') }}" class="forgot">Forgot password?</a>
-        @else
-            <div class="forgot">Forgot password?</div>
+            <div class="links mt-3">
+                <a href="{{ route('password.request') }}">¿Olvidaste tu contraseña?</a>
+            </div>
         @endif
     </div>
+
 </body>
 </html>
