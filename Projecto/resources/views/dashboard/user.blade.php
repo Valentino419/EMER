@@ -1,62 +1,65 @@
-@extends('layouts.app')
 
-@section('title', 'Dashboard')
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EMER - Dashboard Usuario</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f4f5fa; font-family: 'Segoe UI', sans-serif; }
+        .navbar { background: linear-gradient(90deg, #00c6ff, #0072ff); color: white; }
+        .navbar .navbar-text, .navbar strong { color: white !important; }
+        .card-menu {
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transition: transform 0.2s ease;
+        }
+        .card-menu:hover { transform: translateY(-5px); }
+        .card-menu .card-body {
+            text-align: center;
+            padding: 30px;
+        }
+        .card-menu i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #0072ff;
+        }
+    </style>
+    <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
+</head>
+<body>
 
-@section('sidebar')
-    <div class="col-md-2 sidebar">
-        <h4 class="text-center mb-4">Menú</h4>
-        <a href="{{ route('dashboard') }}"><i class="fas fa-home"></i> Inicio</a>
-        <a href="{{ route('cars.index') }}"><i class="fas fa-car"></i> Autos</a>
-        <a href="{{ route('inspectors.index') }}"><i class="fas fa-user-shield"></i> Inspectores</a>
-        <a href="{{ route('infractions.index') }}"><i class="fas fa-exclamation-triangle"></i> Infracciones</a>
-        <a href="{{ route('parking.create') }}"><i class="fas fa-map-pin"></i> Registrar Estacionamiento</a>
+<nav class="navbar px-4">
+    <span class="navbar-text">
+        Bienvenido, <strong>{{ Auth::user()->name ?? 'Usuario' }}</strong>
+    </span>
+    <form action="{{ route('logout') }}" method="POST" class="mb-0">
+        @csrf
+        <button class="btn btn-light btn-sm">Cerrar sesión</button>
+    </form>
+</nav>
+
+<div class="container my-5">
+    <h1 class="text-center mb-4">Dashboard Usuario</h1>
+    <p class="text-center text-muted mb-5">Consulta y gestiona tus autos, pagos y notificaciones.</p>
+
+    <div class="row g-4 justify-content-center">
+        <div class="col-md-4">
+            <div class="card card-menu">
+                <div class="card-body">
+                    <i class="fas fa-car"></i>
+                    <h5 class="card-title">Mis Autos</h5>
+                    <a href="{{ route('cars.index') }}" class="btn btn-primary mt-3">Ver Autos</a>
+                </div>
+            </div>
+        </div>
         
-    </div>
-@endsection
-
-@section('header')
-    <div class="header">
-        <span class="welcome">Bienvenido, <strong>{{ Auth::user()->name ?? 'Invitado' }}</strong></span>
-        <form action="{{ route('logout') }}" method="POST" class="logout-form">
-            @csrf
-            <button type="submit" class="logout-btn">Cerrar sesión</button>
-        </form>
-    </div>
-@endsection
-
-@section('content')
-    <h1>Dashboard</h1>
-    <p>Bienvenido a tu panel de control. Desde aquí puedes navegar por todas las secciones del sistema.</p>
-    <div class="row">
-        <div class="col-md-3">
-            <div class="card">
-                <h5>Autos</h5>
-                <p>Gestiona todos los autos registrados.</p>
-                <a href="{{ route('cars.index') }}" class="btn btn-primary">Ver</a>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card">
-                <h5>Inspectores</h5>
-                <p>Administra la lista de inspectores.</p>
-                <a href="{{ route('inspectors.index') }}" class="btn btn-primary">Ver</a>
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-md-3">
-            <div class="card">
-                <h5>Infracciones</h5>
-                <p>Consulta y gestiona las infracciones.</p>
-                <a href="{{ route('infractions.index') }}" class="btn btn-primary">Ver</a>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card">
-                <h5>Estacionamiento</h5>
-                <p>Registrar un nuevo estacionamiento.</p>
-                <a href="{{ route('parking.create') }}" class="btn btn-primary">Ver</a>
-            </div>
-        </div>
-    </div>
-@endsection
+        <div class="col-md-4">
+            <div class="card card-menu">
+                <div class="card-body">
+                    <i class="fas fa-credit-card"></i>
+                    <h5 class="card-title">Pagos</h5>
+                    <a href="{{ route('payment.index') }}" class="btn btn-success mt-3">Gestionar Pagos</a>
+                </div>
