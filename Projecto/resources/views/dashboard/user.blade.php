@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -62,11 +63,3 @@
                     <h5 class="card-title">Pagos</h5>
                     <a href="{{ route('payment.index') }}" class="btn btn-success mt-3">Gestionar Pagos</a>
                 </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>

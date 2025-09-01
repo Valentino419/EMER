@@ -12,31 +12,38 @@ class InspectorController extends Controller
     {
         $inspectors = Inspectors::with('user')->get();
         $users = User::orderBy('name')->get();
-        return view('inspectors.index', compact('inspectors','users'));
+        return view('inspector.index', compact('inspectors','users'));
     }
 
     public function create()
     {
         $users = User::all();
-        return view('inspectors.create', compact('users'));
+        return view('inspector.create', compact('users'));
     }
 
     public function store(Request $request)
-    {
-        $request->validate([
-            'user_id' => 'required|exists:users,id',
-            'badge_number' => 'required|string|max:255',
-        ]);
+{
+    $validated = $request->validate([
+        'name' => 'required|string|max:255',
+        'surname' => 'required|string|max:255',
+        'dni' => 'required|string|max:20|unique:users,dni',
+        'email' => 'required|email|max:255|unique:users,email',
+        'password' => 'required|string|min:8|confirmed', // Ensures password matches password_confirmation
+        'role_id' => 'required|in:1,2,3',
+    ]);
 
-        Inspectors::create($request->all());
+    // Hash the password before storing
+    $validated['password'] = bcrypt($validated['password']);
 
-        return redirect()->route('inspectors.index')->with('success', 'Inspector creado correctamente.');
-    }
+    User::create($validated);
+
+    return redirect()->route('inspectors.index')->with('success', 'Inspector creado con éxito.');
+}
 
     public function edit(Inspectors $inspector)
     {
         $users = User::all();
-        return view('inspectors.edit', compact('inspector', 'users'));
+        return view('inspector.edit', compact('inspector', 'users'));
     }
 
     public function update(Request $request, Inspectors $inspector)

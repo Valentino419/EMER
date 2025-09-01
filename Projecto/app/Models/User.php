@@ -54,7 +54,7 @@ class User extends Authenticatable
         'email',
         'dni',
         'password', 
-        'role',
+        'role_id',
 
     ];
     /**

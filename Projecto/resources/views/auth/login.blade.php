@@ -145,10 +145,10 @@
         </form>
 
         <div class="text-center mt-3">
-            <p>¿No tienes cuenta?</p>
+            <p>¿No tienes cuenta?
             <a href="{{ route('register') }}" class="btn btn-outline-primary w-100">
                 Registrarse
-            </a>
+            </a></p>
         </div>
 
         @if (Route::has('password.request'))

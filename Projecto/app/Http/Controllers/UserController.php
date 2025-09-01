@@ -13,7 +13,7 @@ class UserController extends Controller
     public function index()
     {
         $users = User::all();
-        return view('User.index', compact('users'));
+        return view('user.index', compact('users'));
     }
 
     /**
@@ -22,7 +22,7 @@ class UserController extends Controller
     public function create()
     {
         $users = User::all();
-        return view('User.create', compact('users'));
+        return view('user.create', compact('users'));
     }
 
     /**
@@ -37,6 +37,7 @@ class UserController extends Controller
             'dni' => $request->type->dni,
             'email' => $request->type->email,
             'password' => $request->type->password,
+            'role'=>$request->type->role
         ]);
 
         return redirect()->route('user.index');

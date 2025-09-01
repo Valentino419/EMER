@@ -16,19 +16,19 @@ class AuthenticatedSessionController extends Controller
     {
         
     if (Auth::check()) {
-        $user = Auth::user();
-        $role = $user->role ? $user->role->name : 'user';
-        $redirectRoute = match ($role) {
-            'admin' => 'dashboard.admin',
-            'inspector' => 'dashboard.inspector',
-            default => 'dashboard',
-        };
+        // $user = Auth::user();
+        // $role = $user->role ? $user->role->name : 'user';
+        // $redirectRoute = match ($role) {
+        //     'admin' => 'dashboard.admin',
+        //     'inspector' => 'dashboard.inspector',
+        //     default => 'dashboard',
+        // };
        
-        if (!Route::has($redirectRoute)) {
+        // if (!Route::has($redirectRoute)) {
           
-            return redirect()->route('dashboard.user');
-        }
-        return redirect()->route($redirectRoute);
+        //     return redirect()->route('dashboard');
+        // }
+        return redirect()->route('dashboard');
     }
      return view('auth.login', [
             'canResetPassword' => Route::has('password.request'),
@@ -45,11 +45,7 @@ class AuthenticatedSessionController extends Controller
         $role = $user->role ? $user->role->name : 'user';
        
 
-        return redirect()->route(match ($role) {
-            'admin' => 'dashboard.admin',
-            'inspector' => 'dashboard.inspector',
-            default => 'dashboard.user',
-        });
+        return redirect()->route('dashboard');
     }
 
     public function destroy(Request $request): RedirectResponse
