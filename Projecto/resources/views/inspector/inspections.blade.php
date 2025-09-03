@@ -6,6 +6,6 @@
 <body>
     <h1>Manage inspectors (Inspector)</h1>
     <p>This is the admin users page.</p>
-    <a href="{{ route('dashboard.admin') }}">Back to Dashboard</a>
+    <a href="{{ route('dashboard') }}">Back to Dashboard</a>
 </body>
 </html>
