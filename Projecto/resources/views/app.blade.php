@@ -252,6 +252,6 @@
         <div class="forgot">
             Forgot password?
         </div>
-    </div>
+    </div> 
 </body>
 </html>

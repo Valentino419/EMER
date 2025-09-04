@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Editar auto</title>
+    <title>Registrar nuevo auto</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
     <style>
         body {
@@ -28,7 +28,7 @@
 </head>
 <body>
     <div class="container">
-        <h2>Editar auto</h2>
+        <h2>Registrar nuevo auto</h2>
 
         @if ($errors->any())
             <div class="alert alert-danger">
@@ -40,30 +40,21 @@
             </div>
         @endif
 
-        <form action="{{ route('cars.update', $car->id) }}" method="POST">
+        <form action="{{ route('cars.store') }}" method="POST">
             @csrf
-            @method('PUT')
 
             <div class="mb-3">
                 <label for="car_plate" class="form-label">Patente</label>
-                <input type="text" class="form-control" id="car_plate" name="car_plate" value="{{ $car->car_plate }}" required>
+                <input type="text" name="car_plate" class="form-control" required>
             </div>
-
-            <div class="mb-3">
-                <label for="user_id" class="form-label">Dueño</label>
-                <select name="user_id" id="user_id" class="form-select" required>
-                    <option value="">Seleccione un usuario</option>
-                    @foreach ($users as $user)
-                        <option value="{{ $user->id }}" {{ $user->id == $car->user_id ? 'selected' : '' }}>
-                            {{ $user->name }}
-                        </option>
-                    @endforeach
-                </select>
+            
+            <div class="d-flex justify-content-end">
+                <a href="{{ route('cars.index') }}" class="btn btn-secondary me-2">Cancelar</a>
+                <button type="submit" class="btn btn-primary">Guardar</button>
             </div>
-
-            <button type="submit" class="btn btn-primary">Actualizar</button>
-            <a href="{{ route('cars.index') }}" class="btn btn-secondary">Cancelar</a>
+            
         </form>
+    </div>
     </div>
 </body>
 </html>

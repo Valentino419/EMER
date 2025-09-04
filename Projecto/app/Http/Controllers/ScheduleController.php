@@ -11,7 +11,7 @@ class ScheduleController extends Controller
      */
     public function index()
     {
-    
+        //
     }
 
     /**

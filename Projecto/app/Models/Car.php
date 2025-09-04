@@ -13,7 +13,7 @@ class Car extends Model
 
     protected $fillable = [
         'car_plate',
-        'id_user',
+        'user_id',
     ];
 
     public function user(){

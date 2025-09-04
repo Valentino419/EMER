@@ -1,126 +1,114 @@
-@extends('layouts.app')
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">  
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <style>
+        body {
+            background-color: #f0f4f8;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
 
-@section('content')
-<style>
-    body {
-        background-color: #f0f4f8;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
+        .container {
+            max-width: 1200px;
+            margin-top: 40px;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        }
 
-    .custom-container {
-        max-width: 800px;
-        margin: 40px auto;
-        padding: 30px;
-        background-color: #ffffff;
-        border-radius: 12px;
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-    }
+        h2 {
+            color: #1a3c6d;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
 
-    h2 {
-        color: #1a3c6d;
-        font-weight: 700;
-        margin-bottom: 25px;
-        text-align: center;
-    }
+        .table {
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid #e0e4e8;
+        }
 
-    label {
-        font-weight: 600;
-        color: #333;
-        margin-bottom: 5px;
-        display: block;
-    }
+        .table th {
+            background-color: #007bff;
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 16px;
+        }
 
-    select, input[type="number"], input[type="text"] {
-        width: 100%;
-        padding: 10px 12px;
-        border: 1px solid #ced4da;
-        border-radius: 6px;
-        margin-bottom: 20px;
-        font-size: 15px;
-        transition: border-color 0.3s;
-    }
+        .table td {
+            padding: 16px;
+            vertical-align: middle;
+            color: #333;
+        }
 
-    select:focus, input:focus {
-        border-color: #007bff;
-        outline: none;
-    }
+        .table-striped tbody tr:nth-of-type(odd) {
+            background-color: #f8fafc;
+        }
 
-    .btn-submit {
-        background-color: #007bff;
-        color: white;
-        font-weight: 600;
-        padding: 10px 20px;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-        transition: background-color 0.3s, transform 0.2s;
-    }
+        .table-hover tbody tr:hover {
+            background-color: #e6f0fa;
+            transition: background-color 0.3s ease;
+        }
 
-    .btn-submit:hover {
-        background-color: #0056b3;
-        transform: translateY(-2px);
-    }
+        .btn-primary {
+            background-color: #007bff;
+            border: none;
+            padding: 8px 18px;
+            font-weight: 500;
+            border-radius: 6px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
 
-    .alert-success {
-        background-color: #d4edda;
-        color: #155724;
-        padding: 15px;
-        border-radius: 8px;
-        margin-bottom: 20px;
-        border-left: 5px solid #28a745;
-    }
+        .btn-primary:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+        }
 
-    .alert-danger {
-        background-color: #f8d7da;
-        color: #721c24;
-        padding: 15px;
-        border-radius: 8px;
-        margin-bottom: 20px;
-        border-left: 5px solid #dc3545;
-    }
+        .btn-danger {
+            background-color: #dc3545;
+            border: none;
+            padding: 8px 18px;
+            font-weight: 500;
+            border-radius: 6px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
 
-    .session-info {
-        background-color: #f8fafc;
-        border: 1px solid #e0e4e8;
-        border-radius: 8px;
-        padding: 15px;
-        margin-bottom: 20px;
-    }
+        .btn-danger:hover {
+            background-color: #b02a37;
+            transform: translateY(-2px);
+        }
 
-    .session-info h4 {
-        margin: 0 0 10px;
-        font-weight: 700;
-        color: #1a3c6d;
-    }
+        .alert-success {
+            border-radius: 8px;
+            margin-bottom: 20px;
+            background-color: #d4edda;
+            color: #155724;
+        }
 
-    .session-info p {
-        margin: 5px 0;
-        color: #333;
-    }
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
 
-    .table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 15px;
-    }
+            .table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
 
-    .table th, .table td {
-        padding: 10px;
-        border: 1px solid #e0e4e8;
-        text-align: left;
-    }
-
-    .table th {
-        background-color: #007bff;
-        color: white;
-        font-weight: 600;
-    }
-
-    .table-striped tbody tr:nth-of-type(odd) {
-        background-color: #f8fafc;
-    }
-</style>
-
+            .table th, .table td {
+                min-width: 120px;
+            }
+        }
+    </style>
+</head>
+<body>
 <div class="custom-container">
     <h2>Cobro de Estacionamiento</h2>
 
@@ -179,3 +167,4 @@
         </table>
     </div>
 </div>
+</body>

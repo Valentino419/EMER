@@ -1,55 +1,52 @@
-@extends('layouts.app')
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Crear Inspector</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
 
-@section('title', 'EMER - Add Zone')
+    <style>
+        body {
+            background-color: #f0f4f8;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
 
-@section('sidebar')
-    <div class="col-md-2 sidebar">
-        <h4 class="text-center mb-4">Menú Admin</h4> <!-- Change to "Menú Inspector" if intended for inspectors -->
-        <a href="{{ route('dashboard') }}"><i class="fas fa-home"></i> Inicio</a>
-        <a href="{{ route('cars.index') }}"><i class="fas fa-car"></i> Autos</a>
-        <a href="{{ route('inspectors.index') }}"><i class="fas fa-user-shield"></i> Inspectores</a>
-        <a href="{{ route('infractions.index') }}"><i class="fas fa-exclamation-triangle"></i> Infracciones</a>
-        <a href="{{ route('parking.create') }}"><i class="fas fa-map-pin"></i> Registrar Estacionamiento</a>
-        <a href="{{ route('logout') }}"><i class="fas fa-sign-out-alt"></i> Cerrar sesión</a>
-    </div>
-@endsection
+        .container {
+            max-width: 600px;
+            margin-top: 50px;
+            padding: 30px;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        }
 
-@section('header')
-    <div class="header">
-        <span class="welcome">Bienvenido, <strong>{{ Auth::user()->name ?? 'Admin' }}</strong></span>
-        <form action="{{ route('logout') }}" method="POST" class="logout-form">
-            @csrf
-            <button type="submit" class="logout-btn">Cerrar sesión</button>
-        </form>
-    </div>
-@endsection
+        h2 {
+            color: #1a3c6d;
+            font-weight: 700;
+            margin-bottom: 25px;
+        }
+    </style>
+<body>
+<div class="container">
+    <h2 class="mb-4">Nueva Zonas</h2>
 
-@section('content')
-    <div class="content">
-        <h1 class="mb-4">Add New Zone</h1>
-        <p>Enter the details for the new zone below.</p>
+    <form action="{{ route('zone.store') }}" method="POST">
+        @csrf
 
-        @if ($errors->any())
-            <div class="error">
-                @foreach ($errors->all() as $error)
-                    <p>{{ $error }}</p>
-                @endforeach
-            </div>
-        @endif
+        <div class="mb-3">
+            <label for="name" class="form-label">Nombre</label>
+            <input  type="text" name="name" id="name" class="form-select" required>
+        </div>
+        
+        <div class="mb-3">
+            <label for="numeration" class="form-label">Numeracion</label>
+            <input type="text" name="numeration" id="numeration" class="form-select" required>
+        </div>
 
-        <form method="POST" action="{{ route('zones.store') }}" class="login-container" style="width: 400px; padding: 30px;">
-            @csrf
-            <div class="mb-3">
-                <input type="text" name="name" placeholder="Name" value="{{ old('name') }}" required
-                       class="form-control" style="padding: 12px 15px; border-radius: 8px; border: 1px solid #ccc; font-size: 14px; color: #010000ff;">
-            </div>
-            <div class="mb-3">
-                <input type="text" name="numeration" placeholder="Numeration" value="{{ old('numeration') }}" required
-                       class="form-control" style="padding: 12px 15px; border-radius: 8px; border: 1px solid #ccc; font-size: 14px; color: #010000ff;">
-            </div>
-            <button type="submit" class="btn btn-primary" style="background: linear-gradient(135deg, #00c6ff, #0072ff); border: none; width: 100%; padding: 12px 20px; border-radius: 8px; font-size: 16px; cursor: pointer; transition: transform 0.2s ease;">
-                Save Zone
-            </button>
-        </form>
-    </div>
-@endsection
+        <button type="submit" class="btn btn-primary">Guardar</button>
+        <a href="{{ route('zone.index') }}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+</body>
+</html>

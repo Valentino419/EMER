@@ -16,18 +16,19 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\NewPasswordController;;
 
-Route::resource('cars', CarController::class);
+
 
 Route::resource('payment', PaymentController::class);
-
-
-
 
 //Route::get('/', function () {
 //    return Inertia::render('welcome');
 //})->name('home');
 
-
+Route::resource('cars', CarController::class)->names([
+    'create' => 'cars.create',
+    'edit' => 'cars.edit',
+    'update'=> 'cars.update',
+]);
 Route::resource('infractions', InfractionController::class)->names([
     'index' => 'infractions.index',
     'create' => 'infractions.create',
@@ -35,7 +36,7 @@ Route::resource('infractions', InfractionController::class)->names([
     'edit' => 'infractions.edit',
     'update' => 'infractions.update',
     'destroy' => 'infractions.destroy',
-]);;
+]);
 
 Route::resource('inspectors', InspectorController::class)->names([
     'index' => 'inspectors.index',
@@ -55,15 +56,16 @@ Route::resource('users', UserController::class)->names([
     'destroy' => 'user.destroy',
 ]);
 
-Route::resource('zones', ZoneController::class)->names([
-    'index' => 'zone.index',
-    'create' => 'zone.create',
-    'store' => 'zone.store',
-    'edit' => 'zone.edit',
-    'update' => 'zone.update',
-    'destroy' => 'zone.destroy',
-]);
-
+// Route::resource('zones', ZoneController::class)->names([
+//     'index' => 'zone.index',
+//     'create' => 'zone.create',
+//     'store' => 'zone.store',
+//     'edit' => 'zone.edit',
+//     'update' => 'zone.update',
+//     'destroy' => 'zone.destroy',
+// ]);
+Route::get('/check-zone', [ZoneController::class, 'checkZone']);
+Route::post('/check-zone', [ZoneController::class, 'checkZone']);
 Route::get('/parking/create', [ParkingSessionController::class, 'create'])->name('parking.create');
 Route::post('/parking', [ParkingSessionController::class, 'store'])->name('parking.store');
 
