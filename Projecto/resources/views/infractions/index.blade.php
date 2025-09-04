@@ -112,8 +112,9 @@
     <h2 class="mb-4">Listado de Infracciones</h2>
 
     <hr>
-    @if(Auth::user()->role === 'admin' || Auth::user()->role === 'inspector')
+    @if(Auth::user()->role->name === 'admin' || Auth::user()->role->name === 'inspector')
         <a href="{{ route('infractions.create') }}" class="btn btn-primary mb-3">Nueva Infracción</a>
+       
     @endif
 
     @if(session('success'))
