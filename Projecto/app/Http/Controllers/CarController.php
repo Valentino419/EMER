@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Car;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class CarController extends Controller
 {
@@ -18,9 +19,13 @@ class CarController extends Controller
 
     // Mostrar el formulario de creación
     public function create()
-    {
+    {   
         $users = User::all();
-        return view('cars.create', compact('users'));
+        if (Auth::user()->role->name == 'admin') {
+            // Vista para administradores
+            return view('cars.admin.create', compact('users'));
+        }else return view('cars.createUser', compact('users'));;
+         // Vista para usuarios comunes
     }
 
     // Guardar un nuevo auto
@@ -28,10 +33,12 @@ class CarController extends Controller
     {
         $request->validate([
             'car_plate' => 'required|string|max:255',
-            'user_id' => 'required|exists:users,id',
         ]);
 
-        Car::create($request->only('car_plate', 'user_id'));
+        Car::create([
+        'car_plate' => $request->car_plate,
+        'user_id'=> Auth::id(), // Obtiene el ID del usuario autenticado
+        ]);
 
         return redirect()->route('cars.index')->with('success', 'Auto creado correctamente.');
     }
@@ -40,7 +47,13 @@ class CarController extends Controller
     public function edit(Car $car)
     {
         $users = User::all();
-        return view('cars.edit', compact('car', 'users'));
+
+        if (Auth::user()->role === 'admin') {
+            // Vista para administradores
+            return view('cars.admin.edit', compact('users','car'));
+
+        } else return view('cars.editUser', compact('users', 'car'));
+        // Vista para usuarios comunes
     }
 
     // Actualizar un auto
@@ -48,7 +61,7 @@ class CarController extends Controller
     {
         $request->validate([
             'car_plate' => 'required|string|max:255',
-            'user_id' => 'required|exists:users,id',
+            'user_id' => Auth::id(),
         ]);
 
         $car->update($request->only('car_plate', 'user_id'));

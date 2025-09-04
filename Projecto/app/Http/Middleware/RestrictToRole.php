@@ -15,6 +15,8 @@ class RestrictToRole
         if ($userRole !== $role) {
             abort(403, 'Unauthorized');
         }
+
         return $next($request);
+        
     }
 }

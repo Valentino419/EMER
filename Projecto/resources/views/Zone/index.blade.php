@@ -127,7 +127,7 @@
             <thead>
                 <tr>
                     <th>Nombre</th> 
-                    <th>Numeracion </th> 
+                    <th>Numeracion (altura)</th> 
                     <th>Acciones</th> 
                 </tr>
             </thead>
