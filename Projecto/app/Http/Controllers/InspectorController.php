@@ -66,7 +66,7 @@ class InspectorController extends Controller
     public function edit(Inspectors $inspector)
     {
         $users = User::all();
-        return view('inspector.edit', compact('inspector', 'users'));
+        return view('inspectors.edit', compact('inspector', 'users'));
     }
 
     public function update(Request $request, User $user)

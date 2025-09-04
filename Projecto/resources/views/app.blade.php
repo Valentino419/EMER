@@ -151,12 +151,9 @@
             </a></p>
         </div>
 
-        @if (Route::has('password.request'))
-            <div class="links mt-3">
-                <a href="{{ route('password.request') }}">¿Olvidaste tu contraseña?</a>
-            </div>
-        @endif
-    </div>
-
+        <div class="forgot">
+            Forgot password?
+        </div>
+    </div> 
 </body>
 </html>
