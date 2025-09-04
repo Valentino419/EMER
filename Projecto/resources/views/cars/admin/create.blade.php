@@ -48,41 +48,6 @@
                 <input type="text" name="car_plate" class="form-control" required>
             </div>
 
-            <div class="mb-3">
-                <label for="brand" class="form-label">Marca</label>
-                <input type="text" name="brand" class="form-control" required>
-            </div>
-
-            <div class="mb-3">
-                <label for="model" class="form-label">Modelo</label>
-                <input type="text" name="model" class="form-control" required>
-            </div>
-
-            <div class="mb-3">
-    <label for="user_id" class="form-label">Dueño</label>
-    <select name="user_id" id="user_id" class="form-select" required>
-        <option value="">Seleccione un dueño</option>
-        @foreach($users as $user)
-            <option value="{{ $user->id }}">{{ $user->name }}</option>
-        @endforeach
-    </select>
-</div>
-
-    <!-- Estilos de Select2 -->
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-
-    <!-- Scripts de Select2 -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-
-<script>
-    $(document).ready(function() {
-        $('#user_id').select2({
-            placeholder: "Seleccione un dueño",
-            allowClear: true
-        });
-    });
-</script>
 
             <div class="d-flex justify-content-end">
                 <a href="{{ route('cars.index') }}" class="btn btn-secondary me-2">Cancelar</a>
@@ -92,3 +57,7 @@
     </div>
 </body>
 </html>
+
+
+    
+           

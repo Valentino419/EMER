@@ -60,6 +60,6 @@
             <div class="card card-menu">
                 <div class="card-body">
                     <i class="fas fa-credit-card"></i>
-                    <h5 class="card-title">Pagos</h5>
-                    <a href="{{ route('payment.index') }}" class="btn btn-success mt-3">Gestionar Pagos</a>
+                    <h5 class="card-title">Iniciar estacionamiento</h5>
+                    <a href="{{ route('parking.create') }}" class="btn btn-success mt-3">Iniciar</a>
                 </div>

@@ -224,7 +224,7 @@
 
     </style>
 </head>
-<!-- <body>
+<body>
             <div class="card shadow">
                 <div class="card-body">
     <div class="login-container">
@@ -252,6 +252,6 @@
         <div class="forgot">
             Forgot password?
         </div>
-    </div> -->
+    </div> 
 </body>
 </html>

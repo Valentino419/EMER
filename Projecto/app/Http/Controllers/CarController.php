@@ -33,10 +33,12 @@ class CarController extends Controller
     {
         $request->validate([
             'car_plate' => 'required|string|max:255',
-            'user_id' => 'required|exists:users,id',
         ]);
 
-        Car::create($request->only('car_plate', 'user_id'));
+        Car::create([
+        'car_plate' => $request->car_plate,
+        'user_id'=> Auth::id(), // Obtiene el ID del usuario autenticado
+        ]);
 
         return redirect()->route('cars.index')->with('success', 'Auto creado correctamente.');
     }
@@ -59,7 +61,7 @@ class CarController extends Controller
     {
         $request->validate([
             'car_plate' => 'required|string|max:255',
-            'user_id' => 'required|exists:users,id',
+            'user_id' => Auth::id(),
         ]);
 
         $car->update($request->only('car_plate', 'user_id'));

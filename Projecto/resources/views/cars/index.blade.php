@@ -125,7 +125,6 @@
                 <tr>
                     <th>ID</th>
                     <th>Patente</th>
-                    <th>Dueño</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
@@ -134,7 +133,6 @@
                     <tr>
                         <td>{{ $car->id }}</td>
                         <td>{{ $car->car_plate }}</td>
-                        <td>{{ $car->user->name ?? 'Sin usuario' }}</td>
                         <td>
                            
                         <a href="{{ route('cars.edit' , $car->id)}}" class="btn btn-primary btn-sm">Editar</a>   
