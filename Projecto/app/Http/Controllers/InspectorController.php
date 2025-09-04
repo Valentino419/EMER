@@ -1,7 +1,8 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use App\Models\Inspectors;
 use App\Models\User;
 use App\Models\Role;
@@ -69,13 +70,13 @@ class InspectorController extends Controller
         return view('inspector.edit', compact('inspector', 'users'));
     }
 
-    public function update(Request $request, User $user)
+    public function update(Request $request, User $inspector)
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'surname' => 'required|string|max:255',
-            'dni' => 'required|string|max:20|unique:users,dni,' . $user->id,
-            'email' => 'required|email|max:255|unique:users,email,' . $user->id,
+            'dni' => 'required|string|max:20|unique:users,dni,' . $inspector->id,
+            'email' => 'required|email|max:255|unique:users,email,' . $inspector->id,
             'password' => 'nullable|string|min:8|confirmed',
             'role_id' => 'required|exists:roles,id',
         ], [
@@ -102,7 +103,7 @@ class InspectorController extends Controller
                 unset($validated['password']); // Remove password from update if not provided
             }
 
-            $user->update($validated);
+            $inspector->update($validated);
 
             DB::commit();
 
