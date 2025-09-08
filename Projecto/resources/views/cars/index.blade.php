@@ -106,10 +106,32 @@
                 min-width: 120px;
             }
         }
+        .back-arrow {
+            display: inline-block;
+            font-size: 32px; /* más grande */
+            font-weight: bold;
+            color: #1a3c6d;
+            text-decoration: none;
+            margin-bottom: 15px;
+            background: #fff;
+            border-radius: 50%;
+            padding: 8px 14px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            transition: all 0.3s ease;
+        }
+
+        .back-arrow:hover {
+            background: #007bff;
+            color: #fff;
+            transform: scale(1.1);
+        }
     </style>
 </head>
 <body>
     <div class="container">
+        <a href="{{ route('dashboard') }}" class="back-arrow" title="Volver al inicio">
+            &#8592;
+        </a>
         <h2>Lista de Autos</h2>
         <hr>
         @if (session('success'))
@@ -117,9 +139,10 @@
                 {{ session('success') }}
             </div>
         @endif
-
-        <a href="{{ route('cars.create') }}" class="btn btn-primary mb-3"> Registrar nuevo auto</a>
         
+        <a>
+        <a href="{{ route('cars.create') }}" class="btn btn-primary mb-3"> Registrar nuevo auto</a>
+       
         <table class="table table-striped table-hover">
             <thead>
                 <tr>
