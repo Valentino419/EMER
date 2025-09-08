@@ -1,5 +1,4 @@
-
-<!DOCTYPE html>
+x<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -55,7 +54,7 @@
                 </div>
             </div>
         </div>
-        
+
         <div class="col-md-4">
             <div class="card card-menu">
                 <div class="card-body">
@@ -63,3 +62,19 @@
                     <h5 class="card-title">Iniciar estacionamiento</h5>
                     <a href="{{ route('parking.create') }}" class="btn btn-success mt-3">Iniciar</a>
                 </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card card-menu">
+                <div class="card-body">
+                    <i class="fas fa-car"></i>
+                    <h5 class="card-title">Multas</h5>
+                    <a href="{{ route('infractions.index') }}" class="btn btn-primary mt-3">Visualizar</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

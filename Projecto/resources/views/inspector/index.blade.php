@@ -288,40 +288,129 @@
             <button type="submit" class="btn btn-primary">Buscar</button>
         </form>
 
-    <a href="{{ route('inspectors.create') }}" class="btn btn-primary mb-3">+ Agregar Inspector</a>
+        <a href="{{ route('inspectors.create') }}" class="btn btn-primary mb-3">+ Agregar Inspector</a>
 
-    <table class="table table-bordered table-hover">
-        <thead class="table-dark">
-        <tr>
-            <th>ID</th>
-            <th>Nombre de Usuario</th>
-            <th>Email</th>
-            <th>Número de Placa</th>
-            <th>Acciones</th>
-        </tr>
-        </thead>
-        <tbody>
-        @foreach ($inspectors as $inspector)
-            <tr>
-                <td>{{ $inspector->id }}</td>
-                <td>{{$inspector->user ? $inspector->user->name: 'Sin usuario'}}</td>
-                <td>{{ $inspector->user ? $inspector->user->email: 'Sin email' }}</td>
-                <td>{{ $inspector->badge_number }}</td>
-                <td>
-                    
-                <button type="button" class="btn btn-sm btn-primary"> Editar</button>
-                    <form action="{{ route('inspectors.destroy', $inspector) }}" method="POST" class="d-inline"
-                          onsubmit="return confirm('¿Estás seguro de eliminar este inspector?');">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
-                    </form>
-                </td>
-            </tr>
-        @endforeach
-        </tbody>
-    </table>
-</div>
+        @if (session('success'))
+            <div class="alert alert-success">
+                {{ session('success') }}
+            </div>
+        @endif
+
+        <table class="table table-bordered table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre de Usuario</th>
+                    <th>Email</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse ($inspectors as $inspector)
+                    <tr>
+                        <td>{{ $inspector->id }}</td>
+                        <td>{{ $inspector->name }}</td>
+                        <td>{{ $inspector->email }}</td>
+                        <td>
+                            <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal"
+                                data-bs-target="#modalEditarInspector{{ $inspector->id }}">Editar</button>
+                            <form action="{{ route('inspectors.destroy', $inspector) }}" method="POST" class="d-inline"
+                                onsubmit="return confirm('¿Estás seguro de eliminar este inspector?');">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
+                            </form>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="4" class="text-center">No se encontraron inspectores.</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+
+        <!-- Pagination Links -->
+        {{ $inspectors->appends(request()->query())->links('pagination::bootstrap-5') }}
+    </div>
+
+    @foreach ($inspectors as $inspector)
+        <div class="modal fade" id="modalEditarInspector{{ $inspector->id }}" tabindex="-1" aria-labelledby="modalEditarInspectorLabel{{ $inspector->id }}" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalEditarInspectorLabel{{ $inspector->id }}">Editar Inspector #{{ $inspector->id }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form action="{{ route('inspectors.update', $inspector) }}" method="POST">
+                            @csrf
+                            @method('PUT')
+                            <div>
+                                <label for="name">Nombre</label>
+                                <input type="text" name="name" value="{{ old('name', $inspector->name) }}" required>
+                                @error('name')
+                                    <span class="error">{{ $message }}</span>
+                                @enderror
+                            </div>
+                            <div>
+                                <label for="surname">Apellido</label>
+                                <input type="text" name="surname" value="{{ old('surname', $inspector->surname) }}" required>
+                                @error('surname')
+                                    <span class="error">{{ $message }}</span>
+                                @enderror
+                            </div>
+                            <div>
+                                <label for="dni">DNI</label>
+                                <input type="text" name="dni" value="{{ old('dni', $inspector->dni) }}" required>
+                                @error('dni')
+                                    <span class="error">{{ $message }}</span>
+                                @enderror
+                            </div>
+                            <div>
+                                <label for="email">Correo</label>
+                                <input type="email" name="email" value="{{ old('email', $inspector->email) }}" required>
+                                @error('email')
+                                    <span class="error">{{ $message }}</span>
+                                @enderror
+                            </div>
+                            <div>
+                                <label for="password">Contraseña (dejar en blanco para no cambiar)</label>
+                                <input type="password" name="password">
+                                @error('password')
+                                    <span class="error">{{ $message }}</span>
+                                @enderror
+                            </div>
+                            <div>
+                                <label for="password_confirmation">Confirmar Contraseña</label>
+                                <input type="password" name="password_confirmation">
+                            </div>
+                            <div>
+                                <label for="role_id">Rol</label>
+                                <select name="role_id" required>
+                                    @foreach ($roles as $id => $name)
+                                        <option value="{{ $id }}"
+                                            {{ old('role_id', $inspector->role_id) == $id ? 'selected' : '' }}>
+                                            {{ $name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('role_id')
+                                    <span class="error">{{ $message }}</span>
+                                @enderror
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                                <button type="submit" class="btn btn-primary">Actualizar</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endforeach
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>

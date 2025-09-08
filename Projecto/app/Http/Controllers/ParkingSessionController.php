@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Car;
 use App\Models\Zone;
+use App\Models\ParkingSession;
 
 class ParkingSessionController extends Controller
 {
@@ -80,4 +81,31 @@ class ParkingSessionController extends Controller
     {
         //
     }
+
+    public function end($id)
+{
+    $session = ParkingSession::findOrFail($id);
+
+    $start = \Carbon\Carbon::parse($session->start_time);
+    $end = now();
+
+    $minutes = $start->diffInMinutes($end);
+
+    // Convertimos minutos a horas, con tu regla de redondeo
+    $hours = floor($minutes / 60);
+    $extraMinutes = $minutes % 60;
+
+    if ($extraMinutes > 10) {
+        $hours += 1; // se pasa de 10 min, cobra otra hora
+    }
+
+    $amount = $hours * 500; // $500 por hora
+
+    $session->end_time = $end;
+    $session->amount = $amount;
+    $session->save();
+
+    return redirect()->back()->with('payment', $session);
+}
+
 }

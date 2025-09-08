@@ -110,8 +110,12 @@
 <body>
 <div class="container mt-4">
     <h2 class="mb-4">Listado de Infracciones</h2>
+
     <hr>
-    <a href="{{ route('infractions.create') }}" class="btn btn-primary mb-3">Nueva Infracción</a>
+    @if(Auth::user()->role->name === 'admin' || Auth::user()->role->name === 'inspector')
+        <a href="{{ route('infractions.create') }}" class="btn btn-primary mb-3">Nueva Infracción</a>
+       
+    @endif
 
     @if(session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>

@@ -5,93 +5,35 @@
     <title>Registrar Infracción</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<style>
-    body {
-        background-color: #f0f4f8;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f0f4f8;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
 
-    .custom-card {
-        max-width: 900px;
-        margin: 40px auto;
-        padding: 30px;
-        background-color: #ffffff;
-        border-radius: 12px;
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-    }
+        .container {
+            max-width: 600px;
+            margin-top: 50px;
+            padding: 30px;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        }
 
-    h2 {
-        color: #1a3c6d;
-        font-weight: 700;
-        margin-bottom: 20px;
-    }
+        h2 {
+            color: #1a3c6d;
+            font-weight: 700;
+            margin-bottom: 25px;
+        }
 
-    label {
-        font-weight: 600;
-        color: #333;
-        margin-bottom: 5px;
-        display: block;
-    }
+        .error {
+            color: #dc3545;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+    </style>
 
-    select, input[type="number"], input[type="text"] {
-        width: 100%;
-        padding: 10px 12px;
-        border: 1px solid #ced4da;
-        border-radius: 6px;
-        margin-bottom: 20px;
-        font-size: 15px;
-        transition: border-color 0.3s;
-    }
-
-    select:focus, input:focus {
-        border-color: #007bff;
-        outline: none;
-    }
-
-    .btn-blue {
-        background-color: #007bff;
-        color: white;
-        font-weight: 600;
-        padding: 10px 20px;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: background-color 0.3s, transform 0.2s;
-    }
-
-    .btn-blue:hover {
-        background-color: #0056b3;
-        transform: translateY(-2px);
-    }
-
-    .form-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 20px;
-    }
-
-    .form-header h2 {
-        margin: 0;
-    }
-
-    .form-section {
-        border-radius: 8px;
-        overflow: hidden;
-    }
-
-    .form-section .form-title {
-        background-color: #007bff;
-        color: #fff;
-        padding: 12px;
-        font-weight: 600;
-        font-size: 16px;
-    }
-
-    .form-section .form-body {
-        padding: 20px;
-    }
-</style>
 <body>
 <div class="container mt-4">
     <h2>Registrar Nueva Infracción</h2>
