@@ -87,7 +87,7 @@ Route::post('/reset-password', [NewPasswordController::class, 'store'])
 
 
 Route::fallback(function () {
-    return view('auth.login');
+    return redirect()->route('login');
 });
 
 
