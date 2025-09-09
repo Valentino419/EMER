@@ -26,21 +26,12 @@
         background-color: #007bff; color: white; font-weight: 600; padding: 10px 20px;
         border: none; border-radius: 8px; cursor: pointer; transition: 0.3s;
     }
-    .btn-blue:hover { background-color: #0056b3; transform: translateY(-2px); }
-    .form-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-    .form-section { border-radius: 8px; overflow: hidden; margin-bottom: 25px; }
-    .form-section .form-title { background-color: #007bff; color: #fff; padding: 12px; font-weight: 600; font-size: 16px; }
-    .form-section .form-body { padding: 20px; }
-    .summary { background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
-    .summary p { margin: 5px 0; }
 </style>
 
 <div class="custom-card">
     <div class="form-header">
         <h2>Registrar Estacionamiento</h2>
     </div>
-
-    {{-- Inicio de estacionamiento --}}
     <form action="{{ route('parking.store') }}" method="POST">
         @csrf
         <div class="form-section">
@@ -48,33 +39,30 @@
             <div class="form-body">
                 <div class="mb-4">
                     <label for="car_id">Vehículo (Patente)</label>
-                    <input type="text" name="car_id" id="car_id" placeholder="Ej: ABC123" required>
                 </div>
 
                 <div class="mb-4">
                     <label for="zone_id">Zona</label>
-                    <select name="zone_id" id="zone_id" required>
-                        <option value="">Seleccioná una zona</option>
-                        @foreach($zones as $zone)
-                            <option value="{{ $zone->id }}">{{ $zone->name }}</option>
-                        @endforeach
+                    <select id="zona" class="form-control">
+                        <option value="">Selecciona una zona</option>
+                        <option value="zona1">Zona 1</option>
+                        <option value="zona2">Zona 2</option>
+                        <option value="zona3">Zona 3</option>
                     </select>
+                    <div style="width: 70%; margin: 10px auto; text-align: center;">
+                        <iframe
+                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d12612.156494877916!2d-58.511!3d-33.0079!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x95bb5f9f9f9f9f9f%3A0x123456789!2zR3VhbGVndWF5Y2jDuw!5e0!3m2!1ses!2sar!4v1694000000000"
+                            width="150%"
+                            height="250"
+                            style="border:0;"
+                            allowfullscreen=""
+                            loading="lazy"
+                            referrerpolicy="no-referrer-when-downgrade">
+                        </iframe>
+                    </div>
                 </div>
 
                 <div class="mb-4">
-                <label for="estimated_hours">Tiempo estimado (horas)</label>
-                <select name="estimated_hours" id="estimated_hours" required>
-                    <option value="">Seleccioná horas</option>
-                    @for ($i = 1; $i <= 12; $i++)
-                        <option value="{{ $i }}">{{ $i }} hora{{ $i > 1 ? 's' : '' }}</option>
-                    @endfor
-                </select>
-            </div>
-
-
-                <div class="flex justify-end">
-                    <button type="submit" class="btn-blue">Iniciar Estacionamiento</button>
-                </div>
             </div>
         </div>
     </form>
