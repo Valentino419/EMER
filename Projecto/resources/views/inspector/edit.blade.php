@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <title>Editar Inspector</title>
@@ -98,5 +97,4 @@
                 </form>
             </div>
 </body>
-
 </html>
