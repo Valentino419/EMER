@@ -106,11 +106,32 @@
                 min-width: 120px;
             }
         }
+        .back-arrow {
+            display: inline-block;
+            font-size: 32px; /* más grande */
+            font-weight: bold;
+            color: #1a3c6d;
+            text-decoration: none;
+            margin-bottom: 15px;
+            background: #fff;
+            border-radius: 50%;
+            padding: 8px 14px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            transition: all 0.3s ease;
+        }
+
+        .back-arrow:hover {
+            background: #007bff;
+            color: #fff;
+            transform: scale(1.1);
+        }
 </style>
 <body>
 <div class="container mt-4">
-    <h2 class="mb-4">Listado de Infracciones</h2>
-
+    <a href="{{ route('dashboard') }}" class="back-arrow" title="Volver al inicio">
+        &#8592;
+    </a> <h2 class="mb-4">Listado de Infracciones</h2> 
+   
     <hr>
     @if(Auth::user()->role->name === 'admin' || Auth::user()->role->name === 'inspector')
         <a href="{{ route('infractions.create') }}" class="btn btn-primary mb-3">Nueva Infracción</a>

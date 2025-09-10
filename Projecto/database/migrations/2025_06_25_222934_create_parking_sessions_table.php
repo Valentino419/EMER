@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('parking_sessions', function (Blueprint $table) {
             $table->id();
-            $table->date('start_date');
-            $table->date('end_date');
+            $table->date('start_time');
+            $table->date('end_time');
             $table->integer('rate');
             $table->integer('duration');
             $table->string('status');

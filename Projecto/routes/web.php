@@ -16,7 +16,9 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\NewPasswordController;
 
-Route::resource('payment', PaymentController::class); // Mantiene CRUD para pagos post-sesión
+
+Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+Route::resource('payment', PaymentController::class);
 
 //Route::get('/', function () {
 //    return Inertia::render('welcome');

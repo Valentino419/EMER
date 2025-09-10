@@ -20,8 +20,12 @@ class ParkingSession extends Model
         'duration',
         'status',
     ];
+    protected $casts = [
+        'start_time' => 'datetime',
+        'end_time' => 'datetime',
+    ];
 
-    public function cars()
+    public function car()
     {
         return $this->belongsTo(Car::class, 'id_car');
     }
@@ -29,5 +33,9 @@ class ParkingSession extends Model
     public function streets()
     {
         return $this->belongsTo(Street::class, 'id_street');
+    }
+    public function zone()
+    {
+        return $this->belongsTo(Zone::class);
     }
 }

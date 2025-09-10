@@ -22,6 +22,9 @@ class Zone extends Model
     {
         return $this->hasMany(Schedules::class, 'id_zone');
     }
-    
+     public function parkingSession()
+    {
+        return $this->belongsTo(ParkingSession::class);
+    }
 }
 
