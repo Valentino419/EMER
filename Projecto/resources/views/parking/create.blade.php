@@ -124,29 +124,33 @@
         &#8592;
     </a>
 
-    <form action="{{ route('parking.store') }}" method="POST">
+    <form id="parking-form" action="{{ route('parking.store') }}" method="POST">
         @csrf
 
         <div class="form-section">
             <div class="form-title">Datos del Estacionamiento</div>
             <div class="form-body">
                 
-                <!-- Patente -->
+                <!--Patente  -->
                 <div class="mb-4">
-                    <label for="car_id">Vehículo (Patente)</label>
-                    <input type="text" name="car_id" id="car_id" placeholder="Ingrese la patente sin espacios ni puntos">
-                </div>
+                    <label for="car_id">Vehículo</label>
+                <select name="car_id" id="car_id" class="form-select" required>
+                    <option value="">Seleccione un auto</option>
+                    @foreach ($cars as $car)
+                        <option value="{{ $car->id }}">{{ $car->car_plate }}</option>
+                    @endforeach
+                </select>
 
                 <!-- Zona -->
                 <div class="mb-4">
                     <label for="zone_id">Zona</label>
-                    <select id="zona" class="form-control">
+                    <select id="zone_id" class="form-control">
                         <option value="">Selecciona una zona</option>
                         <option value="zona1">Zona 1</option>
                         <option value="zona2">Zona 2</option>
                         <option value="zona3">Zona 3</option>
                     </select>
-                    <div style="width: 70%; margin: 10px auto; text-align: center;">
+                    <!-- <div style="width: 70%; margin: 10px auto; text-align: center;">
                         <iframe
                             src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d12612.156494877916!2d-58.511!3d-33.0079!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x95bb5f9f9f9f9f9f%3A0x123456789!2zR3VhbGVndWF5Y2jDuw!5e0!3m2!1ses!2sar!4v1694000000000"
                             width="150%"
@@ -155,115 +159,52 @@
                             allowfullscreen=""
                             loading="lazy"
                             referrerpolicy="no-referrer-when-downgrade">
-                        </iframe>
+                        </iframe> -->
                     </div>
                 </div>
-
+                
+                
                 <!-- Tiempo -->
                 <div class="mb-4">
-                    <label for="estimated_minutes">Tiempo estimado (minutos)</label>
-                    <input type="time" name="estimated_minutes" id="estimated_minutes" min="15" step="15">
+                    <label for="estimated_minutes">Tiempo estimado (horas)</label>
+                    <input type="number" name="start_time" id="start_time">
                 </div>
                 <br>
-               
-                <button id="iniciar-estacionamiento" class="btn btn-primary">Iniciar Estacionamiento</button>
 
-                <!-- Modal de Pago -->
-<div id="payment-modal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5);">
-    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 5px; width: 300px; text-align: center;">
-        <h3>Pago de Estacionamiento</h3>
-        <p>Seleccione un método de pago:</p>
-        <button class="btn btn-secondary" style="margin: 5px;" onclick="selectPayment('mercadopago')">Mercado Pago</button>
-        <div id="payment-details" style="display: none; margin-top: 10px;">
-            <input type="text" id="mp-email" placeholder="Email de Mercado Pago" class="form-control">
-            <input type="text" id="mp-amount" placeholder="Monto (ej. 100)" class="form-control" value="100">
-            <div id="mercadopago-button-container"></div>
-        </div>
-        <button class="btn btn-danger" style="margin-top: 10px;" onclick="closeModal()">Cancelar</button>
-    </div>
+                <button id="iniciar-estacionamiento" class="btn-blue">Iniciar Estacionamiento</button>
+                 <!-- Tarifa -->
+                <div class="mb-4">
+                    <label for="rate"></label>
+                    <input type="number" name="rate" id="rate" class="form-control" step="0.01" hidden>
+                </div>
+
+                 <!-- Calle -->
+                <div class="mb-4">
+                    <label for="street_id"></label>
+                    <select name="street_id" id="street_id" class="form-control" hidden>
+                        <option value="">Seleccione una calle</option>
+                        @foreach ($streets as $street)
+                            <option value="{{ $street->id }}">{{ $street->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <!-- Estado -->
+                <div class="mb-4">
+                    <label for="status"></label>
+                    <select name="status" id="status" class="form-control" hidden>
+                        <option value="active">Activo</option>
+                        <option value="completed">Completado</option>
+                    </select>
+                </div>
+
+              
+
 </div>
+</form>
 
-<!-- Incluir el SDK de Mercado Pago desde CDN -->
-<script src="https://sdk.mercadopago.com/js/v2"></script>
-<script>
-    const mp = new MercadoPago('APP_USR-68914d21-8a4b-40f5-86ea-e699dbec6b69', {
-        locale: 'es-AR'
-    });
-
-    document.getElementById('iniciar-estacionamiento').addEventListener('click', function() {
-        document.getElementById('payment-modal').style.display = 'block';
-    });
-
-    function closeModal() {
-        document.getElementById('payment-modal').style.display = 'none';
-        document.getElementById('payment-details').style.display = 'none';
-    }
-
-    function selectPayment(method) {
-        if (method === 'mercadopago') {
-            document.getElementById('payment-details').style.display = 'block';
-            createMercadoPagoCheckout();
-        }
-    }
-
-    function createMercadoPagoCheckout() {
-        const email = document.getElementById('mp-email').value;
-        const amount = parseFloat(document.getElementById('mp-amount').value);
-
-        const checkout = mp.checkout({
-            preference: {
-                items: [
-                    {
-                        title: 'Estacionamiento en Gualeguaychú',
-                        unit_price: amount,
-                        quantity: 1,
-                    }
-                ],
-                payer: {
-                    email: email
-                },
-                back_urls: {
-                    success: window.location.href,
-                    failure: window.location.href,
-                    pending: window.location.href
-                },
-                auto_return: 'approved',
-            },
-            render: {
-                container: '#mercadopago-button-container',
-                label: 'Pagar con Mercado Pago'
-            }
-        });
-    }
+<!-- <script>
+    const parkingStoreRoute = '{{ route("parking.store") }}';
 </script>
-
-<style>
-    .btn {
-        background-color: #007bff;
-        color: white;
-        padding: 10px 20px;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-    }
-    .btn-secondary {
-        background-color: #6c757d;
-    }
-    .btn-danger {
-        background-color: #dc3545;
-    }
-    .form-control {
-        width: 100%;
-        padding: 8px;
-        margin: 5px 0;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-    }
-</style>
-
-            </div>
-        </div>
-    </form>
-</div>
-
+<script src="{{ asset('js/parking.js') }}" defer></script> -->
 @endsection
