@@ -2,6 +2,10 @@
 
 @section('content')
 
+@extends('layouts.app')
+
+@section('content')
+
 <style>
     body {
         background-color: #f0f4f8;
@@ -197,9 +201,6 @@
                         <option value="completed">Completado</option>
                     </select>
                 </div>
-
-              
-
 </div>
 </form>
 
@@ -208,3 +209,4 @@
 </script>
 <script src="{{ asset('js/parking.js') }}" defer></script> -->
 @endsection
+
