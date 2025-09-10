@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Car;
 use App\Models\Zone;
+use App\Models\Street;
 use App\Models\ParkingSession;
 
 class ParkingSessionController extends Controller
@@ -23,9 +24,10 @@ class ParkingSessionController extends Controller
     public function create()
     {
         $cars = Car::all();
+        $streets= Street::all();
         $zones = Zone::all();
 
-        return view('parking.create', compact('cars', 'zones'));
+        return view('parking.create', compact('cars', 'zones','streets'));
     }
 
     /**
@@ -33,19 +35,25 @@ class ParkingSessionController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'car_id' => 'required|exists:cars,id',
+            'street_id' => 'required|exists:streets,id',
             'zone_id' => 'required|exists:zones,id',
-            'estimated_minutes' => 'required|integer|min:15',
+            'duration' => 'required|integer|min:15',
+            'rate' => 'required|numeric',
+            'status' => 'required|in:active,completed',
         ]);
 
         ParkingSession::create([
-            'car_id' => $request->car_id,
-            'zone_id' => $request->zone_id,
-            'start_time' => now(),
-            'estimated_end_time' => now()->addMinutes($request->estimated_minutes),
-            'status' => 'active',
+            'car_id' => $validated['car_id'],
+            'street_id' => $validated['street_id'],
+            'start_time' =>  $validated['start_time'],
+            'end_time' =>  $validated['end_time'],
+            'rate' => $validated['rate'],
+            'duration' => $validated['duration'],
+            'status' => $validated['status'],
         ]);
+
 
         return redirect()->back()->with('success', '¡Estacionamiento iniciado correctamente!');
     }
