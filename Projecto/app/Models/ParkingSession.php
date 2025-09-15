@@ -12,10 +12,9 @@ class ParkingSession extends Model
     //protected $table = 'Parkingsession';
 
     protected $fillable = [
-        'id_car',
-        'id_street',
+        'car_id',
+        'street_id',
         'start_time',
-        'end_time',
         'rate',
         'duration',
         'status',

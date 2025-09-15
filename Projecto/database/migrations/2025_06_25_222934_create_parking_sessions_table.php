@@ -13,14 +13,14 @@ return new class extends Migration
     {
         Schema::create('parking_sessions', function (Blueprint $table) {
             $table->id();
-            $table->date('start_time');
-            $table->date('end_time');
+            $table->timestamp('start_time');
+            //$table->date('end_time');
+            $table->time('duration');
             $table->integer('rate');
-            $table->integer('duration');
             $table->string('status');
-             $table->foreignId('street_id')->constrained()->onDelete('cascade');
-             $table->foreignId('car_id')->constrained()->onDelete('cascade');
-          
+            $table->foreignId('street_id')->constrained()->onDelete('cascade');
+            $table->foreignId('car_id')->constrained()->onDelete('cascade');
+
             $table->timestamps();
         });
     }
