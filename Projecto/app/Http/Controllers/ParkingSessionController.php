@@ -7,6 +7,7 @@ use App\Models\Car;
 use App\Models\Zone;
 use App\Models\Street;
 use App\Models\ParkingSession;
+use Illuminate\Support\Carbon;
 
 class ParkingSessionController extends Controller
 {
@@ -35,27 +36,47 @@ class ParkingSessionController extends Controller
      */
     public function store(Request $request)
     {
+        DD($request->all());
         $validated = $request->validate([
             'car_id' => 'required|exists:cars,id',
-            'street_id' => 'required|exists:streets,id',
             'zone_id' => 'required|exists:zones,id',
-            'duration' => 'required|integer|min:15',
-            'rate' => 'required|numeric',
-            'status' => 'required|in:active,completed',
+            'street_id' => 'required|exists:streets,id',
+            'start_time' => 'required|date_format:H:i',
+            'duration' => 'required|integer|min:1',
+            'rate' => 'nullable|numeric|min:0',
+            'status' => 'nullable|in:active,completed',
+            'timezone_offset' => 'required|integer', // New: Validate offset
         ]);
 
+        // Get client's timezone offset in hours (JS getTimezoneOffset() is minutes, positive for west of UTC)
+        $offsetMinutes = $validated['timezone_offset'];
+        $tzString = sprintf('%+03d:00', - ($offsetMinutes / 60)); // e.g., 180 minutes (UTC-3) -> '-03:00'
+
+        // Parse start_time as client's local time, using client's local today
+        $startDateTime = Carbon::createFromFormat('H:i', $validated['start_time'], $tzString)
+            ->setDateFrom(Carbon::now($tzString)); // Use client's current date
+
+        // Optional: Convert to UTC for storage if your DB uses UTC
+        // $startDateTime = $startDateTime->utc();
+
+        // Verify street belongs to selected zone
+        $street = \App\Models\Street::find($validated['street_id']);
+        if ($street->zone_id !== (int) $validated['zone_id']) {
+            return back()->withErrors(['street_id' => 'La calle seleccionada no pertenece a la zona seleccionada.']);
+        }
+
+        // Create parking record
         ParkingSession::create([
             'car_id' => $validated['car_id'],
+            'zone_id' => $validated['zone_id'],
             'street_id' => $validated['street_id'],
-            'start_time' =>  $validated['start_time'],
-            'end_time' =>  $validated['end_time'],
-            'rate' => $validated['rate'],
+            'start_time' => $startDateTime,
             'duration' => $validated['duration'],
-            'status' => $validated['status'],
+            'rate' => $validated['rate'],
+            'status' => $validated['status'] ?? 'active',
         ]);
 
-
-        return redirect()->back()->with('success', '¡Estacionamiento iniciado correctamente!');
+        return redirect()->route('dashboard')->with('success', 'Estacionamiento registrado correctamente.');
     }
 
     /**

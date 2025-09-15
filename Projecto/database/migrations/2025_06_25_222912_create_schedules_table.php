@@ -16,8 +16,9 @@ return new class extends Migration
             $table->timestamps();
               $table->foreignId('zone_id')->constrained()->onDelete('cascade');
               $table->string('day_of_week');
-              $table->integer('start_hour');
-              $table->integer('end_hour');
+              $table->timestamp('start_hour');
+              $table->timestamp('end_hour');
+              $table->integer('rate');
         });
     }
 
