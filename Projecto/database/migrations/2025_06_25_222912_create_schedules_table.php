@@ -11,15 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
+     
         Schema::create('schedules', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('zone_id')->constrained()->onDelete('cascade');
+            $table->json('days_of_week'); // Store array of days, e.g., ["Monday", "Tuesday"]
+            $table->time('start_hour'); // e.g., 08:00:00
+            $table->time('end_hour'); // e.g., 18:00:00
+            $table->integer('rate'); // Rate in some currency unit
             $table->timestamps();
-              $table->foreignId('zone_id')->constrained()->onDelete('cascade');
-              $table->string('day_of_week');
-              $table->timestamp('start_hour');
-              $table->timestamp('end_hour');
-              $table->integer('rate');
         });
+    
     }
 
     /**

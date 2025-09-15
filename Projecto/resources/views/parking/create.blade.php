@@ -112,8 +112,7 @@
             transform: scale(1.1);
         }
     </style>
-
-   <div class="custom-card">
+<div class="custom-card">
     <div class="form-header">
         <h2>Registrar Estacionamiento</h2>
     </div>
@@ -180,7 +179,6 @@
                 <div class="mb-4">
                     <label for="start_time">Hora de inicio</label>
                     <input type="time" name="start_time" id="start_time" class="form-control" required>
-                    <!-- Removed min attribute here; set dynamically via JS -->
                     @error('start_time')
                         <div class="text-red-600">{{ $message }}</div>
                     @enderror
@@ -204,9 +202,9 @@
                 </div>
 
                 <!-- Hidden Fields -->
-                <input type="hidden" name="rate" id="rate"  value="12" >
+                <input type="number" name="rate" id="rate" step="0.01" hidden>
                 <input type="hidden" name="status" id="status" value="active">
-                <input type="hidden" name="timezone_offset" id="timezone_offset"> <!-- New: Client timezone offset -->
+                <input type="hidden" name="timezone_offset" id="timezone_offset">
 
                 <button id="iniciar-estacionamiento" class="btn-blue">Iniciar Estacionamiento</button>
             </div>
@@ -228,12 +226,13 @@
     document.getElementById('zone_id').addEventListener('change', async function () {
         const zoneId = this.value;
         const streetSelect = document.getElementById('street_id');
+        const rateInput = document.getElementById('rate');
 
         if (zoneId) {
             try {
                 // Fetch streets for the selected zone
-                const response = await fetch(`/api/zones/${zoneId}/streets`);
-                const streets = await response.json();
+                const streetResponse = await fetch(`/api/zones/${zoneId}/streets`);
+                const streets = await streetResponse.json();
 
                 // Update street dropdown
                 streetSelect.innerHTML = '<option value="">Seleccione una calle</option>';
@@ -245,12 +244,13 @@
                     streetSelect.appendChild(option);
                 });
 
-                // Fetch and set rate
+                // Fetch rate for the selected zone
                 const rateResponse = await fetch(`/api/zones/${zoneId}/rate`);
                 const rateData = await rateResponse.json();
-                //document.getElementById('rate').value = rateData.rate;
+                rateInput.value = rateData.rate; // Fallback to 12 if null
             } catch (error) {
                 console.error('Error fetching data:', error);
+                rateInput.value = 12; // Fallback on error
             }
         } else {
             // Reset to all streets if no zone is selected
@@ -258,7 +258,7 @@
             @foreach ($streets as $street)
                 streetSelect.innerHTML += `<option value="{{ $street->id }}" data-zone-id="{{ $street->zone_id }}">{{ $street->name }}</option>`;
             @endforeach
-            //document.getElementById('rate').value = '';
+            rateInput.value = 12; // Fallback
         }
     });
 </script>
