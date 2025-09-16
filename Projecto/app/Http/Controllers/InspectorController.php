@@ -37,7 +37,7 @@ class InspectorController extends Controller
 
     public function create()
     {
-        return view('inspector.create');
+        return view('infraction.index');
     }
 
     public function store(Request $request)
