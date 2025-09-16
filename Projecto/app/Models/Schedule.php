@@ -5,11 +5,30 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Schedules extends Model
+class Schedule extends Model
 {
     use HasFactory;
+    protected $table = 'schedules';
 
+    protected $fillable = [
+        'zone_id',
+        'days_of_week',
+        'start_hour',
+        'end_hour',
+        'rate',
+    ];
+
+    protected $casts = [
+        'days_of_week' => 'array', // JSON array for days_of_week
+        'start_hour' => 'string',  // Ensure time is treated as string (H:i:s)
+        'end_hour' => 'string',    // Ensure time is treated as string (H:i:s)
+        'rate' => 'decimal:2',     // Treat rate as decimal
+    ];
     public function zone(){
         return $this->belongsTo(Zone::class, 'id_zone');
+    }
+    public function setRateAttribute($value)
+    {
+        $this->attributes['rate'] = $value ?? 12.00; // Fallback to 12.00 if null
     }
 }
