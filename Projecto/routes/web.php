@@ -7,6 +7,7 @@ use App\Http\Controllers\CarController;
 use App\Http\Controllers\InfractionController;
 use App\Http\Controllers\InspectorController;
 use App\Http\Controllers\ZoneController;
+use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ParkingSessionController;
 use App\Http\Controllers\PaymentController;
@@ -14,11 +15,18 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
-use App\Http\Controllers\Auth\NewPasswordController;;
+use App\Http\Controllers\Auth\NewPasswordController;
+use App\Http\Controllers\StreetController;
+
+;
 
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 Route::resource('payment', PaymentController::class);
+Route::resource('schedule', ScheduleController::class);
+Route::resource('street', StreetController::class);
+Route::resource('zones', ZoneController::class);
+Route::post('schedules/check-active', [ScheduleController::class, 'checkActiveSchedule']);
 
 //Route::get('/', function () {
 //    return Inertia::render('welcome');
@@ -56,14 +64,7 @@ Route::resource('users', UserController::class)->names([
     'destroy' => 'user.destroy',
 ]);
 
-// Route::resource('zones', ZoneController::class)->names([
-//     'index' => 'zone.index',
-//     'create' => 'zone.create',
-//     'store' => 'zone.store',
-//     'edit' => 'zone.edit',
-//     'update' => 'zone.update',
-//     'destroy' => 'zone.destroy',
-// ]);
+
 Route::get('/check-zone', [ZoneController::class, 'checkZone']);
 Route::post('/check-zone', [ZoneController::class, 'checkZone']);
 Route::get('/parking/create', [ParkingSessionController::class, 'create'])->name('parking.create');
@@ -89,9 +90,6 @@ Route::post('/reset-password', [NewPasswordController::class, 'store'])
 Route::fallback(function () {
     return redirect()->route('login');
 });
-
-
-
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';

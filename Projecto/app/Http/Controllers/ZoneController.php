@@ -7,131 +7,84 @@ use App\Models\Zone;
 
 class ZoneController extends Controller
 {
-//     /**
-//      * Display a listing of the resource.
-//      */
-//     public function index()
-//     {
-//         $zones= Zone::all();
-//         return view('Zone.index', compact('zones'));
-//     }
 
-//     /**
-//      * Show the form for creating a new resource.
-//      */
-//     public function create()
-//     {
-//         $zones= Zone::all();
-//         return view('Zone.create', compact('zones'));
-//     }
+    public function index()
+    {
+        return Zone::with(['schedules, streets'])->get();
+    }
 
-//     /**
-//      * Store a newly created resource in storage.
-//      */
-//     public function store(Request $request)
-//     {
-//         $request->validate([
-//             'name' => 'required|string|max:255',
-//             'numeration' => 'required|string|max:255',
-//         ]);
-        
-//         $zone= Zone::create([
-//             'name'=>$request->name,
-//             'numeration'=>$request->numeration, 
-//         ]);
+     /**
+      * Show the form for creating a new resource.
+      */
+     public function create()
+    {
+        $zones= Zone::all();
+        return view('Zone.create', compact('zones'));
+    }
 
-//         return redirect()->route('zone.index');
-//     }
+     /**
+      * Store a newly created resource in storage.
+      */
+     public function store(Request $request)
+     {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'numeration' => 'required|integer',
 
-//     /**
-//      * Display the specified resource.
-//      */
-//     public function show(string $id)
-//     {
-//         //
-//     }
+        ]);
+        return Zone::create($validated);
+         
+     }
 
-//     /**
-//      * Show the form for editing the specified resource.
-//      */
-//     public function edit(string $id)
-//     {
-//         $zone= Zone::findOrFail($id);
-//         return view('zone.edit', compact('zone'));
-//     }
+     /**
+      * Display the specified resource.
+      */
+     public function show(Zone $zone)
+     {
+         return $zone->load(['streets, schedules']);
+     }
 
-//     /**
-//      * Update the specified resource in storage.
-//      */
-//     public function update(Request $request, string $id)
-//     {
-//         $request->validate([
-//             'name' => 'required',
-//             'numeration' => 'required|max:255',
-//         ]);
-//        $zone = Zone::find($id);
-//        $zone->update($request->all());
-//        return redirect()->route('zone.index');
-//     }
+     /**
+      * Show the form for editing the specified resource.
+      */
+     public function edit(string $id)
+     {
+         $zone= Zone::findOrFail($id);
+         return view('zone.edit', compact('zone'));
+     }
 
-//     /**
-//      * Remove the specified resource from storage.
-//      */
-//     public function destroy(string $id)
-//     {
-//         $zone= Zone::findOrFail($id);
-//         $zone->delete();
+     /**
+      * Update the specified resource in storage.
+      */
+     public function update(Request $request, Zone $zone)
+     {
+        $validated = $request->validate([
+            'name' => 'string|max:255',
+            'numeration' => 'integer',
+        ]);
 
-//         return redirect()->route('zone.index');
-//     }
-// }
+        $zone->update($validated);
+        return $zone;
+    }
 
+     /**
+      * Remove the specified resource from storage.
+      */
+     public function destroy(Zone $zone)
+     {
+        $zone->delete();
+        return response()->noContent();
+     }
 
-    // Verifica si una coordenada está dentro de la zona
     public function checkZone(Request $request)
     {
-        $lat = $request->input('lat');
-        $lng = $request->input('lng');
-
-        // Zona de ejemplo (un polígono con coordenadas lat/lng)
-        $zone = [
-            [-34.60, -58.45],
-            [-34.60, -58.40],
-            [-34.55, -58.40],
-            [-34.55, -58.45],
-        ];
-
-        $inside = $this->pointInPolygon($lat, $lng, $zone);
-
-        return response()->json([
-            "lat" => $lat,
-            "lng" => $lng,
-            "inside" => $inside,
+        $validated = $request->validate([
+            'zone_id' => 'required|exists:zones,id',
         ]);
+
+        $zone = Zone::with(['streets', 'schedules'])->findOrFail($validated['zone_id']);
+        return view('zones.check', compact('zone'));
     }
+ }
 
-    // Algoritmo Ray Casting para verificar si el punto está en el polígono
-    private function pointInPolygon($lat, $lng, $polygon)
-    {
-        $inside = false;
-        $j = count($polygon) - 1;
-
-        for ($i = 0; $i < count($polygon); $i++) {
-            $xi = $polygon[$i][0];
-            $yi = $polygon[$i][1];
-            $xj = $polygon[$j][0];
-            $yj = $polygon[$j][1];
-
-            $intersect = (($yi > $lng) != ($yj > $lng)) &&
-                         ($lat < ($xj - $xi) * ($lng - $yi) / ($yj - $yi) + $xi);
-
-            if ($intersect) {
-                $inside = !$inside;
-            }
-            $j = $i;
-        }
-
-        return $inside;
-    }
-}
 

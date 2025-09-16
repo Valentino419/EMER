@@ -75,6 +75,18 @@ x<!DOCTYPE html>
             </div>
         </div>
     </div>
+
+     <div class="col-md-4">
+            <div class="card card-menu">
+                <div class="card-body">
+                    <i class="fas fa-car"></i>
+                    <h5 class="card-title">Horarios</h5>
+                    <a href="{{ route('schedule.index') }}" class="btn btn-primary mt-3">Visualizar</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
 </div>
 </body>
 </html>

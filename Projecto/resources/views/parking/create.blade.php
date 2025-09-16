@@ -2,10 +2,6 @@
 
 @section('content')
 
-@extends('layouts.app')
-
-@section('content')
-
 <style>
     body {
         background-color: #f0f4f8;
@@ -204,9 +200,9 @@
 </div>
 </form>
 
-<!-- <script>
+<script>
     const parkingStoreRoute = '{{ route("parking.store") }}';
 </script>
-<script src="{{ asset('js/parking.js') }}" defer></script> -->
+<script src="{{ asset('js/parking.js') }}" defer></script>
 @endsection
 

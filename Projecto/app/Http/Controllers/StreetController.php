@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Street;
 use Illuminate\Http\Request;
 
 class StreetController extends Controller
@@ -11,7 +12,7 @@ class StreetController extends Controller
      */
     public function index()
     {
-        //
+        return Street::with('zone')->get();
     }
 
     /**
@@ -27,7 +28,14 @@ class StreetController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'start_number' => 'required|integer',
+            'end_number' => 'required|integer',
+            'zone_id' => 'required|exists:zones,id',
+        ]);
+
+        return Street::create($validated);
     }
 
     /**
@@ -49,16 +57,24 @@ class StreetController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Street $street)
     {
-        //
+        $validated = $request->validate([
+            'name' => 'string|max:255',
+            'start_number' => 'integer',
+            'end_number' => 'integer',
+            'zone_id' => 'exists:zones,id',
+        ]);
+        $street->update($validated);
+        return $street;
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Street $street)
     {
-        //
+        $street->delete();
+        return response()->noContent();
     }
 }
