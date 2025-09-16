@@ -7,6 +7,7 @@ use App\Http\Controllers\CarController;
 use App\Http\Controllers\InfractionController;
 use App\Http\Controllers\InspectorController;
 use App\Http\Controllers\ZoneController;
+use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ParkingSessionController;
 use App\Http\Controllers\PaymentController;
@@ -15,10 +16,15 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\NewPasswordController;
+use App\Http\Controllers\StreetController;
 
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 Route::resource('payment', PaymentController::class);
+Route::resource('schedule', ScheduleController::class);
+Route::resource('street', StreetController::class);
+Route::resource('zones', ZoneController::class);
+Route::post('schedules/check-active', [ScheduleController::class, 'checkActiveSchedule']);
 
 //Route::get('/', function () {
 //    return Inertia::render('welcome');
@@ -56,6 +62,7 @@ Route::resource('users', UserController::class)->names([
     'destroy' => 'user.destroy',
 ]);
 
+
 Route::get('/check-zone', [ZoneController::class, 'checkZone']);
 Route::post('/check-zone', [ZoneController::class, 'checkZone']);
 
@@ -70,15 +77,6 @@ Route::post('/reset-password', [NewPasswordController::class, 'store'])->name('p
 
 Route::fallback(function () {
     return redirect()->route('login');
-});
-
-Route::middleware('auth')->group(function () {
-    // NUEVA: Ruta para iniciar pago Stripe (crea sesión pending si no existe)
-    Route::post('/parking/create-payment', [PaymentController::class, 'create'])->name('parking.create-payment');
-    Route::post('/parking/confirm', [PaymentController::class, 'confirm'])->name('parking.confirm');
-    Route::get('/parking/show', [PaymentController::class, 'show'])->name('parking.show');
-    // Ruta para webhook (pública, pero verifica signature)
-    Route::post('/stripe/webhook', [PaymentController::class, 'webhook']);
 });
 
 require __DIR__.'/settings.php';
