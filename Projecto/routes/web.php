@@ -35,7 +35,7 @@ Route::post('schedules/check-active', [ScheduleController::class, 'checkActiveSc
 Route::resource('cars', CarController::class)->names([
     'create' => 'cars.create',
     'edit' => 'cars.edit',
-    'update'=> 'cars.update',
+    'update' => 'cars.update',
 ]);
 Route::resource('infractions', InfractionController::class)->names([
     'index' => 'infractions.index',
@@ -67,25 +67,15 @@ Route::resource('users', UserController::class)->names([
 
 Route::get('/check-zone', [ZoneController::class, 'checkZone']);
 Route::post('/check-zone', [ZoneController::class, 'checkZone']);
+
+// Rutas para parking sessions (usa ParkingSessionController para create inicial)
 Route::get('/parking/create', [ParkingSessionController::class, 'create'])->name('parking.create');
-Route::post('/parking', [ParkingSessionController::class, 'store'])->name('parking.store');
+Route::post('/parking', [ParkingSessionController::class, 'store'])->name('parking.store'); // Crea sesión pending
 
-// 1. Mostrar formulario "olvidé mi contraseña"
-Route::get('/forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])
-    ->name('password.request');
-
-// 2. Enviar email con link de reseteo
-Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])
-    ->name('password.email');
-
-// 3. Mostrar formulario para crear nueva contraseña (el link del email apunta acá)
-Route::get('/reset-password/{token}', [NewPasswordController::class, 'create'])
-    ->name('password.reset');
-
-// 4. Guardar nueva contraseña en la BD
-Route::post('/reset-password', [NewPasswordController::class, 'store'])
-    ->name('password.store');
-
+Route::get('/forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
+Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+Route::get('/reset-password/{token}', [NewPasswordController::class, 'create'])->name('password.reset');
+Route::post('/reset-password', [NewPasswordController::class, 'store'])->name('password.store');
 
 Route::fallback(function () {
     return redirect()->route('login');

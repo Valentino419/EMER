@@ -13,12 +13,13 @@ return new class extends Migration
     {
         Schema::create('payments', function (Blueprint $table) {
             $table->id();
-            $table->date('payment_date');
-            $table->integer('amount');
-            $table->string('description');
-             $table->string('payment_method');
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-           
+            $table->string('license_plate');
+            $table->decimal('amount', 8, 2); // Monto del pago
+            $table->string('payment_status')->default('pending'); // pending, completed, failed
+            $table->string('payment_id')->nullable(); // ID del pago en Stripe
+            $table->timestamp('start_time');
+            $table->timestamp('end_time')->nullable();
             $table->timestamps();
         });
     }
