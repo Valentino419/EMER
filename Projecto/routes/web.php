@@ -18,6 +18,10 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\StreetController;
 
+Route::get('/inspector/infractions', [InfractionController::class, 'inspectorIndex'])
+    ->name('infractions.inspector.index')
+    ->middleware('auth');
+
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 Route::resource('payment', PaymentController::class);

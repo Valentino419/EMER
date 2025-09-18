@@ -3,64 +3,119 @@
 namespace App\Http\Controllers;
 
 use App\Models\Infraction;
-use App\Models\Inspectors;
 use App\Models\Car;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
 class InfractionController extends Controller
 {
-    public function index()
+    // Mostrar listado de infracciones del inspector logueado
+    public function index(Request $request)
     {
-        $infractions = Infraction::with(['inspector', 'car'])->get();
+        $user = auth()->user();
+
+        // Query principal
+        $query = Infraction::with('car')
+                    ->where('user_id', $user->id);
+
+        // Filtrado por patente si viene 'search'
+        if($search = $request->input('search')) {
+            $query->whereHas('car', function($q) use ($search) {
+                $q->where('car_plate', 'like', "%{$search}%");
+            });
+        }
+
+        $infractions = $query->get();
+
         return view('infractions.index', compact('infractions'));
     }
 
+    // Formulario para crear nueva infracción (solo admin o inspector)
     public function create()
     {
-        $inspectors = Inspectors::all();
+        $user = auth()->user();
+
+        // Traemos autos que pueda usar el inspector
         $cars = Car::all();
-        return view('infractions.create', compact('inspectors', 'cars'));
+        $infractions = Infraction::all();
+
+        return view('infractions.admin.create', compact('cars', 'infractions'));
     }
 
+    // Guardar nueva infracción
     public function store(Request $request)
     {
         $request->validate([
-            'inspector_id' => 'required|exists:inspectors,id',
             'car_id' => 'required|exists:cars,id',
             'fine' => 'required|integer|min:0',
             'date' => 'required|date',
             'status' => 'required|string|max:255',
         ]);
 
-        Infraction::create($request->all());
+        $user = auth()->user();
+
+        // Crear la infracción asociada al inspector logueado
+        Infraction::create([
+            'user_id' => $user->id,
+            'car_id' => $request->car_id,
+            'fine' => $request->fine,
+            'date' => $request->date,
+            'status' => $request->status,
+        ]);
 
         return redirect()->route('infractions.index')->with('success', 'Infracción registrada correctamente.');
     }
 
+    // Editar infracción (solo si pertenece al inspector)
     public function edit(Infraction $infraction)
     {
-        $inspectors = Inspectors::all();
+        $user = auth()->user();
+
+        if($infraction->user_id != $user->id) {
+            abort(403, "No tiene permiso para editar esta infracción.");
+        }
+
         $cars = Car::all();
-        return view('infractions.edit', compact('infraction', 'inspectors', 'cars'));
+
+        return view('infractions.edit', compact('infraction', 'cars'));
     }
 
+    // Actualizar infracción
     public function update(Request $request, Infraction $infraction)
     {
+        $user = auth()->user();
+
+        if($infraction->user_id != $user->id) {
+            abort(403, "No tiene permiso para actualizar esta infracción.");
+        }
+
         $request->validate([
-            'inspector_id' => 'required|exists:inspectors,id',
             'car_id' => 'required|exists:cars,id',
             'fine' => 'required|integer|min:0',
             'date' => 'required|date',
             'status' => 'required|string|max:255',
         ]);
 
-        $infraction->update($request->all());
+        $infraction->update([
+            'car_id' => $request->car_id,
+            'fine' => $request->fine,
+            'date' => $request->date,
+            'status' => $request->status,
+        ]);
 
         return redirect()->route('infractions.index')->with('success', 'Infracción actualizada correctamente.');
     }
 
+    // Eliminar infracción (solo si pertenece al inspector)
     public function destroy(Infraction $infraction)
     {
+        $user = auth()->user();
+
+        if($infraction->user_id != $user->id) {
+            abort(403, "No tiene permiso para eliminar esta infracción.");
+        }
+
         $infraction->delete();
 
         return redirect()->route('infractions.index')->with('success', 'Infracción eliminada correctamente.');
