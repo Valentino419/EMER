@@ -61,25 +61,26 @@ class InfractionController extends Controller
         // Search for existing car
         $car = Car::where('car_plate', $result['cleaned'])
             ->first(); // Use exact match for better performance
-
+        
         if (! $car) {
             $car = Car::create([
                 'user_id' => 0,
                 'car_plate' => $result['cleaned'],
             ]);
+          
         }
-
+       // dd($car);
         try {
             // Create the infraction
             Infraction::create([
                 'user_id' => $car->user_id,
-                'car_id' => $car->car_id,
+                'car_id' => $car->id,
                 'fine' => 5000,
                 'date' => now()->format('Y-m-d'),
                 'status' => 'pending',
             ]);
 
-            return redirect()->route('infractions.index')
+            return redirect()->route('dashboard')
                 ->with('success', 'Infracción registrada correctamente para '.$car->car_plate);
 
         } catch (\Exception $e) {
