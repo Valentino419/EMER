@@ -149,7 +149,7 @@
                     <td>
                         <form action="{{ route('payment.store') }}" method="POST" style="display:inline;">
                             @csrf
-                            <input type="hidden" name="id_car" value="{{ $sesion->id_car }}">
+                            <input type="hidden" name="id_car" value="{{ $sesion->car_id }}">
                             <select name="metodo_pago" required>
                                 <option value="">Seleccionar método</option>
                                 <option value="efectivo">Efectivo</option>

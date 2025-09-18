@@ -1,9 +1,6 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detalles del Estacionamiento</title>
+@extends('layouts.app')
+
+@section('content')
     <style>
         body {
             background-color: #f0f4f8;
@@ -83,7 +80,8 @@
             transform: translateY(-2px);
         }
 
-        .alert-success, .alert-danger {
+        .alert-success,
+        .alert-danger {
             border-radius: 8px;
             margin-bottom: 20px;
         }
@@ -109,13 +107,13 @@
                 white-space: nowrap;
             }
 
-            .table th, .table td {
+            .table th,
+            .table td {
                 min-width: 120px;
             }
         }
     </style>
-</head>
-<body>
+
     <div class="container">
         <h2>Detalles del Estacionamiento</h2>
 
@@ -125,57 +123,54 @@
             </div>
         @endif
 
-        @if (isset($noParking) && $noParking)
+        @if (isset($noSession) && $noSession)
             <div class="alert alert-danger">
-                No tienes estacionamientos completados aún. Registra uno nuevo.
+                No tienes estacionamientos pagados aún. Registra uno nuevo.
             </div>
             <a href="{{ route('parking.create') }}" class="btn btn-primary">Registrar Estacionamiento</a>
-        @elseif (isset($parking))
+        @elseif (isset($session))
             <table class="table table-striped table-hover">
                 <tbody>
                     <tr>
                         <th>Patente</th>
-                        <td>{{ $parking->license_plate }}</td>
+                        <td>{{ $session->license_plate }}</td>
                     </tr>
                     <tr>
                         <th>Duración</th>
-                        <td>{{ number_format($parking->end_time->diffInHours($parking->start_time), 1) }} horas</td>
+                        <td>{{ number_format($session->duration / 60, 1) }} horas</td>
                     </tr>
                     <tr>
                         <th>Monto Pagado</th>
-                        <td>${{ number_format($parking->amount, 2) }}</td>
+                        <td>${{ number_format($session->amount, 2) }}</td>
                     </tr>
                     <tr>
                         <th>Inicio</th>
-                        <td>{{ $parking->start_time->format('d/m/Y H:i') }}</td>
+                        <td>{{ $session->start_time->format('d/m/Y H:i') }}</td>
                     </tr>
                     <tr>
                         <th>Fin</th>
-                        <td>{{ $parking->end_time->format('d/m/Y H:i') }}</td>
+                        <td>{{ $session->end_time->format('d/m/Y H:i') }}</td>
                     </tr>
                     <tr>
                         <th>Estado del Pago</th>
-                        <td>
-                            <span class="badge bg-success">Completado</span>
-                        </td>
+                        <td><span class="badge bg-success">Completado</span></td>
                     </tr>
-                    @if ($parking->payment_id)
+                    @if ($session->payment_id)
                         <tr>
                             <th>ID de Pago (Stripe)</th>
-                            <td>{{ $parking->payment_id }}</td>
+                            <td>{{ $session->payment_id }}</td>
                         </tr>
                     @endif
                 </tbody>
             </table>
             <div class="mt-3">
-                <a href="{{ route('parking.create') }}" class="btn btn-primary">Registrar otro estacionamiento</a>
+                <a href="{{ route('parking.create') }}" class="btn btn-primary">Registrar otro</a>
                 <a href="{{ route('home') }}" class="btn btn-danger">Volver al inicio</a>
             </div>
         @else
             <div class="alert alert-danger">
-                Error al cargar los detalles. Intenta recargar la página.
+                Error al cargar. Recarga la página.
             </div>
         @endif
     </div>
-</body>
-</html>
+@endsection

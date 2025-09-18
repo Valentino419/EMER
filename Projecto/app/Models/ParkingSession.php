@@ -3,38 +3,27 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class ParkingSession extends Model
 {
-    use HasFactory;
-
-    //protected $table = 'Parkingsession';
-
     protected $fillable = [
-        'car_id',
-        'street_id',
-        'start_time',
-        'rate',
-        'duration',
-        'status',
+        'user_id', 'car_id', 'zone_id', 'street_id', 'license_plate',
+        'start_time', 'end_time', 'duration', 'rate', 'amount',
+        'payment_status', 'status', 'metodo_pago', 'payment_id',
     ];
-    protected $casts = [
-        'start_time' => 'datetime',
-        'end_time' => 'datetime',
-    ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 
     public function car()
     {
-        return $this->belongsTo(Car::class, 'id_car');
+        return $this->belongsTo(Car::class);
     }
 
-    public function streets()
+    public function payment()
     {
-        return $this->belongsTo(Street::class, 'id_street');
-    }
-    public function zone()
-    {
-        return $this->belongsTo(Zone::class);
+        return $this->hasOne(Payment::class);
     }
 }
