@@ -40,14 +40,56 @@
     <h1 class="dashboard-title text-center mb-5">Panel de Inspector</h1>
     <div class="row g-4 justify-content-center">
         
-        <div class="col-md-4">
-            <a href="{{ route('infractions.index') }}" class="text-decoration-none text-dark">
-                <div class="card card-option text-center p-4">
-                    <div class="icon">⚠️</div>
-                    <h5 class="mt-3">Gestionar Infracciones</h5>
-                </div>
-            </a>
+    {{-- Buscador por patente --}}
+    <form method="GET" action="{{ route('infractions.index') }}" class="mb-3">
+        <div class="input-group">
+            <input type="text" name="search" class="form-control" placeholder="Buscar por patente..."
+                value="{{ request('search') }}">
+            <button class="btn btn-outline-secondary" type="submit">Buscar</button>
         </div>
+    </form>
+    
+    {{-- Mensaje de éxito --}}
+    @if(session('success'))
+        <div class="alert alert-success">{{ session('success') }}</div>
+    @endif
+    
+    {{-- Botón y tabla solo para admin e inspector --}}
+    @if(Auth::user()->role->name === 'admin' || Auth::user()->role->name === 'inspector')
+        <a href="{{ route('infractions.create') }}" class="btn btn-primary mb-3">Nueva Infracción</a>
+
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Patente</th>
+                    <th>Multa</th>
+                    <th>Fecha</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($infractions as $infraction)
+                    <tr>
+                        <td>{{ $infraction->id }}</td>
+                        <td>{{ $infraction->car->car_plate }}</td>
+                        <td>${{ $infraction->fine }}</td>
+                        <td>{{ $infraction->date }}</td>
+                        <td>{{ $infraction->status }}</td>
+                        <td>
+                            <a href="{{ route('infractions.edit', $infraction) }}" class="btn btn-sm btn-primary">Editar</a>
+                           
+                               
+                            </form>
+                        </td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    @endif
+    </div>
+
 
         <div class="col-md-4">
             <a href="{{ route('cars.index') }}" class="text-decoration-none text-dark">
