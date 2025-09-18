@@ -7,7 +7,7 @@ use App\Models\Car;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
-
+use Carbon\Carbon;
 class InfractionController extends Controller
 {
     // Mostrar listado de infracciones del inspector logueado
@@ -39,29 +39,28 @@ class InfractionController extends Controller
         // Traemos autos que pueda usar el inspector
         $cars = Car::all();
         $infractions = Infraction::all();
+        $inspectors= User::all();
 
-        return view('infractions.admin.create', compact('cars', 'infractions'));
+        return view('infractions.admin.create', compact('cars', 'infractions','inspectors'));
     }
 
     // Guardar nueva infracción
     public function store(Request $request)
     {
+        dd($request->all());
         $request->validate([
             'car_id' => 'required|exists:cars,id',
-            'fine' => 'required|integer|min:0',
-            'date' => 'required|date',
-            'status' => 'required|string|max:255',
         ]);
-
+        
         $user = auth()->user();
-
+        dd($user);
         // Crear la infracción asociada al inspector logueado
         Infraction::create([
             'user_id' => $user->id,
             'car_id' => $request->car_id,
-            'fine' => $request->fine,
-            'date' => $request->date,
-            'status' => $request->status,
+            'fine' => 5000,
+            'date' => date("Y-m-d"),
+            'status' => 'pending',
         ]);
 
         return redirect()->route('infractions.index')->with('success', 'Infracción registrada correctamente.');
