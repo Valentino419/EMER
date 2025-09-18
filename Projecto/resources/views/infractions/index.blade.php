@@ -20,8 +20,7 @@
         @endif
 
         {{-- Botón y tabla solo para admin e inspector --}}
-        @if(Auth::user()->role->name === 'admin' || Auth::user()->role->name === 'inspector')
-            <a href="{{ route('infractions.create') }}" class="btn btn-primary mb-3">Nueva Infracción</a>
+       
 
             <table class="table table-striped">
                 <thead>
@@ -44,17 +43,12 @@
                             <td>{{ $infraction->status }}</td>
                             <td>
                                 <a href="{{ route('infractions.edit', $infraction) }}" class="btn btn-sm btn-primary">Editar</a>
-                                <form action="{{ route('infractions.destroy', $infraction) }}" method="POST" class="d-inline">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-danger"
-                                        onclick="return confirm('¿Estás seguro de eliminar esta infracción?')">Eliminar</button>
+                           
                                 </form>
                             </td>
                         </tr>
                     @endforeach
                 </tbody>
             </table>
-        @endif
     </div>
 @endsection
