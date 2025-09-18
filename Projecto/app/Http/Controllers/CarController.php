@@ -5,7 +5,7 @@ use App\Traits\LicensePlateValidator;
 use App\Models\Car;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;gi
+use Illuminate\Support\Facades\Auth;
 
 class CarController extends Controller
 {
