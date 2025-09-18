@@ -32,13 +32,23 @@
     <div class="container mt-4">
         <h2>Registrar Nueva Infracción</h2>
 
+        @if ($errors->any())
+            <div class="alert alert-danger">
+                <ul class="mb-0">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
         <form action="{{ route('infractions.store') }}" method="POST" class="mt-3">
             @csrf
 
             {{-- Buscador de autos --}}
             <div class="mb-3">
-                <label for="car_id" class="form-label">Auto (buscar por patente)</label>
-                <input class="form-control" list="carsList" id="car_id" name="car_id"
+                <label for="car_plate" class="form-label">Auto (buscar por patente)</label>
+                <input class="form-control" list="carsList" id="car_plate" name="car_plate"
                     placeholder="Escribí la patente..." required>
                 <datalist id="carsList">
                     @foreach ($cars as $car)
