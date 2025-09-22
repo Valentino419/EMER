@@ -65,6 +65,8 @@
 
             <button type="submit" class="btn btn-primary">Registrar</button>
             <a href="{{ route('infractions.index') }}" class="btn btn-secondary">Cancelar</a>
+          
+
         </form>
     </div>
 </body>
