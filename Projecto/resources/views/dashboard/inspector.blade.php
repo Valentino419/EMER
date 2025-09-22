@@ -71,7 +71,10 @@
                 </div>
             </form>
             @if(Auth::user()->role->name === 'admin' || Auth::user()->role->name === 'inspector')
-                <a href="{{ route('infractions.create') }}" class="btn btn-primary btn-new">Nueva Infracción</a>
+                {{-- Botón que abre el modal --}}
+                <button class="btn btn-primary btn-new" data-bs-toggle="modal" data-bs-target="#infraccionModal">
+                    Nueva Infracción
+                </button>
             @endif
         </div>
 
@@ -85,18 +88,43 @@
                     </div>
                 </a>
             </div>
+        </div>
+    </div>
 
-            <div class="col-md-4">
-                <a href="{{ route('cars.index') }}" class="text-decoration-none text-dark">
-                    <div class="card card-option text-center p-4">
-                        <div class="icon">🚗</div>
-                        <h5 class="mt-3">Ver Autos</h5>
-                    </div>
-                </a>
+    {{-- Modal para nueva infracción --}}
+    <div class="modal fade" id="infraccionModal" tabindex="-1" aria-labelledby="infraccionModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow-lg">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="infraccionModalLabel">Registrar Nueva Infracción</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form action="{{ route('infractions.store') }}" method="POST" id="infraccionForm">
+                        @csrf
+
+                        <div class="mb-3">
+                            <label for="car_plate" class="form-label">Patente del Auto</label>
+                            <input type="text" class="form-control" id="car_plate" name="car_plate"
+                                placeholder="Ej: ABC123" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="fine" class="form-label">Monto de la Multa</label>
+                            <input type="number" class="form-control" id="fine" name="fine" value="5000" readonly>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" form="infraccionForm" class="btn btn-primary">Registrar</button>
+                </div>
             </div>
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>
