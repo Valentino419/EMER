@@ -73,15 +73,16 @@ class InfractionController extends Controller
         try {
             // Create the infraction
             Infraction::create([
-                'user_id' => $car->user_id,
+                'user_id' => auth()->id(),
                 'car_id' => $car->id,
                 'fine' => 5000,
                 'date' => now()->format('Y-m-d'),
                 'status' => 'pending',
             ]);
 
-            return redirect()->route('dashboard')
-                ->with('success', 'Infracción registrada correctamente para '.$car->car_plate);
+        return redirect()
+            ->route('infractions.index')
+            ->with('success', 'Infracción registrada correctamente para ' . $car->car_plate);
 
         } catch (\Exception $e) {
             return back()->withErrors([
