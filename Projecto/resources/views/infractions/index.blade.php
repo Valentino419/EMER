@@ -188,6 +188,45 @@
                     </tbody>
                 </table>
         </div>
+<!-- Modal para nueva infracción (igual que lo armamos antes) -->
+<div class="modal fade" id="infraccionModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">Registrar Nueva Infracción</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="infraccionForm" action="{{ route('infractions.store') }}" method="POST">
+                    @csrf
+                    <div class="mb-3">
+                        <label for="car_plate" class="form-label">Patente</label>
+                        {{-- Si querés autocompletar con las patentes del usuario: --}}
+                        <input list="carsList" id="car_plate" name="car_plate" class="form-control" required>
+                        <datalist id="carsList">
+                            @if(isset($userCars))
+                                @foreach($userCars as $id => $plate)
+                                    <option value="{{ $plate }}"></option>
+                                @endforeach
+                            @endif
+                        </datalist>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="fine" class="form-label">Multa</label>
+                        <input type="number" name="fine" id="fine" class="form-control" value="5000" readonly>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" form="infraccionForm" class="btn btn-primary">Registrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 </html>
