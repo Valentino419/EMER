@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Traits\LicensePlateValidator;
 use App\Models\Car;
 use App\Models\User;
@@ -13,11 +14,22 @@ class CarController extends Controller
     // Mostrar todos los autos
     public function index()
     {
-        $cars = Car::with('user')->get();
-        $users = User::orderBy('name')->get();
+        $user = auth()->user();
 
-        return view('cars.index', compact('cars', 'users'));
+        if ($user->role->name === 'admin' || $user->role->name === 'inspector') {
+            // Admin e inspectores ven todos
+            $cars = Car::with('user')->latest()->paginate(10);
+        } else {
+            // Usuarios solo sus autos
+            $cars = Car::where('user_id', $user->id)
+                ->with('user')
+                ->latest()
+                ->paginate(10);
+        }
+
+        return view('cars.index', compact('cars'));
     }
+
 
     // Mostrar el formulario de creación
     public function create()
@@ -35,13 +47,20 @@ class CarController extends Controller
     // Guardar un nuevo auto
     public function store(Request $request)
     {
-         
+        $request->validate([
+            'car_plate' => 'required|string|max:10|unique:cars,car_plate',
+    
+        ]);
+
+
+
         $plate = $request->input('car_plate');
         $result = $this->validateAndCleanLicensePlate($plate);
 
         if (! $result['valid']) {
             return back()->withErrors(['license_plate' => 'Invalid license plate format']);
         }
+
 
         Car::create([
             'car_plate' => $result['cleaned'],
@@ -59,7 +78,6 @@ class CarController extends Controller
         if (Auth::user()->role === 'admin') {
             // Vista para administradores
             return view('cars.admin.edit', compact('users', 'car'));
-
         } else {
             return view('cars.editUser', compact('users', 'car'));
         }

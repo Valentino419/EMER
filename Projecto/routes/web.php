@@ -18,10 +18,7 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\StreetController;
 
-Route::get('/inspector/infractions', [InfractionController::class, 'inspectorIndex'])
-    ->name('infractions.inspector.index')
-    ->middleware('auth');
-
+Route::get('/dashboard.inspector', [InspectorController::class, 'index'])->name('dashboard.inspector');
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 Route::resource('payment', PaymentController::class);
@@ -30,9 +27,7 @@ Route::resource('street', StreetController::class);
 Route::resource('zones', ZoneController::class);
 Route::post('schedules/check-active', [ScheduleController::class, 'checkActiveSchedule']);
 
-//Route::get('/', function () {
-//    return Inertia::render('welcome');
-//})->name('home');
+
 
 Route::resource('cars', CarController::class)->names([
     'create' => 'cars.create',

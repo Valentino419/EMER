@@ -27,7 +27,7 @@
         }
     </style>
 </head>
-
+{{-- hecho en el dashboard con un modal --}}
 <body>
     <div class="container mt-4">
         <h2>Registrar Nueva Infracción</h2>
@@ -63,10 +63,18 @@
                 <input type="number" name="fine" id="fine" class="form-control" value="5000" readonly>
             </div>
 
-            <button type="submit" class="btn btn-primary">Registrar</button>
+            <button type="submit" href="{{ route('infractions.index') }}" class="btn btn-primary">Registrar</button>
+
             <a href="{{ route('infractions.index') }}" class="btn btn-secondary">Cancelar</a>
         </form>
+        
+        <div class="text-center mt-4">
+                <a href="{{ route('dashboard') }}" class="btn btn-outline-primary btn-lg"> Volver al inicio</a>
+        </div>
+
+      
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>
