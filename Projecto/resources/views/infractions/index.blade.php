@@ -139,11 +139,18 @@
             <a href="{{ route('dashboard') }}" class="back-arrow" title="Volver al inicio">
                 &#8592;
             </a>
-            <h2 class="mb-4">Mis Infracciones</h2>
+            {{-- Título dinámico según rol --}}
+            <h2 class="mb-4">
+                @if(Auth::user()->role->name === 'inspector' || Auth::user()->role->name === 'user')
+                    Gestión de Infracciones
+                @else
+                    Mis Infracciones
+                @endif
+            </h2>
             <hr>
-
-            {{-- Buscador por patente --}}
-            <form method="GET" action="{{ route('infractions.index') }}" class="mb-3">
+            
+            {{-- Buscador --}}
+            <form method="GET" action="{{ url()->current() }}" class="mb-3">
                 <div class="input-group">
                     <input type="text" name="search" class="form-control" placeholder="Buscar por patente..."
                         value="{{ request('search') }}">
@@ -179,7 +186,11 @@
                                 <td>{{ $infraction->date }}</td>
                                 <td>{{ $infraction->status }}</td>
                                 <td>
-                                    <a href="{{ route('infractions.edit', $infraction) }}" class="btn btn-sm btn-primary">Editar</a>
+                                    @if(Auth::user()->role->name === 'admin' || Auth::user()->role->name === 'inspector')
+                                        <a href="{{ route('infractions.edit', $infraction) }}" class="btn btn-sm btn-primary">Editar</a>
+                                    @else
+                                        <a href="{{ route('infractions.index', $infraction) }}" class="btn btn-sm btn-success">Pagar</a>
+                                    @endif
 
                                     </form>
                                 </td>
@@ -188,6 +199,45 @@
                     </tbody>
                 </table>
         </div>
+<!-- Modal para nueva infracción (igual que lo armamos antes) -->
+<div class="modal fade" id="infraccionModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">Registrar Nueva Infracción</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="infraccionForm" action="{{ route('infractions.store') }}" method="POST">
+                    @csrf
+                    <div class="mb-3">
+                        <label for="car_plate" class="form-label">Patente</label>
+                        {{-- Si querés autocompletar con las patentes del usuario: --}}
+                        <input list="carsList" id="car_plate" name="car_plate" class="form-control" required>
+                        <datalist id="carsList">
+                            @if(isset($userCars))
+                                @foreach($userCars as $id => $plate)
+                                    <option value="{{ $plate }}"></option>
+                                @endforeach
+                            @endif
+                        </datalist>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="fine" class="form-label">Multa</label>
+                        <input type="number" name="fine" id="fine" class="form-control" value="5000" readonly>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" form="infraccionForm" class="btn btn-primary">Registrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 </html>

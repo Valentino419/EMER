@@ -17,21 +17,26 @@ class InfractionController extends Controller
     {
         $user = auth()->user();
 
-        // Query principal
-        $query = Infraction::with('car')
-            ->where('user_id', $user->id);
+        if ($user->role->name === 'admin' || $user->role->name === 'inspector') {
+            // Inspector/Admin ven todas
+            $infractions = Infraction::with(['car', 'inspector'])
+                ->latest()
+                ->paginate(10);
+        } else {
+            // Usuario común: recopila sus patentes y filtra infracciones por coincidencia de patente
+            $userPlates = $user->cars()->pluck('car_plate')->toArray(); // Obtiene array de patentes del usuario
 
-        // Filtrado por patente si viene 'search'
-        if ($search = $request->input('search')) {
-            $query->whereHas('car', function ($q) use ($search) {
-                $q->where('car_plate', 'like', "%{$search}%");
-            });
+            $infractions = Infraction::with(['car', 'inspector'])
+                ->whereHas('car', function ($query) use ($userPlates) {
+                    $query->whereIn('car_plate', $userPlates); // Filtra por patente en lugar de user_id
+                })
+                ->latest()
+                ->paginate(10);
         }
-
-        $infractions = $query->get();
 
         return view('infractions.index', compact('infractions'));
     }
+
 
     // Formulario para crear nueva infracción (solo admin o inspector)
     public function create()
@@ -50,7 +55,7 @@ class InfractionController extends Controller
     public function store(Request $request)
     {
         //dd($request->all());
-        
+
         $plate = $request->input('car_plate');
         $result = $this->validateAndCleanLicensePlate($plate); // Now this works!
         //DD($result);
@@ -61,15 +66,14 @@ class InfractionController extends Controller
         // Search for existing car
         $car = Car::where('car_plate', $result['cleaned'])
             ->first(); // Use exact match for better performance
-        
+
         if (! $car) {
             $car = Car::create([
                 'user_id' => 0,
                 'car_plate' => $result['cleaned'],
             ]);
-          
         }
-       // dd($car);
+        // dd($car);
         try {
             // Create the infraction
             Infraction::create([
@@ -80,16 +84,14 @@ class InfractionController extends Controller
                 'status' => 'pending',
             ]);
 
-        return redirect()
-            ->route('infractions.index')
-            ->with('success', 'Infracción registrada correctamente para ' . $car->car_plate);
-
+            return redirect()
+                ->route('infractions.index')
+                ->with('success', 'Infracción registrada correctamente para ' . $car->car_plate);
         } catch (\Exception $e) {
             return back()->withErrors([
-                'car_plate' => 'Error creating infraction: '.$e->getMessage(),
+                'car_plate' => 'Error creating infraction: ' . $e->getMessage(),
             ]);
         }
-
     }
 
     // Editar infracción (solo si pertenece al inspector)
