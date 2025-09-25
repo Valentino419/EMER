@@ -10,7 +10,7 @@ class Street extends Model
 
     public function zone()
     {
-        return $this->belongsTo(Zone::class, 'id_zone');
+        return $this->belongsTo(Zone::class, 'zone_id');
     }
     public function parkingsessions()
     {
