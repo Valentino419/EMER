@@ -3,29 +3,24 @@
 namespace App\Http\Controllers;
 
 use App\Models\Street;
+use App\Models\Zone;
 use Illuminate\Http\Request;
 
 class StreetController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function index($zone_id = null)
     {
-        return Street::with('zone')->get();
+        $streets = $zone_id ? Street::where('zone_id', $zone_id)->get() : Street::all();
+        return view('streets.index', compact('streets', 'zone_id'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function create(Request $request)
     {
-        //
+        $zones = Zone::all();
+        $zone_id = $request->query('zone_id');
+        return view('streets.create', compact('zones', 'zone_id'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -35,28 +30,20 @@ class StreetController extends Controller
             'zone_id' => 'required|exists:zones,id',
         ]);
 
-        return Street::create($validated);
+        $street = Street::create($validated);
+        return redirect()->route('zones.show', ['zone' => $validated['zone_id']])->with('success', 'Calle creada exitosamente.');
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(string $id)
     {
         //
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(string $id)
     {
         //
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, Street $street)
     {
         $validated = $request->validate([
@@ -66,12 +53,9 @@ class StreetController extends Controller
             'zone_id' => 'exists:zones,id',
         ]);
         $street->update($validated);
-        return $street;
+        return redirect()->route('zones.show', ['zone' => $validated['zone_id'] ?? $street->zone_id])->with('success', 'Calle actualizada exitosamente.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Street $street)
     {
         $street->delete();

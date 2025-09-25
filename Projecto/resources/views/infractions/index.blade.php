@@ -141,7 +141,7 @@
             </a>
             {{-- Título dinámico según rol --}}
             <h2 class="mb-4">
-                @if(Auth::user()->role->name === 'inspector' || Auth::user()->role->name === 'user')
+                @if(Auth::user()->role->name === 'inspector' || Auth::user()->role->name === 'admin')
                     Gestión de Infracciones
                 @else
                     Mis Infracciones

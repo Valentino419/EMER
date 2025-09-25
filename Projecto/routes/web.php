@@ -18,16 +18,27 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\StreetController;
 
-Route::get('/dashboard.inspector', [InspectorController::class, 'index'])->name('dashboard.inspector');
+//Route::get('/streets.create', [InspectorController::class, 'index'])->name('streets.create');
+
+//Route::get('/dashboard.inspector', [InspectorController::class, 'index'])->name('dashboard.inspector');
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
 Route::resource('payment', PaymentController::class);
+
 Route::resource('schedule', ScheduleController::class);
+
 Route::resource('street', StreetController::class);
+
 Route::resource('zones', ZoneController::class);
+
 Route::post('schedules/check-active', [ScheduleController::class, 'checkActiveSchedule']);
 
-
+Route::resource('zone', ZoneController::class)->names([
+    'index' => 'zone.index',
+    'create' => 'zone.create',
+    'edit' => 'zone.edit',
+]);
 
 Route::resource('cars', CarController::class)->names([
     'create' => 'cars.create',
