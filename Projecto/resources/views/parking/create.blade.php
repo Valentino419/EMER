@@ -123,6 +123,15 @@
                 {{ session('success') }}
             </div>
         @endif
+        @if ($errors->any())
+            <div class="alert alert-danger">
+                <ul class="mb-0">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
 
         <a href="{{ route('dashboard') }}" class="back-arrow" title="Volver al inicio" aria-label="Volver al inicio">
             &#8592;
@@ -190,15 +199,15 @@
                     <!-- Duration -->
                     <div class="mb-4">
                         <label for="duration">Duración (minutos)</label>
+
                         <select name="duration" id="duration" class="form-control" required>
-                           <select name="duration" id="duration" class="form-control" required>
-                        <option value="">Selecciona una duración</option>
-                        <option value="60">1 hora</option>
-                        <option value="120">2 horas</option>
-                        <option value="180">3 horas</option>
-                        <option value="240">4 horas</option>
-                        <option value="360">6 horas</option>
-                        <option value="480">8 horas</option>
+                            <option value="">Selecciona una duración</option>
+                            <option value="60">1 hora</option>
+                            <option value="120">2 horas</option>
+                            <option value="180">3 horas</option>
+                            <option value="240">4 horas</option>
+                            <option value="360">6 horas</option>
+                            <option value="480">8 horas</option>
                         </select>
                         @error('duration')
                             <div class="text-red-600">{{ $message }}</div>
@@ -229,7 +238,7 @@
         document.getElementById('timezone_offset').value = now.getTimezoneOffset();
 
         // Zone change: Filter streets, get rate
-       
+
         document.getElementById('zone_id').addEventListener('change', async function() {
             const zoneId = this.value;
             const streetSelect = document.getElementById('street_id');
@@ -253,7 +262,7 @@
                     // Fetch and set rate
                     const rateResponse = await fetch(`/api/zones/${zoneId}/rate`);
                     const rateData = await rateResponse.json();
-                     updateAmount(rateData);
+                    updateAmount(rateData);
                     //document.getElementById('rate').value = rateData.rate;
                 } catch (error) {
                     console.error('Error fetching data:', error);
