@@ -139,11 +139,18 @@
             <a href="{{ route('dashboard') }}" class="back-arrow" title="Volver al inicio">
                 &#8592;
             </a>
-            <h2 class="mb-4">Mis Infracciones</h2>
+            {{-- Título dinámico según rol --}}
+            <h2 class="mb-4">
+                @if(Auth::user()->role->name === 'inspector' || Auth::user()->role->name === 'user')
+                    Gestión de Infracciones
+                @else
+                    Mis Infracciones
+                @endif
+            </h2>
             <hr>
-
-            {{-- Buscador por patente --}}
-            <form method="GET" action="{{ route('infractions.index') }}" class="mb-3">
+            
+            {{-- Buscador --}}
+            <form method="GET" action="{{ url()->current() }}" class="mb-3">
                 <div class="input-group">
                     <input type="text" name="search" class="form-control" placeholder="Buscar por patente..."
                         value="{{ request('search') }}">
@@ -179,7 +186,11 @@
                                 <td>{{ $infraction->date }}</td>
                                 <td>{{ $infraction->status }}</td>
                                 <td>
-                                    <a href="{{ route('infractions.edit', $infraction) }}" class="btn btn-sm btn-primary">Editar</a>
+                                    @if(Auth::user()->role->name === 'admin' || Auth::user()->role->name === 'inspector')
+                                        <a href="{{ route('infractions.edit', $infraction) }}" class="btn btn-sm btn-primary">Editar</a>
+                                    @else
+                                        <a href="{{ route('infractions.index', $infraction) }}" class="btn btn-sm btn-success">Pagar</a>
+                                    @endif
 
                                     </form>
                                 </td>
