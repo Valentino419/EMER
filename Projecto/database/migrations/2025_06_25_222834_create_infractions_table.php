@@ -20,8 +20,7 @@ return new class extends Migration
             $table->string('status')->default('pendiente');
             $table->timestamps();
 
-            $table->integer('user_id');
-            $table->foreign('car_id')->references('id')->on('cars')->onDelete('cascade');
+            
         });
 
     }
