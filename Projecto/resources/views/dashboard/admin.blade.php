@@ -87,13 +87,4 @@
                 </div>
             </div>
           
-            <div class="col-md-6">
-                <div class="card card-menu">
-                    <div class="card-body">
-                        <span class="emoji">🛤️</span>
-                        <h5 class="card-title">Calles</h5>
-                        <a href="{{ route('street.index') }}" class="btn btn-primary">Gestionar Calles</a>
-                    </div>
-                </div>
-            </div>
        
