@@ -64,6 +64,7 @@
 
     <script src="https://js.stripe.com/v3/"></script>
 <script src="https://js.stripe.com/v3/"></script>
+<script src="https://js.stripe.com/v3/"></script>
 <script>
     const stripe = Stripe('{{ config('services.stripe.publishable_key') }}');  // Use publishable key!
     const elements = stripe.elements();
