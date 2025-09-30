@@ -291,53 +291,65 @@
             document.getElementById('amount-preview').textContent = `$${amount.toFixed(2)}`;
         }
     </script>
-    <script>
-        // Set start_time min and value to client's local current time
-        const now = new Date();
-        const currentTime = now.toTimeString().slice(0, 5);
-        document.getElementById('start_time').min = currentTime;
-        document.getElementById('start_time').value = currentTime;
+  <script>
+    // Set start_time min and value to client's local current time
+    const now = new Date();
+    const currentTime = now.toTimeString().slice(0, 5);
+    document.getElementById('start_time').min = currentTime;
+    document.getElementById('start_time').value = currentTime;
 
-        // Set timezone offset (minutes from UTC)
-        document.getElementById('timezone_offset').value = now.getTimezoneOffset();
+    // Set timezone offset (minutes from UTC)
+    document.getElementById('timezone_offset').value = now.getTimezoneOffset();
 
-        // Filter streets and update rate based on zone selection
-        document.getElementById('zone_id').addEventListener('change', async function() {
-            const zoneId = this.value;
-            const streetSelect = document.getElementById('street_id');
+    // Filter streets and update rate based on zone selection
+    document.getElementById('zone_id').addEventListener('change', async function() {
+        const zoneId = this.value;
+        const streetSelect = document.getElementById('street_id');
 
-            if (zoneId) {
-                try {
-                    // Fetch streets for the selected zone
-                    const response = await fetch(`/api/zones/${zoneId}/streets`);
-                    const streets = await response.json();
+        if (zoneId) {
+            try {
+                // Fetch streets for the selected zone
+                const response = await fetch(`/api/zones/${zoneId}/streets`);
+                const streets = await response.json();
 
-                    // Update street dropdown
-                    streetSelect.innerHTML = '<option value="">Seleccione una calle</option>';
-                    streets.forEach(street => {
-                        const option = document.createElement('option');
-                        option.value = street.id;
-                        option.textContent = street.name;
-                        option.setAttribute('data-zone-id', street.zone_id);
-                        streetSelect.appendChild(option);
-                    });
-
-                    // Fetch and set rate
-                    const rateResponse = await fetch(`/api/zones/${zoneId}/rate`);
-                    const rateData = await rateResponse.json();
-                    //document.getElementById('rate').value = rateData.rate;
-                } catch (error) {
-                    console.error('Error fetching data:', error);
-                }
-            } else {
-                // Reset to all streets if no zone is selected
+                // Update street dropdown
                 streetSelect.innerHTML = '<option value="">Seleccione una calle</option>';
-                @foreach ($streets as $street)
-                    streetSelect.innerHTML +=
-                        `<option value="{{ $street->id }}" data-zone-id="{{ $street->zone_id }}">{{ $street->name }}</option>`;
-                @endforeach
-                //document.getElementById('rate').value = '';
+                streets.forEach(street => {
+                    const option = document.createElement('option');
+                    option.value = street.id;
+                    option.textContent = street.name;
+                    option.setAttribute('data-zone-id', street.zone_id);
+                    streetSelect.appendChild(option);
+                });
+
+                // Fetch and set rate, then update amount
+                const rateResponse = await fetch(`/api/zones/${zoneId}/rate`);
+                const rateData = await rateResponse.json();
+                updateAmount(rateData.rate);
+            } catch (error) {
+                console.error('Error fetching data:', error);
             }
-        });
-    </script>
+        } else {
+            // Reset to all streets if no zone is selected
+            streetSelect.innerHTML = '<option value="">Seleccione una calle</option>';
+            @foreach ($streets as $street)
+                streetSelect.innerHTML += `<option value="{{ $street->id }}" data-zone-id="{{ $street->zone_id }}">{{ $street->name }}</option>`;
+            @endforeach
+        }
+    });
+
+    // Duration change: Update amount
+    document.getElementById('duration').addEventListener('change', function() {
+        const zoneSelect = document.getElementById('zone_id');
+        const selectedOption = zoneSelect.options[zoneSelect.selectedIndex];
+        const rate = selectedOption ? selectedOption.getAttribute('data-rate') : 5.00;
+        updateAmount(rate);
+    });
+
+    function updateAmount(rate) {
+        const duration = document.getElementById('duration').value;
+        const amount = duration ? (duration / 60) * rate : 0;
+        document.getElementById('amount-preview').textContent = `$${amount.toFixed(2)}`;  // Adjust currency if needed
+    }
+</script>
 @endsection

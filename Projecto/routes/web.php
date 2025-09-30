@@ -73,10 +73,13 @@ Route::get('/forgot-password', [ForgotPasswordController::class, 'showLinkReques
 Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
 Route::get('/reset-password/{token}', [NewPasswordController::class, 'create'])->name('password.reset');
 Route::post('/reset-password', [NewPasswordController::class, 'store'])->name('password.store');
-
+Route::resource('payment', PaymentController::class);
+Route::get('payment/confirm', [PaymentController::class,'confirm'])->name('payment.confirm');
+Route::post('/stripe/webhook', [PaymentController::class, 'webhook'])->name('stripe.webhook');
 Route::fallback(function () {
     return redirect()->route('login');
 });
+
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';

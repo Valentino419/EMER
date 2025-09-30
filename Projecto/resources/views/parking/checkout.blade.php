@@ -36,8 +36,7 @@
                         <td>{{ $session->start_time->format('d/m/Y H:i') }}</td>
                     </tr>
                     <tr>
-                        <th>Fin</th>
-                        <td>{{ $session->end_time->format('d/m/Y H:i') }}</td>
+
                     </tr>
                     <tr>
                         <th>Estado del Pago</th>
@@ -64,36 +63,51 @@
     </div>
 
     <script src="https://js.stripe.com/v3/"></script>
-    <script>
-        const stripe = Stripe('{{ env('STRIPE_KEY') }}');
-        const elements = stripe.elements();
-        const card = elements.create('card', {
-            style: { base: { fontSize: '16px', color: '#333', '::placeholder': { color: '#6c757d' } } },
-        });
-        card.mount('#card-element');
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+    const stripe = Stripe('{{ config('services.stripe.publishable_key') }}');  // Use publishable key!
+    const elements = stripe.elements();
+    const card = elements.create('card', {
+        style: {
+            base: {
+                fontSize: '16px',
+                color: '#333',
+                '::placeholder': {
+                    color: '#6c757d'
+                }
+            },
+        },
+    });
+    card.mount('#card-element');
 
-        const form = document.getElementById('payment-form');
-        const cardErrors = document.getElementById('card-errors');
+    const form = document.getElementById('payment-form');
+    const cardErrors = document.getElementById('card-errors');
 
-        form.addEventListener('submit', async (event) => {
-            event.preventDefault();
-            cardErrors.textContent = '';
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        cardErrors.textContent = '';
 
-            const { error, paymentIntent } = await stripe.confirmCardPayment(
-                '{{ $clientSecret }}',
-                { payment_method: { card: card, billing_details: { name: '{{ auth()->user()->name ?? "Usuario" }}' } } }
-            );
-
-            if (error) {
-                cardErrors.textContent = error.message;
-            } else if (paymentIntent.status === 'succeeded') {
-                const hiddenInput = document.createElement('input');
-                hiddenInput.type = 'hidden';
-                hiddenInput.name = 'payment_intent';
-                hiddenInput.value = paymentIntent.id;
-                form.appendChild(hiddenInput);
-                form.submit();
+        const { error, paymentIntent } = await stripe.confirmCardPayment(
+            '{{ $clientSecret }}', {
+                payment_method: {
+                    card: card,
+                    billing_details: {
+                        name: '{{ auth()->user()->name ?? 'Usuario' }}'
+                    }
+                }
             }
-        });
-    </script>
+        );
+
+        if (error) {
+            cardErrors.textContent = error.message;
+        } else if (paymentIntent.status === 'succeeded') {
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = 'payment_intent';
+            hiddenInput.value = paymentIntent.id;
+            form.appendChild(hiddenInput);
+            form.submit();
+        }
+    });
+</script>
 @endsection
