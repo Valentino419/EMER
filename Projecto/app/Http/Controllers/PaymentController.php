@@ -2,13 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\ParkingSession;
 use App\Models\Payment;
 use App\Services\PaymentService;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Stripe\PaymentIntent;
 
 class PaymentController extends Controller
 {
@@ -19,7 +17,7 @@ class PaymentController extends Controller
             ->latest()
             ->first();
 
-        if (!$session) {
+        if (! $session) {
             return view('parking.show', ['noSession' => true]);
         }
 
@@ -29,8 +27,10 @@ class PaymentController extends Controller
     public function confirm(Request $request)
     {
         $validated = $request->validate([
-            'session_id' => 'required|exists:parking_sessions,id', // Renamed for clarity
-            'payment_intent' => 'required|string',
+            'session_id' => 'required|exists:parking_sessions,id',
+            'token' => 'required|string', // Changed from payment_intent to token
+            // Add if needed: 'payment_method_id' => 'required|string',
+            // 'installments' => 'required|integer',
         ]);
 
         try {
@@ -40,22 +40,23 @@ class PaymentController extends Controller
                 ->firstOrFail();
 
             $paymentService = app(PaymentService::class);
-            $paymentService->confirmAndRecord($validated['payment_intent'], $session, 'Pago por estacionamiento medido');
+            $payment = $paymentService->confirmAndRecord($validated['token'], $session, 'Pago por estacionamiento medido');
 
             // Activate session
             $session->update([
                 'payment_status' => 'completed',
                 'status' => 'active',
-                'payment_id' => $validated['payment_intent'],
+                'payment_id' => $payment->id, // Mercado Pago payment ID
             ]);
 
             Log::info('Payment confirmed', ['session_id' => $session->id]);
 
-            return redirect()->route('parking.show')->with('success', 'Pago confirmado. Estacionamiento activo hasta ' . $session->end_time->format('H:i'));
+            return redirect()->route('parking.show')->with('success', 'Pago confirmado. Estacionamiento activo hasta '.$session->end_time->format('H:i'));
 
         } catch (\Exception $e) {
-            Log::error('Error in confirm: ' . $e->getMessage());
-            return redirect()->back()->withErrors(['error' => 'Error al confirmar: ' . $e->getMessage()]);
+            Log::error('Error in confirm: '.$e->getMessage());
+
+            return redirect()->back()->withErrors(['error' => 'Error al confirmar: '.$e->getMessage()]);
         }
     }
 
@@ -91,7 +92,8 @@ class PaymentController extends Controller
 
             return response('OK', 200);
         } catch (\Exception $e) {
-            Log::error('Webhook error: ' . $e->getMessage());
+            Log::error('Webhook error: '.$e->getMessage());
+
             return response('Error', 400);
         }
     }

@@ -62,53 +62,52 @@
         @endif
     </div>
 
-    <script src="https://js.stripe.com/v3/"></script>
-<script src="https://js.stripe.com/v3/"></script>
-<script src="https://js.stripe.com/v3/"></script>
+  <script src="https://sdk.mercadopago.com/js/v2"></script>
 <script>
-    const stripe = Stripe('{{ config('services.stripe.publishable_key') }}');  // Use publishable key!
-    const elements = stripe.elements();
-    const card = elements.create('card', {
-        style: {
-            base: {
-                fontSize: '16px',
-                color: '#333',
-                '::placeholder': {
-                    color: '#6c757d'
-                }
-            },
-        },
-    });
-    card.mount('#card-element');
+    const mp = new MercadoPago('{{ $publicKey }}');
+    
+    // Create card fields (adapt IDs to your form)
+    const cardNumberElement = mp.fields.create('cardNumber', { placeholder: 'Número de tarjeta' }).mount('card-number-container');
+    const expirationDateElement = mp.fields.create('expirationDate', { placeholder: 'MM/AA' }).mount('expiration-date-container');
+    const securityCodeElement = mp.fields.create('securityCode', { placeholder: 'Código de seguridad' }).mount('security-code-container');
 
     const form = document.getElementById('payment-form');
-    const cardErrors = document.getElementById('card-errors');
-
     form.addEventListener('submit', async (event) => {
         event.preventDefault();
-        cardErrors.textContent = '';
-
-        const { error, paymentIntent } = await stripe.confirmCardPayment(
-            '{{ $clientSecret }}', {
-                payment_method: {
-                    card: card,
-                    billing_details: {
-                        name: '{{ auth()->user()->name ?? 'Usuario' }}'
-                    }
-                }
+        try {
+            const { token, error } = await mp.createCardToken({
+                cardNumber: document.getElementById('card-number').value, // Or use field values
+                cardholderName: document.getElementById('cardholder-name').value,
+                cardExpirationMonth: ..., // Extract from expiration
+                cardExpirationYear: ...,
+                securityCode: document.getElementById('security-code').value,
+                identificationType: document.getElementById('doc-type').value,
+                identificationNumber: document.getElementById('doc-number').value,
+            });
+            if (error) {
+                // Show error
+                document.getElementById('card-errors').textContent = error.message;
+            } else {
+                // Add token to form and submit
+                document.getElementById('token').value = token.id;
+                form.submit();
             }
-        );
-
-        if (error) {
-            cardErrors.textContent = error.message;
-        } else if (paymentIntent.status === 'succeeded') {
-            const hiddenInput = document.createElement('input');
-            hiddenInput.type = 'hidden';
-            hiddenInput.name = 'payment_intent';
-            hiddenInput.value = paymentIntent.id;
-            form.appendChild(hiddenInput);
-            form.submit();
+        } catch (e) {
+            console.error(e);
         }
     });
 </script>
-@endsection
+
+<!-- Form example -->
+<form id="payment-form" action="{{ route('payment.confirm') }}" method="POST">
+    @csrf
+    <input type="hidden" name="session_id" value="{{ $session->id }}">
+    <input type="hidden" id="token" name="token">
+    <!-- Card fields containers -->
+    <div id="card-number-container"></div>
+    <div id="expiration-date-container"></div>
+    <div id="security-code-container"></div>
+    <!-- Other fields: cardholder name, doc type/number, etc. -->
+    <div id="card-errors"></div>
+    <button type="submit">Pagar</button>
+</form>

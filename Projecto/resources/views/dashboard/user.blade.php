@@ -152,7 +152,20 @@
     <div class="container">
         <h1 class="text-center mb-4">Dashboard Usuario</h1>
         <p class="text-center text-muted mb-5">Consulta y gestiona tus autos, pagos y notificaciones.</p>
-
+        @if (session('success'))
+            <div class="bg-green-100 text-green-800 p-4 rounded mb-4">
+                {{ session('success') }}
+            </div>
+        @endif
+        @if ($errors->any())
+            <div class="alert alert-danger">
+                <ul class="mb-0">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
         <div class="row g-4 justify-content-center">
             <div class="col-md-4">
                 <div class="card card-menu">

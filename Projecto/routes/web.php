@@ -1,5 +1,5 @@
 <?php
-
+use App\Models\Zone;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\UserController;
@@ -79,7 +79,8 @@ Route::post('/stripe/webhook', [PaymentController::class, 'webhook'])->name('str
 Route::fallback(function () {
     return redirect()->route('login');
 });
-
+Route::get('/zones/{zone}/rate', function (Zone $zone) {
+return Zone::where('id', $zone->id)->get(['rate']);});
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';

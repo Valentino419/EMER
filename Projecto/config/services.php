@@ -35,8 +35,13 @@ return [
         ],
     ],
     'stripe' => [
-    'secret' => env('STRIPE_SECRET'),
-    'publishable_key' => env('STRIPE_PUBLISHABLE_KEY'),
-],
+        'secret' => env('STRIPE_SECRET'),
+        'publishable_key' => env('STRIPE_PUBLISHABLE_KEY'),
+    ],
+    'mercadopago' => [
+        'access_token' => env('MERCADO_PAGO_ACCESS_TOKEN'),
+        'public_key' => env('MERCADO_PAGO_PUBLIC_KEY'),
+        'currency' => env('MERCADO_PAGO_CURRENCY', 'ARS'),
+    ],
 
 ];
