@@ -77,14 +77,25 @@
                     </div>
                 </a>
             </div>
-            <div class="col-md-6"> <!-- Ajusté a col-md-6 para centrar el botón -->
+            <div class="col-md-6"> 
                 <div class="card card-menu">
                     <div class="card-body">
-                        <span class="emoji">🌍</span> <!-- Emoji para Zonas -->
+                        <span class="emoji">🌍</span> 
                         <h5 class="card-title">Zonas</h5>
                         <a href="{{ route('zone.index') }}" class="btn btn-primary">Gestionar Zonas</a>
                     </div>
                 </div>
             </div>
+          
+    <div class="col-md-6">
+        <div class="card card-menu">
+            <div class="card-body">
+                <span class="emoji">👥</span>
+                <h5 class="card-title">Usuarios Logueados</h5>
+                <a href="{{ route('user.logged') }}" class="btn btn-primary">Ver Usuarios Logueados</a>
+            </div>
+        </div>
+    </div>
+
           
        

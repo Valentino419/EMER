@@ -14,19 +14,30 @@
         .table td { padding: 12px; vertical-align: middle; }
         .btn-primary { background-color: #4a90e2; border: none; padding: 6px 12px; border-radius: 5px; }
         .btn-primary:hover { background-color: #357abd; }
+        .btn-secondary { background-color: #6c757d; border: none; padding: 6px 12px; border-radius: 5px; }
+        .btn-secondary:hover { background-color: #5a6268; }
         .alert-success { border-radius: 5px; margin-bottom: 20px; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1 class="text-center mb-4">Gestión de Calles @if($zone_id) - Zona {{ $zone_id }} @endif</h1>
+        <h1 class="text-center mb-4">
+            @if(Auth::check() && (Auth::user()->role === 'admin' || Auth::user()->role === 'inspector'))
+                Gestión de Calles
+            @else
+                Calles Asignadas
+            @endif
+            @if($zone_id) - Zona {{ $zone_id }} @endif
+        </h1>
 
         @if(session('success'))
             <div class="alert alert-success">{{ session('success') }}</div>
         @endif
 
-
-        <a href="{{ route('street.create', ['zone_id' => $zone_id]) }}" class="btn btn-primary mb-3">Nueva Calle</a>
+        <!-- Botón de crear solo para admin/inspector -->
+        @if(Auth::check() && (Auth::user()->role === 'admin' || Auth::user()->role === 'inspector'))
+            <a href="{{ route('street.create', ['zone_id' => $zone_id]) }}" class="btn btn-primary mb-3">Nueva Calle</a>
+        @endif
 
         <table class="table table-striped">
             <thead>
@@ -35,7 +46,9 @@
                     <th>Nombre</th>
                     <th>Número Inicial</th>
                     <th>Número Final</th>
-                    <th>Acciones</th>
+                    @if(Auth::check() && (Auth::user()->role === 'admin' || Auth::user()->role === 'inspector'))
+                        <th>Acciones</th>
+                    @endif
                 </tr>
             </thead>
             <tbody>
@@ -45,13 +58,15 @@
                         <td>{{ $street->name }}</td>
                         <td>{{ $street->start_number }}</td>
                         <td>{{ $street->end_number }}</td>
-                        <td>
-                            <a href="{{ route('street.edit', $street) }}" class="btn btn-primary btn-sm">Editar</a>
-                        </td>
+                        @if(Auth::check() && (Auth::user()->role === 'admin' || Auth::user()->role === 'inspector'))
+                            <td>
+                                <a href="{{ route('street.edit', $street) }}" class="btn btn-primary btn-sm">Editar</a>
+                            </td>
+                        @endif
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="5" class="text-center">No hay calles registradas.</td>
+                        <td colspan="@if(Auth::check() && (Auth::user()->role === 'admin' || Auth::user()->role === 'inspector')) 5 @else 4 @endif" class="text-center">No hay calles registradas.</td>
                     </tr>
                 @endforelse
             </tbody>
