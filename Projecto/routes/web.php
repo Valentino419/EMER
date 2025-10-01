@@ -19,7 +19,7 @@ use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\StreetController;
 
 
-Route::get('/users/logged', [UserController::class, 'logged'])->middleware('auth')->name('users.logged');
+Route::get('/user/logged', [UserController::class, 'logged'])->middleware('auth')->name('user.logged');
 
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
