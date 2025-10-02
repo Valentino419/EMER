@@ -185,6 +185,18 @@
             </div>
         </div>
     </div>
-</body>
 
-</html>
+    <script> // Al
+        document.addEventListener("DOMContentLoaded", function () { 
+        Swal.fire({ 
+            title: '🚨 Nueva Infracción', 
+            text: 'Tienes una nueva infracción registrada.', 
+            icon: 'warning', 
+            confirmButtonText: 'Ver Infracciones', 
+            confirmButtonColor: '#4a90e2' })
+            .then((result) => { 
+                if (result.isConfirmed) { 
+                    window.location.href = "{{ route('infractions.index') }}"; } }); }); 
+    </script>
+</body>
+</html> 

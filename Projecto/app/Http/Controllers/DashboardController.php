@@ -3,6 +3,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Notification;
 
 class DashboardController extends Controller
 {
@@ -11,13 +12,19 @@ class DashboardController extends Controller
         $user = Auth::user();
         $role = $user->role ? $user->role->name : 'user';
         $data = $this->getDashboardData($role);
-
+       
         // Render role-specific view
-        return view("dashboard.{$role}", [
+          return view("dashboard.{$role}", [
             'user' => $user,
             'role' => $role,
             'data' => $data,
         ]);
+        $unreadNotifications = Notification::where('user_id', $user->id)
+            ->where('type', 'infraccion')
+            ->unread()
+            ->get();
+
+        return view('dashboard.user', compact('unreadNotifications','user'));
     }
 
     private function getDashboardData($role)

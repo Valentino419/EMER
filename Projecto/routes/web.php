@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\CarController;
 use App\Http\Controllers\InfractionController;
 use App\Http\Controllers\InspectorController;
@@ -72,7 +73,6 @@ Route::resource('users', UserController::class)->names([
     'destroy' => 'user.destroy',
 ]);
 
-
 Route::get('/check-zone', [ZoneController::class, 'checkZone']);
 Route::post('/check-zone', [ZoneController::class, 'checkZone']);
 
@@ -84,6 +84,13 @@ Route::get('/forgot-password', [ForgotPasswordController::class, 'showLinkReques
 Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
 Route::get('/reset-password/{token}', [NewPasswordController::class, 'create'])->name('password.reset');
 Route::post('/reset-password', [NewPasswordController::class, 'store'])->name('password.store');
+
+// Rutas para notificaciones
+Route::get('/notifications', [NotificationController::class, 'userNotifications'])->name('notifications.user')->middleware('auth');
+Route::get('/admin/notifications', [NotificationController::class, 'index'])->name('notifications.index')->middleware('auth');
+Route::post('/admin/notifications', [NotificationController::class, 'store'])->name('notifications.store')->middleware('auth');
+Route::post('/admin/notifications/{infraccionId}/send', [NotificationController::class, 'sendInfraccion'])->name('notifications.send')->middleware('auth');
+Route::post('/admin/notifications/user/{userId}/send', [NotificationController::class, 'sendUserInfracciones'])->name('notifications.sendUser')->middleware('auth');
 
 Route::fallback(function () {
     return redirect()->route('login');
