@@ -6,6 +6,7 @@ use App\Traits\LicensePlateValidator;
 use App\Models\Car;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Auth;
 
 class CarController extends Controller
@@ -48,23 +49,26 @@ class CarController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'car_plate' => 'required|string|max:10|unique:cars,car_plate',
-    
+            'car_plate' => [
+                'required',
+                'string',
+                'max:10',
+                Rule::unique('cars')->where(function ($query) {
+                    return $query->where('user_id', Auth::id());
+                }), // Única por usuario (ignora otros usuarios/inspectores)
+            ],
         ]);
-
-
 
         $plate = $request->input('car_plate');
         $result = $this->validateAndCleanLicensePlate($plate);
 
-        if (! $result['valid']) {
-            return back()->withErrors(['license_plate' => 'Invalid license plate format']);
+        if (!$result['valid']) {
+            return back()->withErrors(['car_plate' => 'Formato de patente inválido.']); // Cambiado a 'car_plate'
         }
-
 
         Car::create([
             'car_plate' => $result['cleaned'],
-            'user_id' => Auth::id(), // Obtiene el ID del usuario autenticado
+            'user_id' => Auth::id(),
         ]);
 
         return redirect()->route('cars.index')->with('success', 'Auto creado correctamente.');

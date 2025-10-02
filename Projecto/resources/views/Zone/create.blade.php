@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Crear Inspector</title>
+    <title>Crear zona de estacionamiento</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 
@@ -39,10 +39,7 @@
             <input  type="text" name="name" id="name" class="form-select" required>
         </div>
         
-        <div class="mb-3">
-            <label for="numeration" class="form-label">Numeracion</label>
-            <input type="text" name="numeration" id="numeration" class="form-select" required>
-        </div>
+        
 
         <button type="submit" class="btn btn-primary">Guardar</button>
         <a href="{{ route('zone.index') }}" class="btn btn-secondary">Cancelar</a>

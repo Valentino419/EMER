@@ -11,7 +11,6 @@ class Zone extends Model
     
     protected $fillable = [
         'name',
-        'numeration',
     ];
     public function streets()
     {

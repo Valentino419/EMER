@@ -18,16 +18,26 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\StreetController;
 
-Route::get('/dashboard.inspector', [InspectorController::class, 'index'])->name('dashboard.inspector');
-
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+Route::get('/dashboard', [DashboardController::class, 'user'])->name('dashboard');
+
 Route::resource('payment', PaymentController::class);
+
 Route::resource('schedule', ScheduleController::class);
+
 Route::resource('street', StreetController::class);
+
 Route::resource('zones', ZoneController::class);
+
+Route::resource('users', UserController::class);
+
 Route::post('schedules/check-active', [ScheduleController::class, 'checkActiveSchedule']);
 
-
+Route::resource('zone', ZoneController::class)->names([
+    'index' => 'zone.index',
+    'create' => 'zone.create',
+    'edit' => 'zone.edit',
+]);
 
 Route::resource('cars', CarController::class)->names([
     'create' => 'cars.create',
@@ -60,6 +70,8 @@ Route::resource('users', UserController::class)->names([
     'update' => 'user.update',
     'destroy' => 'user.destroy',
 ]);
+
+Route::get('/user/logged', [UserController::class, 'logged'])->middleware('auth')->name('user.logged');
 
 
 Route::get('/check-zone', [ZoneController::class, 'checkZone']);

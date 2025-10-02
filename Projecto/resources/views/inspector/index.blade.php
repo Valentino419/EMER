@@ -278,7 +278,11 @@
 </style>
 
 <body>
+
     <div class="container">
+        <a href="{{ route('dashboard') }}" class="back-arrow" title="Volver al inicio">
+            &#8592;
+        </a>
         <h2>Lista de Inspectores</h2>
         <hr>
 
@@ -330,7 +334,7 @@
             </tbody>
         </table>
 
-        <!-- Pagination Links -->
+        <!-- modal editar -->
         {{ $inspectors->appends(request()->query())->links('pagination::bootstrap-5') }}
     </div>
 
