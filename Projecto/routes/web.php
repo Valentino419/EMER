@@ -19,9 +19,9 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\StreetController;
 
-//Route::get('/streets.create', [InspectorController::class, 'index'])->name('streets.create');
 
-//Route::get('/dashboard.inspector', [InspectorController::class, 'index'])->name('dashboard.inspector');
+Route::get('/user/logged', [UserController::class, 'logged'])->middleware('auth')->name('user.logged');
+
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
@@ -32,6 +32,8 @@ Route::resource('schedule', ScheduleController::class);
 Route::resource('street', StreetController::class);
 
 Route::resource('zones', ZoneController::class);
+
+Route::resource('users', UserController::class);
 
 Route::post('schedules/check-active', [ScheduleController::class, 'checkActiveSchedule']);
 

@@ -334,7 +334,7 @@
             </tbody>
         </table>
 
-        <!-- Pagination Links -->
+        <!-- modal editar -->
         {{ $inspectors->appends(request()->query())->links('pagination::bootstrap-5') }}
     </div>
 
