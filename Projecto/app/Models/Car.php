@@ -16,16 +16,18 @@ class Car extends Model
         'user_id',
     ];
 
-    public function user(){
-        return $this->belongsTo(User::class, );
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 
-    public function infractions(){
-        return $this->hasMany(Infraction::class, 'id_car');
+    public function infractions()
+    {
+        return $this->hasMany(Infraction::class, 'car_id');
     }
 
-    public function parking_sessions(){
+    public function parking_sessions()
+    {
         return $this->hasMany(ParkingSession::class, 'id_car');
     }
 }
-

@@ -48,30 +48,30 @@ class CarController extends Controller
     // Guardar un nuevo auto
     public function store(Request $request)
     {
-        $request->validate([
-            'car_plate' => [
-                'required',
-                'string',
-                'max:10',
-                Rule::unique('cars')->where(function ($query) {
-                    return $query->where('user_id', Auth::id());
-                }), // Única por usuario (ignora otros usuarios/inspectores)
-            ],
-        ]);
-
-        $plate = $request->input('car_plate');
-        $result = $this->validateAndCleanLicensePlate($plate);
-
-        if (!$result['valid']) {
-            return back()->withErrors(['car_plate' => 'Formato de patente inválido.']); // Cambiado a 'car_plate'
+        $request->validate(['car_plate' => 'required|string|max:10']);
+        $plate = $this->validateAndCleanLicensePlate($request->car_plate);
+        if (!$plate['valid']) {
+            return back()->withErrors(['car_plate' => 'Patente inválida'])->withInput();
         }
-
-        Car::create([
-            'car_plate' => $result['cleaned'],
-            'user_id' => Auth::id(),
-        ]);
-
-        return redirect()->route('cars.index')->with('success', 'Auto creado correctamente.');
+        $car = Car::where('car_plate', $plate['cleaned'])->first();
+        if ($car) {
+            if ($car->user_id && $car->user_id !== Auth::id()) {
+                // Verificar si hay infracciones asociadas
+                $infractions = $car->infractions()->count();
+                if ($infractions > 0) {
+                    // Permitir reclamar la patente y actualizar user_id
+                    $car->update(['user_id' => Auth::id()]);
+                    return redirect()->route('infractions.index')
+                        ->with('success', 'Patente ' . $plate['cleaned'] . ' reclamada. Gestioná tus ' . $infractions . ' infracción(es).');
+                }
+                return back()->withErrors(['car_plate' => 'Patente ya registrada por otro usuario y no tiene infracciones asociadas.']);
+            }
+        }
+        $car = Car::updateOrCreate(
+            ['car_plate' => $plate['cleaned']],
+            ['user_id' => Auth::id()]
+        );
+        return redirect()->route('cars.index')->with('success', 'Auto registrado');
     }
 
     // Mostrar el formulario de edición
@@ -92,11 +92,26 @@ class CarController extends Controller
     public function update(Request $request, Car $car)
     {
         $request->validate([
-            'car_plate' => 'required|string|max:255',
-            'user_id' => Auth::id(),
+            'car_plate' => [
+                'required',
+                'string',
+                'max:10',
+                Rule::unique('cars', 'car_plate')->ignore($car->id), // Ignora el auto actual
+            ],
+            'user_id' => 'required|exists:users,id',
         ]);
 
-        $car->update($request->only('car_plate', 'user_id'));
+        $plate = $request->input('car_plate');
+        $result = $this->validateAndCleanLicensePlate($plate);
+
+        if (!$result['valid']) {
+            return back()->withErrors(['car_plate' => 'Formato de patente inválido.']);
+        }
+
+        $car->update([
+            'car_plate' => $result['cleaned'],
+            'user_id' => $request->user_id,
+        ]);
 
         return redirect()->route('cars.index')->with('success', 'Auto actualizado correctamente.');
     }
