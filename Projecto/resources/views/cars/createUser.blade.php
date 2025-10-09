@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Registrar nuevo auto</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        crossorigin="anonymous">
     <style>
         body {
             background-color: #f0f4f8;
@@ -26,6 +28,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <h2>Registrar nuevo auto</h2>
@@ -45,16 +48,21 @@
 
             <div class="mb-3">
                 <label for="car_plate" class="form-label">Patente</label>
-                <input type="text" name="car_plate" class="form-control" required>
+                <input type="text" class="form-control" id="car_plate" name="car_plate"
+                    value="{{ old('car_plate') }}" required maxlength="10">
+                @error('car_plate')
+                    <div class="alert alert-danger">{{ $message }}</div>
+                @enderror
             </div>
-            
+
             <div class="d-flex justify-content-end">
                 <a href="{{ route('cars.index') }}" class="btn btn-secondary me-2">Cancelar</a>
                 <button type="submit" class="btn btn-primary">Guardar</button>
             </div>
-            
+
         </form>
     </div>
     </div>
 </body>
+
 </html>

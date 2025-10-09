@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('type');
             $table->string('title');
             $table->text('message');
-            $table->boolean('read')->default(false);
+            $table->timestamp('read_at')->nullable();
             $table->timestamps();
 
           $table->foreignId('user_id')->constrained()->onDelete('cascade');

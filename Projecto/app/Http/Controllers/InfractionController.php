@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Car;
 use App\Models\Infraction;
+Use App\Notifications\InfraccionNotification;
 use App\Models\User;
 use App\Traits\LicensePlateValidator;
 use Illuminate\Http\Request;
@@ -14,28 +15,48 @@ class InfractionController extends Controller
 
     // Mostrar listado de infracciones del inspector logueado
     public function index(Request $request)
-    {
-        $user = auth()->user();
+{
+    $user = auth()->user();
 
-        if ($user->role->name === 'admin' || $user->role->name === 'inspector') {
-            // Inspector/Admin ven todas
-            $infractions = Infraction::with(['car', 'inspector'])
-                ->latest()
-                ->paginate(10);
-        } else {
-            // Usuario común: recopila sus patentes y filtra infracciones por coincidencia de patente
-            $userPlates = $user->cars()->pluck('car_plate')->toArray(); // Obtiene array de patentes del usuario
+    $query = Infraction::with(['car', 'inspector']); // eager loading
 
-            $infractions = Infraction::with(['car', 'inspector'])
-                ->whereHas('car', function ($query) use ($userPlates) {
-                    $query->whereIn('car_plate', $userPlates); // Filtra por patente en lugar de user_id
-                })
-                ->latest()
-                ->paginate(10);
-        }
+    // Verificamos rol sin romper si es null
+    $roleName = $user->role->name ?? null;
 
-        return view('infractions.index', compact('infractions'));
+    if (!in_array($roleName, ['admin', 'inspector'])) {
+        // Usuario común: filtra por sus autos
+        $userPlates = $user->cars()->pluck('car_plate')->toArray();
+
+        $query->where(function ($q) use ($user, $userPlates) {
+            $q->where('user_id', $user->id) // infracciones hechas por el usuario
+              ->orWhereHas('car', function ($subQuery) use ($user, $userPlates) {
+                  $subQuery->where('user_id', $user->id) // autos del usuario
+                           ->orWhereIn('car_plate', $userPlates); // por patente
+              });
+        });
+
+        // Marcar notificaciones como leídas
+        $user->unreadNotifications()->where('type', InfraccionNotification::class)->update(['read_at' => now()]);
     }
+
+    // Filtro de búsqueda (antes del paginate)
+    if ($request->filled('search')) {
+        $search = $request->search;
+
+        $query->where(function ($q) use ($search) {
+            $q->whereHas('car', function ($subQuery) use ($search) {
+                $subQuery->where('car_plate', 'like', "%$search%");
+            })
+            ->orWhere('description', 'like', "%$search%");
+        });
+    }
+
+    // Ahora sí ejecutamos la query
+    $infractions = $query->latest()->paginate(10)->appends($request->query());
+
+    return view('infractions.index', compact('infractions'));
+}
+
 
 
     // Formulario para crear nueva infracción (solo admin o inspector)
@@ -53,47 +74,63 @@ class InfractionController extends Controller
 
     // Guardar nueva infracción
     public function store(Request $request)
-    {
-        //dd($request->all());
+{
+    $plate = $request->input('car_plate');
+    $result = $this->validateAndCleanLicensePlate($plate);
 
-        $plate = $request->input('car_plate');
-        $result = $this->validateAndCleanLicensePlate($plate); // Now this works!
-        //DD($result);
-        if (! $result['valid']) {
-            return back()->withErrors(['car_plate' => 'Invalid license plate format']);
-        }
-
-        // Search for existing car
-        $car = Car::where('car_plate', $result['cleaned'])
-            ->first(); // Use exact match for better performance
-
-        if (! $car) {
-            $car = Car::create([
-                'user_id' => 0,
-                'car_plate' => $result['cleaned'],
-            ]);
-        }
-        // dd($car);
-        try {
-            // Create the infraction
-            Infraction::create([
-                'user_id' => auth()->id(),
-                'car_id' => $car->id,
-                'fine' => 5000,
-                'date' => now()->format('Y-m-d'),
-                'status' => 'pending',
-            ]);
-
-            return redirect()
-                ->route('infractions.index')
-                ->with('success', 'Infracción registrada correctamente para ' . $car->car_plate);
-        } catch (\Exception $e) {
-            return back()->withErrors([
-                'car_plate' => 'Error creating infraction: ' . $e->getMessage(),
-            ]);
-        }
+    if (!$result['valid']) {
+        return back()->withErrors(['car_plate' => 'Formato de patente inválido.']);
     }
 
+    // Buscar auto existente
+    $car = Car::where('car_plate', $result['cleaned'])->first();
+
+    if (!$car) {
+        $car = Car::create([
+            'user_id' => 0, // Para inspectores, user_id = 0 (no asociado)
+            'car_plate' => $result['cleaned'],
+        ]);
+    }
+
+    try {
+        // Crear la infracción
+        $infraction = Infraction::create([
+            'user_id' => auth()->id(), // Inspector como user_id
+            'car_id' => $car->id,
+            'fine' => 5000,
+            'date' => now()->format('Y-m-d'),
+            'status' => 'pending',
+        ]);
+
+        // Notificar al propietario del auto si existe
+        if ($car->user_id && $car->user_id != 0) {
+            $user = User::find($car->user_id);
+            if ($user) {
+                $user->notify(new InfraccionNotification([
+                    'car_plate' => $car->car_plate,
+                    'date' => $infraction->date,
+                    'hour' => now()->format('H:i'),
+                    'ubication' => 'No especificado',
+                    'infraccion_id' => $infraction->id,
+                ]));
+                \Log::info('Notificación enviada a usuario ID: ' . $user->id); // Depuración
+            } else {
+                \Log::warning('No se encontró usuario para car_id: ' . $car->id);
+            }
+        } else {
+            \Log::warning('El auto no tiene un user_id válido: ' . $car->id);
+        }
+
+        return redirect()
+            ->route('infractions.index')
+            ->with('success', 'Infracción registrada correctamente para ' . $car->car_plate);
+    } catch (\Exception $e) {
+        \Log::error('Error al crear infracción: ' . $e->getMessage());
+        return back()->withErrors([
+            'car_plate' => 'Error creating infraction: ' . $e->getMessage(),
+        ]);
+    }
+}
     // Editar infracción (solo si pertenece al inspector)
     public function edit(Infraction $infraction)
     {
@@ -104,6 +141,8 @@ class InfractionController extends Controller
         }
 
         $cars = Car::all();
+
+        Log::info('Loading view: infractions.edit', ['path' => resource_path('views/infractions/edit.blade.php')]);
 
         return view('infractions.edit', compact('infraction', 'cars'));
     }

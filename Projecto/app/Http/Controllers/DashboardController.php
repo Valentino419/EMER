@@ -13,18 +13,22 @@ class DashboardController extends Controller
         $role = $user->role ? $user->role->name : 'user';
         $data = $this->getDashboardData($role);
        
+        // Si hay usuario autenticado, contar sus notificaciones de infracción sin leer
+        $unreadCount = 0;
+        if ($user) {
+            $unreadCount = $user->unreadNotifications()
+            ->where('type', 'App\\Notifications\\InfraccionNotification')
+            ->count();
+        }
+    
         // Render role-specific view
           return view("dashboard.{$role}", [
             'user' => $user,
             'role' => $role,
             'data' => $data,
+            'unreadCount'=> $unreadCount,
         ]);
-        $unreadNotifications = Notification::where('user_id', $user->id)
-            ->where('type', 'infraccion')
-            ->unread()
-            ->get();
-
-        return view('dashboard.user', compact('unreadNotifications','user'));
+        
     }
 
     private function getDashboardData($role)

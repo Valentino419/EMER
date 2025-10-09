@@ -17,6 +17,6 @@ class Notification extends Model
     }
     public function scopeUnread($query)
     {
-        return $query->whereNull('read');
+        return $query->whereNull('read_at');
     }
 }

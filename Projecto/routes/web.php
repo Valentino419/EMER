@@ -19,12 +19,13 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\StreetController;
 
-
-Route::get('/user/logged', [UserController::class, 'logged'])->middleware('auth')->name('user.logged');
-
-
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+Route::get('/dashboard', [DashboardController::class, 'user'])->name('dashboard');
 
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.user');
+});
 Route::resource('payment', PaymentController::class);
 
 Route::resource('schedule', ScheduleController::class);
@@ -74,6 +75,9 @@ Route::resource('users', UserController::class)->names([
     'update' => 'user.update',
     'destroy' => 'user.destroy',
 ]);
+
+Route::get('/user/logged', [UserController::class, 'logged'])->middleware('auth')->name('user.logged');
+
 
 Route::get('/check-zone', [ZoneController::class, 'checkZone']);
 Route::post('/check-zone', [ZoneController::class, 'checkZone']);
