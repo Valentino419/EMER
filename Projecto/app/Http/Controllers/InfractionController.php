@@ -21,14 +21,6 @@ class InfractionController extends Controller
         if ($request->filled('search')) {
             $query->whereHas('car', fn($q) => $q->where('car_plate', 'like', '%' . $request->search . '%'));
         }
-        // Si hay una patente en la sesión desde CarController
-        if (session('car_plate')) {
-            $car = Car::where('car_plate', session('car_plate'))->first();
-            if ($car && $car->infractions()->count() > 0) {
-                $query->where('car_id', $car->id);
-            }
-            session()->forget('car_plate'); // Limpiar la sesión después de usar
-        }
         $infractions = $query->latest()->paginate(10);
         return view('infractions.index', compact('infractions'));
     }

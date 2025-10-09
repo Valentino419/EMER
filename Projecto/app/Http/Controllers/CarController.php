@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 class CarController extends Controller
 {
     use LicensePlateValidator;
+
     // Mostrar todos los autos
     public function index()
     {
@@ -31,20 +32,6 @@ class CarController extends Controller
         return view('cars.index', compact('cars'));
     }
 
-
-    // Mostrar el formulario de creación
-    public function create()
-    {
-        $users = User::all();
-        if (Auth::user()->role->name == 'admin') {
-            // Vista para administradores
-            return view('cars.admin.create', compact('users'));
-        } else {
-            return view('cars.createUser', compact('users'));
-        }
-        // Vista para usuarios comunes
-    }
-
     // Guardar un nuevo auto
     public function store(Request $request)
     {
@@ -59,6 +46,12 @@ class CarController extends Controller
                 // Verificar si hay infracciones asociadas
                 $infractions = $car->infractions()->count();
                 if ($infractions > 0) {
+                    // Verificar si el usuario actual es inspector o el propietario es inspector
+                    $currentUserRole = Auth::user()->role->name;
+                    $ownerRole = User::find($car->user_id)->role->name ?? 'user';
+                    if ($currentUserRole === 'user' && $ownerRole !== 'inspector') {
+                        return back()->withErrors(['car_plate' => 'Esta patente ya fue reclamada por otro usuario y no puede ser modificada.']);
+                    }
                     // Permitir reclamar la patente y actualizar user_id
                     $car->update(['user_id' => Auth::id()]);
                     return redirect()->route('infractions.index')
@@ -85,7 +78,6 @@ class CarController extends Controller
         } else {
             return view('cars.editUser', compact('users', 'car'));
         }
-        // Vista para usuarios comunes
     }
 
     // Actualizar un auto
@@ -96,7 +88,7 @@ class CarController extends Controller
                 'required',
                 'string',
                 'max:10',
-                Rule::unique('cars', 'car_plate')->ignore($car->id), // Ignora el auto actual
+                Rule::unique('cars', 'car_plate')->ignore($car->id),
             ],
             'user_id' => 'required|exists:users,id',
         ]);
