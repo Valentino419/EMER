@@ -1,12 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Autos</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
-        crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
     <style>
         body {
             background-color: #f0f4f8;
@@ -87,7 +86,8 @@
         }
 
         .alert-info,
-        .alert-success {
+        .alert-success,
+        .alert-warning {
             border-radius: 8px;
             margin-bottom: 20px;
         }
@@ -100,6 +100,11 @@
         .alert-success {
             background-color: #d4edda;
             color: #155724;
+        }
+
+        .alert-warning {
+            background-color: #fff3cd;
+            color: #856404;
         }
 
         .back-arrow {
@@ -139,9 +144,7 @@
 
 <body>
     <div class="container">
-        <a href="{{ route('dashboard') }}" class="back-arrow" title="Volver al inicio">
-            &#8592;
-        </a>
+        <a href="{{ route('dashboard') }}" class="back-arrow" title="Volver al inicio">&#8592;</a>
         <h2>Mis Autos</h2>
         <hr>
 
@@ -151,19 +154,48 @@
             </div>
         @endif
 
+        @if(session('warning'))
+            <div class="alert alert-warning">
+                {{ session('warning') }}
+                <a href="{{ route('cars.store') }}" class="btn btn-primary btn-sm">Reclamar Patente</a>
+            </div>
+        @endif
+
+        @if($errors->any())
+            <div class="alert alert-danger">
+                <ul>
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
         @if($cars->isEmpty())
             <div class="alert alert-info text-center">
                 @if(Auth::user()->role->name === 'user')
                     Aún no registraste ningún auto. 🚗
                     <div class="mt-3">
-                        <a href="{{ route('cars.create') }}" class="btn btn-primary">Registrar mi primer auto</a>
+                        <form action="{{ route('cars.store') }}" method="POST">
+                            @csrf
+                            <div class="input-group">
+                                <input type="text" name="car_plate" class="form-control" placeholder="Ingresar patente" required>
+                                <button type="submit" class="btn btn-primary">Registrar mi primer auto</button>
+                            </div>
+                        </form>
                     </div>
                 @else
                     No hay autos registrados.
                 @endif
             </div>
         @else
-            <a href="{{ route('cars.create') }}" class="btn btn-primary mb-3">Registrar nuevo auto</a>
+            <form action="{{ route('cars.store') }}" method="POST" class="mb-3">
+                @csrf
+                <div class="input-group">
+                    <input type="text" name="car_plate" class="form-control" placeholder="Ingresar patente" required>
+                    <button type="submit" class="btn btn-primary">Registrar nuevo auto</button>
+                </div>
+            </form>
             <table class="table table-striped table-hover text-center align-middle">
                 <thead>
                     <tr>
@@ -180,18 +212,11 @@
                         <tr>
                             <td>{{ $car->id }}</td>
                             <td>{{ $car->car_plate }}</td>
-                            
                             @if(Auth::user()->role->name !== 'user')
                                 <td>{{ $car->user->name ?? 'N/A' }}</td>
                             @endif
                             <td>
-                                <a href="{{ route('cars.edit', $car) }}" class="btn btn-primary btn-sm">Editar</a>
-                                <form action="{{ route('cars.destroy', $car) }}" method="POST" class="d-inline"
-                                    onsubmit="return confirm('¿Eliminar auto?');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
-                                </form>
+                                <a href="{{ route('infractions.index') }}" class="btn btn-primary btn-sm">Ver Infracciones</a>
                             </td>
                         </tr>
                     @endforeach
@@ -203,6 +228,7 @@
             </div>
         @endif
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
 </body>
 
 </html>
