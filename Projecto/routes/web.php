@@ -33,6 +33,7 @@ Route::resource('users', UserController::class);
 
 Route::post('schedules/check-active', [ScheduleController::class, 'checkActiveSchedule']);
 
+Route::get('zones/create', [ZoneController::class, 'create'])->name('zones.create')->middleware('auth');
 Route::resource('zone', ZoneController::class)->names([
     'index' => 'zone.index',
     'create' => 'zone.create',
