@@ -9,10 +9,14 @@ class Notification extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['title', 'message', 'read', 'user_id'];
+    protected $fillable = ['type','title', 'message', 'read', 'user_id'];
 
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+    public function scopeUnread($query)
+    {
+        return $query->whereNull('read_at');
     }
 }
