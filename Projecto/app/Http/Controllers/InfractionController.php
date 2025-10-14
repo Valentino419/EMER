@@ -3,10 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Car;
+use App\Models\User;
 use App\Models\Infraction;
+use App\Notifications\InfraccionNotification;
 use App\Traits\LicensePlateValidator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+
 
 class InfractionController extends Controller
 {
@@ -14,15 +17,25 @@ class InfractionController extends Controller
 
     public function index(Request $request)
     {
-        $query = Infraction::with('car');
-        if (Auth::user()->role->name !== 'admin' && Auth::user()->role->name !== 'inspector') {
-            $query->whereHas('car', fn($q) => $q->where('user_id', Auth::id()));
-        }
-        if ($request->filled('search')) {
-            $query->whereHas('car', fn($q) => $q->where('car_plate', 'like', '%' . $request->search . '%'));
-        }
+         $query = Infraction::with('car');
+
+            if (Auth::user()->role->name !== 'admin' && Auth::user()->role->name !== 'inspector') {
+             $query->whereHas('car', fn($q) => $q->where('user_id', Auth::id()));
+            }
+
+            if ($request->filled('search')) {
+              $query->whereHas('car', fn($q) => $q->where('car_plate', 'like', '%' . $request->search . '%'));
+            }
+
         $infractions = $query->latest()->paginate(10);
-        return view('infractions.index', compact('infractions'));
+
+   
+        $user = Auth::user();
+        $user->unreadNotifications()
+         ->where('type', InfraccionNotification::class)
+         ->update(['read_at' => now()]);
+
+        return view('infractions.index', compact('infractions', 'user'));
     }
 
     public function store(Request $request)
@@ -44,13 +57,34 @@ class InfractionController extends Controller
             ['car_plate' => $plate['cleaned']],
             ['user_id' => Auth::id()]
         );
+
         $infraction = Infraction::create([
-            'user_id' => Auth::id(),
+            'user_id' => auth()->id(), // Inspector como user_id
             'car_id' => $car->id,
-            'fine' => $request->input('fine', 5000),
-            'date' => $request->input('date', now()->format('Y-m-d')),
-            'status' => $request->input('status', 'pending'),
+            'fine' => 5000,
+            'date' => now()->format('Y-m-d'),
+            'status' => 'pending',
         ]);
+
+        // Notificar al propietario del auto si existe
+        if ($car->user_id && $car->user_id != 0) {
+            $user = User::find($car->user_id);
+            if ($user && $user->email) {
+                $user->notify(new InfraccionNotification([
+                    'car_plate' => $car->car_plate,
+                    'date' => $infraction->date,
+                    'hour' => now()->format('H:i'),
+                    'ubication' => 'No especificado',
+                    'infraccion_id' => $infraction->id,
+                ]));
+                \Log::info('Notificación enviada a usuario ID: ' . $user->id); // Depuración
+            } else {
+                \Log::warning('No se encontró usuario para car_id: ' . $car->id);
+            }
+        } else {
+            \Log::warning('El auto no tiene un user_id válido: ' . $car->id);
+        }
+
         return redirect()->route('infractions.index')->with('success', 'Infracción registrada');
     }
 
@@ -59,8 +93,9 @@ class InfractionController extends Controller
         if (Auth::user()->role->name !== 'admin' && $infraction->user_id !== Auth::id()) {
             abort(403);
         }
-        $cars = Car::all();
-        return view('infractions.edit', compact('infraction','cars'));
+        $cars= Car::with('user')->get();
+
+        return view('infractions.edit', compact('infraction', 'cars'));
     }
 
     public function update(Request $request, Infraction $infraction)

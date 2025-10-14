@@ -3,6 +3,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Notification;
 
 class DashboardController extends Controller
 {
@@ -11,13 +12,23 @@ class DashboardController extends Controller
         $user = Auth::user();
         $role = $user->role ? $user->role->name : 'user';
         $data = $this->getDashboardData($role);
-
+       
+        // Si hay usuario autenticado, contar sus notificaciones de infracción sin leer
+        $unreadCount = 0;
+        if ($user) {
+            $unreadCount = $user->unreadNotifications()
+            ->where('type', 'App\\Notifications\\InfraccionNotification')
+            ->count();
+        }
+    
         // Render role-specific view
-        return view("dashboard.{$role}", [
+          return view("dashboard.{$role}", [
             'user' => $user,
             'role' => $role,
             'data' => $data,
+            'unreadCount'=> $unreadCount,
         ]);
+        
     }
 
     private function getDashboardData($role)
