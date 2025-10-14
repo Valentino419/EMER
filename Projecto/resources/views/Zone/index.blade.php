@@ -68,6 +68,26 @@
             border-radius: 5px;
             margin-bottom: 20px;
         }
+        .back-arrow {
+            display: inline-block;
+            font-size: 32px;
+            font-weight: bold;
+            color: #1a3c6d;
+            text-decoration: none;
+            margin-bottom: 15px;
+            background: #fff;
+            border-radius: 50%;
+            padding: 8px 14px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
+        }
+
+        .back-arrow:hover {
+            background: #007bff;
+            color: #fff;
+            transform: scale(1.1);
+        }
+        
     </style>
 </head>
 
@@ -81,7 +101,9 @@
             @endif
         </h1>
 
-        <a href="{{ route('dashboard') }}" class="btn btn-secondary">Volver al Inicio</a>
+         <a href="{{ route('dashboard') }}" class="back-arrow" title="Volver al inicio" aria-label="Volver al inicio">
+            &#8592;
+        </a>      
 
         @if (session('success'))
             <div class="alert alert-success">{{ session('success') }}</div>

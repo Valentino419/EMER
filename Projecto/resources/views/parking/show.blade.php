@@ -95,6 +95,25 @@
             background-color: #f8d7da;
             color: #721c24;
         }
+        .back-arrow {
+            display: inline-block;
+            font-size: 32px;
+            font-weight: bold;
+            color: #1a3c6d;
+            text-decoration: none;
+            margin-bottom: 15px;
+            background: #fff;
+            border-radius: 50%;
+            padding: 8px 14px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
+        }
+
+        .back-arrow:hover {
+            background: #007bff;
+            color: #fff;
+            transform: scale(1.1);
+        }
 
         @media (max-width: 768px) {
             .container {
@@ -114,8 +133,14 @@
         }
     </style>
 
+    <!-- ... (estilos y encabezado) ... -->
+
     <div class="container">
-        <h2>Detalles del Estacionamiento</h2>
+        <h2>Estacionamientos</h2>
+
+        <a href="{{ route('dashboard') }}" class="back-arrow" title="Volver al inicio" aria-label="Volver al inicio">
+            &#8592;
+        </a>
 
         @if (session('success'))
             <div class="alert alert-success">
@@ -123,24 +148,37 @@
             </div>
         @endif
 
-        @if (isset($noSession) && $noSession)
+        @if (isset($sessions) && $sessions->isEmpty())
             <div class="alert alert-danger">
-                No tienes estacionamientos pagados aún. Registra uno nuevo.
+                No tienes estacionamientos registrados aún. Registra uno nuevo.
             </div>
             <a href="{{ route('parking.create') }}" class="btn btn-primary">Registrar Estacionamiento</a>
         @elseif (isset($session))
+            <!-- Detalles de un estacionamiento específico -->
             <table class="table table-striped table-hover">
                 <tbody>
                     <tr>
+                        <th>ID</th>
+                        <td>{{ $session->id }}</td>
+                    </tr>
+                    <tr>
                         <th>Patente</th>
                         <td>{{ $session->license_plate }}</td>
+                    </tr>
+                    <tr>
+                        <th>Zona</th>
+                        <td>{{ $session->street->zone->name }}</td>
+                    </tr>
+                    <tr>
+                        <th>Calle</th>
+                        <td>{{ $session->street->name }}</td>
                     </tr>
                     <tr>
                         <th>Duración</th>
                         <td>{{ number_format($session->duration / 60, 1) }} horas</td>
                     </tr>
                     <tr>
-                        <th>Monto Pagado</th>
+                        <th>Monto Estimado</th>
                         <td>${{ number_format($session->amount, 2) }}</td>
                     </tr>
                     <tr>
@@ -149,11 +187,19 @@
                     </tr>
                     <tr>
                         <th>Fin</th>
-                        <td>{{ $session->end_time->format('d/m/Y H:i') }}</td>
+                        <td>{{ $session->end_time ? $session->end_time->format('d/m/Y H:i') : 'No finalizado' }}</td>
                     </tr>
                     <tr>
-                        <th>Estado del Pago</th>
-                        <td><span class="badge bg-success">Completado</span></td>
+                        <th>Estado</th>
+                        <td>
+                            @if ($session->status === 'active')
+                                <span class="badge bg-warning">Activo</span>
+                            @elseif ($session->payment_status === 'completed')
+                                <span class="badge bg-success">Completado</span>
+                            @else
+                                <span class="badge bg-secondary">Pendiente</span>
+                            @endif
+                        </td>
                     </tr>
                     @if ($session->payment_id)
                         <tr>
@@ -165,7 +211,51 @@
             </table>
             <div class="mt-3">
                 <a href="{{ route('parking.create') }}" class="btn btn-primary">Registrar otro</a>
-                <a href="{{ route('home') }}" class="btn btn-danger">Volver al inicio</a>
+                <a href="{{ route('parking.show') }}" class="btn btn-secondary">Volver al Historial</a>
+            </div>
+        @elseif (isset($sessions))
+            <!-- Lista de todos los estacionamientos (historial) -->
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Patente</th>
+                        <th>Zona</th>
+                        <th>Calle</th>
+                        <th>Inicio</th>
+                        <th>Duración</th>
+                        <th>Monto</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($sessions as $session)
+                        <tr>
+                            <td>{{ $session->id }}</td>
+                            <td>{{ $session->license_plate }}</td>
+                            <td>{{ $session->street->zone->name }}</td>
+                            <td>{{ $session->street->name }}</td>
+                            <td>{{ $session->start_time->format('d/m/Y H:i') }}</td>
+                            <td>{{ number_format($session->duration / 60, 1) }} horas</td>
+                            <td>${{ number_format($session->amount, 2) }}</td>
+                            <td>
+                                @if ($session->status === 'active')
+                                    <span class="badge bg-warning">Activo</span>
+                                @elseif ($session->payment_status === 'completed')
+                                    <span class="badge bg-success">Completado</span>
+                                @else
+                                    <span class="badge bg-secondary">Pendiente</span>
+                                @endif
+                            </td>
+                            <td><a href="{{ route('parking.show', $session->id) }}"
+                                    class="btn btn-primary btn-sm">Detalles</a></td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+            <div class="mt-3">
+                <a href="{{ route('parking.create') }}" class="btn btn-primary">Registrar nuevo</a>
             </div>
         @else
             <div class="alert alert-danger">

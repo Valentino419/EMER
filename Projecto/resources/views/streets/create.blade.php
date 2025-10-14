@@ -1,100 +1,59 @@
-<!DOCTYPE html>
-<html lang="en">
+@extends('layouts.app')
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crear Calle</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body {
-            background-color: #f8f9fa;
-            font-family: 'Segoe UI', sans-serif;
-        }
+@section('content')
+<div class="container">
+    <h1>Crear Nueva Calle</h1>
+    <a href="{{ route('zones.show', ['zone' => $zone_id]) }}" class="btn btn-secondary">Volver</a>
 
-        .container {
-            max-width: 600px;
-            margin: 30px auto;
-            padding: 20px;
-        }
+    @if ($errors->any())
+        <div class="alert alert-danger">
+            <ul>
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
 
-        h1 {
-            color: #1a3c6d;
-            font-weight: 600;
-            margin-bottom: 20px;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .btn-primary {
-            background-color: #4a90e2;
-            border: none;
-            padding: 8px 20px;
-            border-radius: 5px;
-        }
-
-        .btn-primary:hover {
-            background-color: #357abd;
-        }
-
-        .alert-danger {
-            border-radius: 5px;
-        }
-    </style>
-</head>
-
-<body>
-    <div class="container">
-        <h1>Crear Nueva Calle</h1>
-
-        @if ($errors->any())
-            <div class="alert alert-danger">
-                <ul>
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
-
-        @if (session('success'))
-            <div class="alert alert-success">
-                {{ session('success') }}
-            </div>
-        @endif
-
-        <form action="{{ route('street.store') }}" method="POST">
-            @csrf
-            <div class="form-group">
-                <label for="name">Nombre:</label>
-                <input type="text" name="name" id="name" class="form-control" required>
-            </div>
-            <div class="form-group">
-                <label for="start_number">Número Inicial:</label>
-                <input type="number" name="start_number" id="start_number" class="form-control" required>
-            </div>
-            <div class="form-group">
-                <label for="end_number">Número Final:</label>
-                <input type="number" name="end_number" id="end_number" class="form-control" required>
-            </div>
-            <div class="form-group">
-                <label for="zone_id">Zona:</label>
-                <select name="zone_id" id="zone_id" class="form-control" required>
-                    <option value="">Selecciona una zona</option>
-                    @foreach ($zones as $zone)
-                        <option value="{{ $zone->id }}" {{ $zone_id == $zone->id ? 'selected' : '' }}>
-                            {{ $zone->name }}</option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="button-group">
-                <a href="{{ route('zones.show', ['zone' => $zone_id]) }}" class="btn btn-secondary">Cancelar</a>
-                <button type="submit" class="btn btn-primary">Crear</button>
-            </div>
-         </form>
-    </div>
-</body>
-
-</html>
+    <form action="{{ route('street.store') }}" method="POST">
+        @csrf
+        <div class="mb-3">
+            <label for="name" class="form-label">Nombre de la Calle</label>
+            <input type="text" name="name" id="name" class="form-control" value="{{ old('name') }}" required>
+        </div>
+        <div class="mb-3">
+            <label for="start_number" class="form-label">Inicio del Cobro</label>
+            <input type="number" name="start_number" id="start_number" class="form-control" value="{{ old('start_number') }}" required>
+        </div>
+        <div class="mb-3">
+            <label for="end_number" class="form-label">Fin del Cobro</label>
+            <input type="number" name="end_number" id="end_number" class="form-control" value="{{ old('end_number') }}" required>
+        </div>
+        <div class="mb-3">
+            <label for="zone_id" class="form-label">Zona</label>
+            <select name="zone_id" id="zone_id" class="form-control" required>
+                @foreach ($zones as $z)
+                    <option value="{{ $z->id }}" {{ $zone_id == $z->id ? 'selected' : '' }}>{{ $z->name }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="start_lat" class="form-label">Latitud Inicio (opcional, usa decimales ej: -33.007200)</label>
+            <input type="number" step="0.000001" name="start_lat" id="start_lat" class="form-control" value="{{ old('start_lat') }}" placeholder="Ej: -33.007200">
+        </div>
+        <div class="mb-3">
+            <label for="start_lng" class="form-label">Longitud Inicio (opcional, usa decimales ej: -58.520500)</label>
+            <input type="number" step="0.000001" name="start_lng" id="start_lng" class="form-control" value="{{ old('start_lng') }}" placeholder="Ej: -58.520500">
+        </div>
+        <div class="mb-3">
+            <label for="end_lat" class="form-label">Latitud Fin (opcional, usa decimales ej: -33.007200)</label>
+            <input type="number" step="0.000001" name="end_lat" id="end_lat" class="form-control" value="{{ old('end_lat') }}" placeholder="Ej: -33.007200">
+        </div>
+        <div class="mb-3">
+            <label for="end_lng" class="form-label">Longitud Fin (opcional, usa decimales ej: -58.516000)</label>
+            <input type="number" step="0.000001" name="end_lng" id="end_lng" class="form-control" value="{{ old('end_lng') }}" placeholder="Ej: -58.516000">
+        </div>
+        <button type="submit" class="btn btn-primary">Guardar</button>
+    </form>
+</div>
+@endsection
