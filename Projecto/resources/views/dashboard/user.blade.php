@@ -117,6 +117,32 @@
             transform: translateY(-1px);
         }
 
+        #active-parking-widget {
+            position: fixed;
+            bottom: 0;
+            right: 0;
+            margin: 20px;
+            padding: 15px;
+            background-color: #4a90e2;
+            color: white;
+            border-radius: 8px;
+            min-width: 200px;
+            z-index: 1000;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            display: none;
+            /* Oculto por defecto, se muestra con JS */
+        }
+
+        #active-parking-widget h5 {
+            margin: 0 0 10px 0;
+            font-size: 1.1em;
+        }
+
+        #active-parking-widget button {
+            width: 100%;
+            margin-top: 5px;
+        }
+
         @media (max-width: 768px) {
             .navbar {
                 padding: 10px;
@@ -183,18 +209,78 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-6"> 
+            <div class="col-md-6">
                 <div class="card card-menu">
                     <div class="card-body">
-                        <span class="emoji">🌍</span> 
+                        <span class="emoji">🌍</span>
                         <h5 class="card-title">Zonas</h5>
                         <a href="{{ route('zone.index') }}" class="btn btn-primary">Gestionar Zonas</a>
                     </div>
                 </div>
             </div>
-          
+        </div>
+        <div class="col-md-4">
+            <div class="card card-menu">
+                <div class="card-body">
+                    <span class="emoji">📋</span>
+                    <h5 class="card-title">Historial de Estacionamientos</h5>
+                    <a href="{{ route('parking.show') }}" class="btn btn-primary">Ver Historial</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ventanita de estacionamiento activo (oculta por defecto) -->
+        <div id="active-parking-widget">
+            <h5>Estacionamiento Activo</h5>
+            <p id="dashboard-timer">Cargando...</p>
+            <button id="go-to-parking" class="btn btn-light btn-sm mt-2">Ver Detalles</button>
+            <button id="end-parking" class="btn btn-danger btn-sm mt-2">Finalizar</button>
         </div>
     </div>
+
+    <script>
+        let dashboardTimeLeft = localStorage.getItem('parkingTimeLeft') ? parseInt(localStorage.getItem(
+            'parkingTimeLeft')) : 0;
+        let dashboardTimerInterval;
+
+        const activeParkingWidget = document.getElementById('active-parking-widget');
+        if (dashboardTimeLeft > 0) {
+            activeParkingWidget.style.display = 'block';
+            updateDashboardTimer();
+            dashboardTimerInterval = setInterval(updateDashboardTimer, 1000);
+        }
+
+        function updateDashboardTimer() {
+            if (dashboardTimeLeft > 0) {
+                dashboardTimeLeft--;
+                localStorage.setItem('parkingTimeLeft', dashboardTimeLeft);
+                const hours = Math.floor(dashboardTimeLeft / 3600);
+                const minutes = Math.floor((dashboardTimeLeft % 3600) / 60);
+                const seconds = dashboardTimeLeft % 60;
+                document.getElementById('dashboard-timer').textContent =
+                    `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')} restantes`;
+            } else {
+                clearInterval(dashboardTimerInterval);
+                document.getElementById('dashboard-timer').textContent = 'Tiempo terminado';
+                localStorage.removeItem('parkingTimeLeft');
+                localStorage.removeItem('parkingSessionId');
+                activeParkingWidget.style.display = 'none';
+            }
+        }
+
+        document.getElementById('go-to-parking')?.addEventListener('click', function() {
+            window.location.href = '{{ route('parking.create') }}';
+        });
+
+        document.getElementById('end-parking')?.addEventListener('click', function() {
+            dashboardTimeLeft = 0;
+            localStorage.removeItem('parkingTimeLeft');
+            localStorage.removeItem('parkingSessionId');
+            clearInterval(dashboardTimerInterval);
+            activeParkingWidget.style.display = 'none';
+            alert('Estacionamiento finalizado manualmente.');
+        });
+    </script>
 </body>
 
 </html>

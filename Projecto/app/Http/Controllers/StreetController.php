@@ -15,7 +15,6 @@ class StreetController extends Controller
     public function index($zone_id = null)
     {
         if (Auth::check() && Auth::user()->role === 'user') {
-            // Verificar que la zona pertenece al usuario
             if ($zone_id && !Auth::user()->zones()->where('id', $zone_id)->exists()) {
                 abort(403, 'No tienes acceso a esta zona.');
             }
@@ -46,6 +45,10 @@ class StreetController extends Controller
             'start_number' => 'required|integer',
             'end_number' => 'required|integer',
             'zone_id' => 'required|exists:zones,id',
+            'start_lat' => 'nullable|numeric|between:-90,90',
+            'start_lng' => 'nullable|numeric|between:-180,180',
+            'end_lat' => 'nullable|numeric|between:-90,90',
+            'end_lng' => 'nullable|numeric|between:-180,180',
         ]);
 
         $street = Street::create($validated);
@@ -80,6 +83,10 @@ class StreetController extends Controller
             'start_number' => 'integer',
             'end_number' => 'integer',
             'zone_id' => 'exists:zones,id',
+            'start_lat' => 'nullable|numeric|between:-90,90',
+            'start_lng' => 'nullable|numeric|between:-180,180',
+            'end_lat' => 'nullable|numeric|between:-90,90',
+            'end_lng' => 'nullable|numeric|between:-180,180',
         ]);
         $street->update($validated);
         return redirect()->route('zones.show', ['zone' => $validated['zone_id'] ?? $street->zone_id])->with('success', 'Calle actualizada exitosamente.');

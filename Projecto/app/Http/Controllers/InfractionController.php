@@ -59,7 +59,8 @@ class InfractionController extends Controller
         if (Auth::user()->role->name !== 'admin' && $infraction->user_id !== Auth::id()) {
             abort(403);
         }
-        return view('infractions.edit', compact('infraction'));
+        $cars = Car::all();
+        return view('infractions.edit', compact('infraction','cars'));
     }
 
     public function update(Request $request, Infraction $infraction)
