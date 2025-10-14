@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Car;
+use App\Models\User;
 use App\Models\Infraction;
-use App\Http\Controllers\InfraccionNotification;
-use App\Http\Controllers\User;
+use App\Notifications\InfraccionNotification;
 use App\Traits\LicensePlateValidator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -69,7 +69,7 @@ class InfractionController extends Controller
         // Notificar al propietario del auto si existe
         if ($car->user_id && $car->user_id != 0) {
             $user = User::find($car->user_id);
-            if ($user) {
+            if ($user && $user->email) {
                 $user->notify(new InfraccionNotification([
                     'car_plate' => $car->car_plate,
                     'date' => $infraction->date,
@@ -93,7 +93,9 @@ class InfractionController extends Controller
         if (Auth::user()->role->name !== 'admin' && $infraction->user_id !== Auth::id()) {
             abort(403);
         }
-        return view('infractions.edit', compact('infraction'));
+        $cars= Car::with('user')->get();
+
+        return view('infractions.edit', compact('infraction', 'cars'));
     }
 
     public function update(Request $request, Infraction $infraction)

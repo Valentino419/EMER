@@ -70,7 +70,7 @@
         <a href="{{ route('infractions.index') }}" class="back-arrow" title="Volver al listado">
             &#8592;
         </a>
-        <h1 class="mb-4">Editar Infracción #{{ $infraction->id }}</h1>
+        <h1 class="mb-4">Editar Infracción </h1>
 
         @if(session('success'))
             <div class="alert alert-success">{{ session('success') }}</div>
@@ -91,10 +91,10 @@
             @method('PATCH')
             <div class="mb-3">
                 <label for="car_id" class="form-label">Auto</label>
-                <select class="form-control" id="car_id" name="car_id" required>
+                <select class="form-control" id="car_plate" name="car_plate" required>
                     <option value="">Selecciona un auto</option>
                     @foreach($cars as $car)
-                        <option value="{{ $car->id }}" {{ old('car_id', $infraction->car_id) == $car->id ? 'selected' : '' }}>
+                        <option value="{{ $car->car_plate }}" {{ old('car_plate', $infraction->car_id) == $car->id ? 'selected' : '' }}>
                             {{ $car->car_plate }} ({{ $car->user->name ?? 'Sin usuario' }})
                         </option>
                     @endforeach
