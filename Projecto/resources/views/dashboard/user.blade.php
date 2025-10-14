@@ -65,6 +65,11 @@
             background-color: #ffffff;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
+            height: 100%; /* Asegura que todas las tarjetas tengan la misma altura */
+            display: flex;
+            flex-direction: column;
+            justify-content: center; /* Centra verticalmente */
+            align-items: center; /* Centra horizontalmente */
         }
 
         .card-menu:hover {
@@ -74,7 +79,12 @@
 
         .card-menu .card-body {
             padding: 25px;
-            text-align: center;
+            text-align: center; /* Centra el texto horizontalmente */
+            flex-grow: 1; /* Ocupa el espacio disponible */
+            display: flex;
+            flex-direction: column;
+            justify-content: center; /* Centra verticalmente dentro del card-body */
+            align-items: center; /* Centra horizontalmente dentro del card-body */
         }
 
         .card-menu .emoji {
@@ -88,6 +98,7 @@
             font-weight: 500;
             color: #2c3e50;
             margin-bottom: 15px;
+            text-align: center; /* Asegura centrado del título */
         }
 
         .btn {
@@ -95,6 +106,8 @@
             font-weight: 500;
             border-radius: 5px;
             transition: background-color 0.3s ease, transform 0.2s ease;
+            display: block; /* Asegura que el botón ocupe su propio espacio */
+            margin: 0 auto; /* Centra el botón horizontalmente */
         }
 
         .btn-primary {
@@ -129,8 +142,7 @@
             min-width: 200px;
             z-index: 1000;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            display: none;
-            /* Oculto por defecto, se muestra con JS */
+            display: none; /* Oculto por defecto, se muestra con JS */
         }
 
         #active-parking-widget h5 {
@@ -156,7 +168,8 @@
                 flex-direction: column;
             }
 
-            .col-md-4 {
+            .col-md-4,
+            .col-md-6 {
                 width: 100%;
                 margin-bottom: 20px;
             }
@@ -209,6 +222,8 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Fila combinada para Zonas e Historial -->
             <div class="col-md-6">
                 <div class="card card-menu">
                     <div class="card-body">
@@ -218,13 +233,13 @@
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card card-menu">
-                <div class="card-body">
-                    <span class="emoji">📋</span>
-                    <h5 class="card-title">Historial de Estacionamientos</h5>
-                    <a href="{{ route('parking.show') }}" class="btn btn-primary">Ver Historial</a>
+            <div class="col-md-6">
+                <div class="card card-menu">
+                    <div class="card-body">
+                        <span class="emoji">📋</span>
+                        <h5 class="card-title">Historial de Estacionamientos</h5>
+                        <a href="{{ route('parking.show') }}" class="btn btn-primary">Ver Historial</a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -239,8 +254,7 @@
     </div>
 
     <script>
-        let dashboardTimeLeft = localStorage.getItem('parkingTimeLeft') ? parseInt(localStorage.getItem(
-            'parkingTimeLeft')) : 0;
+        let dashboardTimeLeft = localStorage.getItem('parkingTimeLeft') ? parseInt(localStorage.getItem('parkingTimeLeft')) : 0;
         let dashboardTimerInterval;
 
         const activeParkingWidget = document.getElementById('active-parking-widget');
@@ -257,8 +271,7 @@
                 const hours = Math.floor(dashboardTimeLeft / 3600);
                 const minutes = Math.floor((dashboardTimeLeft % 3600) / 60);
                 const seconds = dashboardTimeLeft % 60;
-                document.getElementById('dashboard-timer').textContent =
-                    `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')} restantes`;
+                document.getElementById('dashboard-timer').textContent = `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')} restantes`;
             } else {
                 clearInterval(dashboardTimerInterval);
                 document.getElementById('dashboard-timer').textContent = 'Tiempo terminado';
