@@ -65,11 +65,11 @@
             background-color: #ffffff;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
-            height: 100%; /* Asegura que todas las tarjetas tengan la misma altura */
+            height: 100%;
             display: flex;
             flex-direction: column;
-            justify-content: center; /* Centra verticalmente */
-            align-items: center; /* Centra horizontalmente */
+            justify-content: center;
+            align-items: center;
         }
 
         .card-menu:hover {
@@ -79,12 +79,12 @@
 
         .card-menu .card-body {
             padding: 25px;
-            text-align: center; /* Centra el texto horizontalmente */
-            flex-grow: 1; /* Ocupa el espacio disponible */
+            text-align: center;
+            flex-grow: 1;
             display: flex;
             flex-direction: column;
-            justify-content: center; /* Centra verticalmente dentro del card-body */
-            align-items: center; /* Centra horizontalmente dentro del card-body */
+            justify-content: center;
+            align-items: center;
         }
 
         .card-menu .emoji {
@@ -98,7 +98,7 @@
             font-weight: 500;
             color: #2c3e50;
             margin-bottom: 15px;
-            text-align: center; /* Asegura centrado del título */
+            text-align: center;
         }
 
         .btn {
@@ -106,8 +106,8 @@
             font-weight: 500;
             border-radius: 5px;
             transition: background-color 0.3s ease, transform 0.2s ease;
-            display: block; /* Asegura que el botón ocupe su propio espacio */
-            margin: 0 auto; /* Centra el botón horizontalmente */
+            display: block;
+            margin: 0 auto;
         }
 
         .btn-primary {
@@ -142,12 +142,16 @@
             min-width: 200px;
             z-index: 1000;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            display: none; /* Oculto por defecto, se muestra con JS */
+            display: none;
         }
 
         #active-parking-widget h5 {
             margin: 0 0 10px 0;
             font-size: 1.1em;
+        }
+
+        #active-parking-widget p {
+            margin: 0 0 10px 0;
         }
 
         #active-parking-widget button {
@@ -244,56 +248,39 @@
             </div>
         </div>
 
-        <!-- Ventanita de estacionamiento activo (oculta por defecto) -->
-        <div id="active-parking-widget">
-            <h5>Estacionamiento Activo</h5>
-            <p id="dashboard-timer">Cargando...</p>
-            <button id="go-to-parking" class="btn btn-light btn-sm mt-2">Ver Detalles</button>
-            <button id="end-parking" class="btn btn-danger btn-sm mt-2">Finalizar</button>
-        </div>
+        <!-- Ventanitas de estacionamientos activos -->
+        @php
+            $activeSessions = ParkingSession::where('user_id', auth()->id())
+                ->where('status', 'active')
+                ->with('car')
+                ->get();
+        @endphp
+        @foreach ($activeSessions as $session)
+            <?php
+                $start = Carbon::parse($session->start_time);
+                $end = $start->copy()->addMinutes($session->duration);
+                $now = Carbon::now();
+                $timeLeft = max(0, $end->diffInSeconds($now));
+                $hours = floor($timeLeft / 3600);
+                $minutes = floor(($timeLeft % 3600) / 60);
+                $seconds = $timeLeft % 60;
+            ?>
+            <div id="active-parking-widget-{{ $session->id }}" style="display: block;">
+                <h5>Estacionamiento Activo ({{ $session->car->license_plate ?? $session->car->car_plate }})</h5>
+                <p>Tiempo restante: {{ $hours }}h {{ $minutes }}m {{ $seconds }}s</p>
+                <button id="go-to-parking-{{ $session->id }}" class="btn btn-light btn-sm mt-2">Ver Detalles</button>
+                <form action="{{ route('parking.end', $session->id) }}" method="POST" style="display: inline;">
+                    @csrf
+                    @method('POST')
+                    <button type="submit" class="btn btn-danger btn-sm mt-2">Finalizar</button>
+                </form>
+            </div>
+            <script>
+                document.getElementById('go-to-parking-{{ $session->id }}')?.addEventListener('click', function() {
+                    window.location.href = '{{ route('parking.show', $session->id) }}';
+                });
+            </script>
+        @endforeach
     </div>
-
-    <script>
-        let dashboardTimeLeft = localStorage.getItem('parkingTimeLeft') ? parseInt(localStorage.getItem('parkingTimeLeft')) : 0;
-        let dashboardTimerInterval;
-
-        const activeParkingWidget = document.getElementById('active-parking-widget');
-        if (dashboardTimeLeft > 0) {
-            activeParkingWidget.style.display = 'block';
-            updateDashboardTimer();
-            dashboardTimerInterval = setInterval(updateDashboardTimer, 1000);
-        }
-
-        function updateDashboardTimer() {
-            if (dashboardTimeLeft > 0) {
-                dashboardTimeLeft--;
-                localStorage.setItem('parkingTimeLeft', dashboardTimeLeft);
-                const hours = Math.floor(dashboardTimeLeft / 3600);
-                const minutes = Math.floor((dashboardTimeLeft % 3600) / 60);
-                const seconds = dashboardTimeLeft % 60;
-                document.getElementById('dashboard-timer').textContent = `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')} restantes`;
-            } else {
-                clearInterval(dashboardTimerInterval);
-                document.getElementById('dashboard-timer').textContent = 'Tiempo terminado';
-                localStorage.removeItem('parkingTimeLeft');
-                localStorage.removeItem('parkingSessionId');
-                activeParkingWidget.style.display = 'none';
-            }
-        }
-
-        document.getElementById('go-to-parking')?.addEventListener('click', function() {
-            window.location.href = '{{ route('parking.create') }}';
-        });
-
-        document.getElementById('end-parking')?.addEventListener('click', function() {
-            dashboardTimeLeft = 0;
-            localStorage.removeItem('parkingTimeLeft');
-            localStorage.removeItem('parkingSessionId');
-            clearInterval(dashboardTimerInterval);
-            activeParkingWidget.style.display = 'none';
-            alert('Estacionamiento finalizado manualmente.');
-        });
-    </script>
 </body>
-
 </html>
