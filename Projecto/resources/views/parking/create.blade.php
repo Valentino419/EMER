@@ -1,9 +1,6 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registrar Estacionamiento</title>
+@extends('layouts.app')
+
+@section('content')
     <style>
         body {
             background-color: #f0f4f8;
@@ -33,6 +30,7 @@
         }
 
         select,
+        input[type="number"],
         input[type="text"] {
             width: 100%;
             padding: 10px 12px;
@@ -63,6 +61,17 @@
         .btn-blue:hover {
             background-color: #0056b3;
             transform: translateY(-2px);
+        }
+
+        .form-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .form-header h2 {
+            margin: 0;
         }
 
         .form-section {
@@ -102,142 +111,277 @@
             transform: scale(1.1);
         }
 
-        .active-sessions-list {
+        #timer {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
             margin-top: 20px;
-            list-style: none;
-            padding: 0;
+            text-align: center;
         }
 
-        .active-sessions-list li {
-            padding: 10px;
-            background-color: #e9ecef;
-            border-radius: 6px;
+        .active-warning {
+            color: #dc3545;
+            font-weight: 600;
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        .details-section {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f1f1f1;
+            border-radius: 8px;
+        }
+
+        .details-section h3 {
+            color: #1a3c6d;
             margin-bottom: 10px;
         }
 
-        .active-sessions-list a {
-            color: #007bff;
-            text-decoration: none;
-        }
-
-        .active-sessions-list a:hover {
-            text-decoration: underline;
+        .details-section p {
+            margin: 5px 0;
         }
     </style>
-</head>
-<body>
+
     <div class="custom-card">
-        <a href="index.html" class="back-arrow" title="Volver al inicio" aria-label="Volver al inicio">&#8592;</a>
         <div class="form-header">
             <h2>Registrar Estacionamiento (Pre-Pago)</h2>
         </div>
 
-        <form id="parking-form">
+        @if (session('success'))
+            <div class="bg-green-100 text-green-800 p-4 rounded mb-4">
+                {{ session('success') }}
+            </div>
+        @endif
+        @if ($errors->any())
+            <div class="alert alert-danger">
+                <ul class="mb-0">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+        <a href="{{ route('dashboard') }}" class="back-arrow" title="Volver al inicio" aria-label="Volver al inicio">
+            &#8592;
+        </a>
+
+        <form id="parking-form" action="{{ route('parking.store') }}" method="POST" @if($activeSession) style="display: none;" @endif>
+            @csrf
+
             <div class="form-section">
                 <div class="form-title">Datos del Estacionamiento</div>
                 <div class="form-body">
+                    <!-- Car -->
                     <div class="mb-4">
-                        <label for="licensePlate">Patente</label>
-                        <input type="text" id="licensePlate" required>
+                        <label for="car_id">Vehículo</label>
+                        <select name="car_id" id="car_id" class="form-select" required>
+                            <option value="">Seleccione un auto</option>
+                            @foreach ($cars as $car)
+                                <option value="{{ $car->id }}">{{ $car->license_plate ?? $car->car_plate }}</option>
+                            @endforeach
+                        </select>
+                        @error('car_id')
+                            <div class="text-red-600">{{ $message }}</div>
+                        @enderror
                     </div>
+
+                    <!-- Zone -->
+                    <div class="mb-4">
+                        <label for="zone_id">Zona</label>
+                        <select name="zone_id" id="zone_id" class="form-control" required>
+                            <option value="">Selecciona una zona</option>
+                            @foreach ($zones as $zone)
+                                <option value="{{ $zone->id }}" data-rate="{{ $zone->rate ?? 5.0 }}">
+                                    {{ $zone->name }}</option>
+                            @endforeach
+                        </select>
+                        @error('zone_id')
+                            <div class="text-red-600">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <!-- Street -->
+                    <div class="mb-4">
+                        <label for="street_id">Calle</label>
+                        <select name="street_id" id="street_id" class="form-control" required>
+                            <option value="">Seleccione una calle</option>
+                            @foreach ($streets as $street)
+                                <option value="{{ $street->id }}" data-zone-id="{{ $street->zone_id }}">
+                                    {{ $street->name }}</option>
+                            @endforeach
+                        </select>
+                        @error('street_id')
+                            <div class="text-red-600">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <!-- Start Time -->
+                    <div class="mb-4">
+                        <label for="start_time">Hora de inicio</label>
+                        <input type="time" name="start_time" id="start_time" class="form-control" required>
+                        @error('start_time')
+                            <div class="text-red-600">{{ $message }}</div>
+                        @endif
+                    </div>
+
+                    <!-- Duration -->
                     <div class="mb-4">
                         <label for="duration">Duración (minutos)</label>
-                        <select id="duration" required>
+                        <select name="duration" id="duration" class="form-control" required>
                             <option value="">Selecciona una duración</option>
                             <option value="60">1 hora</option>
                             <option value="120">2 horas</option>
                             <option value="180">3 horas</option>
+                            <option value="240">4 horas</option>
+                            <option value="360">6 horas</option>
+                            <option value="480">8 horas</option>
                         </select>
+                        @error('duration')
+                            <div class="text-red-600">{{ $message }}</div>
+                        @endif
                     </div>
-                    <button type="submit" class="btn-blue">Iniciar Estacionamiento</button>
+
+                    <!-- Amount Preview -->
+                    <div class="mb-4">
+                        <label>Monto Estimado</label>
+                        <p id="amount-preview">$0.00</p>
+                    </div>
+
+                    <!-- Hidden -->
+                    <input type="hidden" name="timezone_offset" id="timezone_offset">
+
+                    <button type="button" id="start-parking" class="btn-blue">Iniciar Estacionamiento</button>
+                    <div id="active-warning" class="active-warning" style="display: none;">Tienes un estacionamiento activo. Finalízalo antes de iniciar otro.</div>
                 </div>
             </div>
         </form>
 
-        <div id="active-sessions" class="details-section">
-            <h3>Estacionamientos Activos</h3>
-            <ul class="active-sessions-list" id="active-sessions-list"></ul>
-        </div>
+        <div id="timer" style="display: none;">Tiempo restante: --:--</div>
+
+        <!-- Sección de detalles del estacionamiento activo -->
+        @if($activeSession)
+            <div class="details-section">
+                <h3>Detalles del Estacionamiento Activo</h3>
+                <p><strong>Vehículo:</strong> {{ $activeSession->car->license_plate ?? $activeSession->car->car_plate }}</p>
+                <p><strong>Zona:</strong> {{ $activeSession->street->zone->name }}</p>
+                <p><strong>Calle:</strong> {{ $activeSession->street->name }}</p>
+                <p><strong>Hora de inicio:</strong> {{ $activeSession->start_time }}</p>
+                <p><strong>Duración:</strong> {{ $activeSession->duration }} minutos</p>
+                <p><strong>Monto estimado:</strong> ${{ number_format($activeSession->amount, 2) }}</p>
+                <p><strong>Estado:</strong> {{ $activeSession->status }}</p>
+            </div>
+        @endif
     </div>
 
     <script>
-        // Cargar y guardar estacionamientos en localStorage
-        function loadParkings() {
-            return JSON.parse(localStorage.getItem('parkings') || '[]');
-        }
+        // Set start_time min and value to client's local current time
+        const now = new Date();
+        const currentTime = now.toTimeString().slice(0, 5);
+        document.getElementById('start_time').min = currentTime;
+        document.getElementById('start_time').value = currentTime;
+        document.getElementById('timezone_offset').value = now.getTimezoneOffset();
 
-        function saveParkings(parkings) {
-            localStorage.setItem('parkings', JSON.stringify(parkings));
-        }
+        // Zone change: Filter streets, get rate
+        document.getElementById('zone_id').addEventListener('change', async function() {
+            const zoneId = this.value;
+            const streetSelect = document.getElementById('street_id');
 
-        // Iniciar un nuevo estacionamiento
-        document.getElementById('parking-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const licensePlate = document.getElementById('licensePlate').value;
-            const duration = parseInt(document.getElementById('duration').value);
-            if (licensePlate && duration) {
-                const parkings = loadParkings();
-                const newId = parkings.length > 0 ? Math.max(...parkings.map(p => p.id)) + 1 : 1;
-                parkings.push({
-                    id: newId,
-                    licensePlate: licensePlate,
-                    startTime: new Date().toISOString(),
-                    duration: duration,
-                    status: 'active'
-                });
-                saveParkings(parkings);
-                alert('Estacionamiento iniciado correctamente.');
-                document.getElementById('licensePlate').value = '';
-                document.getElementById('duration').value = '';
-                updateActiveSessions();
+            if (zoneId) {
+                try {
+                    const response = await fetch(`/api/zones/${zoneId}/streets`);
+                    const streets = await response.json();
+                    streetSelect.innerHTML = '<option value="">Seleccione una calle</option>';
+                    streets.forEach(street => {
+                        const option = document.createElement('option');
+                        option.value = street.id;
+                        option.textContent = street.name;
+                        option.setAttribute('data-zone-id', street.zone_id);
+                        streetSelect.appendChild(option);
+                    });
+
+                    const rateResponse = await fetch(`/api/zones/${zoneId}/rate`);
+                    const rateData = await rateResponse.json();
+                    updateAmount(rateData.rate || 5.0);
+                } catch (error) {
+                    console.error('Error fetching data:', error);
+                }
+            } else {
+                streetSelect.innerHTML = '<option value="">Seleccione una calle</option>';
+                @foreach ($streets as $street)
+                    streetSelect.innerHTML += `<option value="{{ $street->id }}" data-zone-id="{{ $street->zone_id }}">{{ $street->name }}</option>`;
+                @endforeach
+                updateAmount(5.0); // Default rate
             }
         });
 
-        // Actualizar lista de estacionamientos activos
-        function updateActiveSessions() {
-            const parkings = loadParkings();
-            const activeParkings = parkings.filter(p => p.status === 'active');
-            const list = document.getElementById('active-sessions-list');
+        // Duration change: Update amount
+        document.getElementById('duration').addEventListener('change', function() {
+            const zoneSelect = document.getElementById('zone_id');
+            const selectedOption = zoneSelect.options[zoneSelect.selectedIndex];
+            const rate = selectedOption ? selectedOption.getAttribute('data-rate') || 5.0 : 5.0;
+            updateAmount(rate);
+        });
 
-            if (activeParkings.length === 0) {
-                list.innerHTML = '<li>No hay estacionamientos activos.</li>';
+        function updateAmount(rate) {
+            const duration = document.getElementById('duration').value;
+            const amount = duration ? (duration / 60) * rate : 0;
+            document.getElementById('amount-preview').textContent = `$${amount.toFixed(2)}`;
+        }
+
+        // Temporizador y persistencia
+        let timerInterval;
+        let timeLeft = localStorage.getItem('parkingTimeLeft') ? parseInt(localStorage.getItem('parkingTimeLeft')) : 0;
+        let sessionId = localStorage.getItem('parkingSessionId') || null;
+
+        // Restaurar temporizador al cargar la página
+        if (timeLeft > 0 && sessionId) {
+            document.getElementById('timer').style.display = 'block';
+            document.getElementById('parking-form').style.display = 'none';
+            document.getElementById('active-warning').style.display = 'block';
+            timerInterval = setInterval(updateTimer, 1000);
+        }
+
+        document.getElementById('start-parking').addEventListener('click', function(e) {
+            e.preventDefault();
+            if (timeLeft > 0) {
+                alert('Ya tienes un estacionamiento activo. Finalízalo antes de iniciar otro.');
                 return;
             }
+            document.getElementById('parking-form').submit();
+        });
 
-            list.innerHTML = '';
-            activeParkings.forEach(parking => {
-                const now = new Date();
-                const start = new Date(parking.startTime);
-                const end = new Date(start.getTime() + parking.duration * 60000);
-                let timeLeft = Math.max(0, Math.floor((end - now) / 1000));
+        // Iniciar temporizador después de guardar en el controlador
+        @if(session('sessionData'))
+            const sessionData = @json(session('sessionData'));
+            timeLeft = sessionData.duration * 60;
+            sessionId = @json(session('parkingSessionId'));
+            localStorage.setItem('parkingTimeLeft', timeLeft);
+            localStorage.setItem('parkingSessionId', sessionId);
+            document.getElementById('timer').style.display = 'block';
+            document.getElementById('parking-form').style.display = 'none';
+            document.getElementById('active-warning').style.display = 'block';
+            timerInterval = setInterval(updateTimer, 1000);
+        @endif
+
+        function updateTimer() {
+            if (timeLeft > 0) {
+                timeLeft--;
+                localStorage.setItem('parkingTimeLeft', timeLeft);
                 const hours = Math.floor(timeLeft / 3600);
                 const minutes = Math.floor((timeLeft % 3600) / 60);
                 const seconds = timeLeft % 60;
-
-                const li = document.createElement('li');
-                li.innerHTML = `<a href="details.html?id=${parking.id}">Patente: ${parking.licensePlate}</a> - Tiempo: ${hours}h ${minutes}m ${seconds}s`;
-                list.appendChild(li);
-
-                // Actualizar tiempo en tiempo real
-                setInterval(() => {
-                    const updatedNow = new Date();
-                    timeLeft = Math.max(0, Math.floor((end - updatedNow) / 1000));
-                    const updatedHours = Math.floor(timeLeft / 3600);
-                    const updatedMinutes = Math.floor((timeLeft % 3600) / 60);
-                    const updatedSeconds = timeLeft % 60;
-                    li.innerHTML = `<a href="details.html?id=${parking.id}">Patente: ${parking.licensePlate}</a> - Tiempo: ${updatedHours}h ${updatedMinutes}m ${updatedSeconds}s`;
-
-                    if (timeLeft <= 0) {
-                        parking.status = 'expired';
-                        saveParkings(parkings);
-                        updateActiveSessions();
-                    }
-                }, 1000);
-            });
+                document.getElementById('timer').textContent = `Tiempo restante: ${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            } else {
+                clearInterval(timerInterval);
+                document.getElementById('timer').textContent = 'Tiempo terminado!';
+                alert('El tiempo de estacionamiento ha terminado.');
+                localStorage.removeItem('parkingTimeLeft');
+                localStorage.removeItem('parkingSessionId');
+                document.getElementById('parking-form').style.display = 'block';
+                document.getElementById('active-warning').style.display = 'none';
+            }
         }
-
-        // Cargar estacionamientos al iniciar
-        window.onload = updateActiveSessions;
     </script>
-</head>
-</html>
+@endsection

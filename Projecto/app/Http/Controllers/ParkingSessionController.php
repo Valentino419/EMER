@@ -20,13 +20,12 @@ class ParkingSessionController extends Controller
         $zones = Zone::all();
         $streets = Street::all();
 
-        // Obtener todos los estacionamientos activos del usuario
-        $activeSessions = ParkingSession::where('user_id', auth()->id())
+        // Buscar el estacionamiento activo del usuario
+        $activeSession = ParkingSession::where('user_id', auth()->id())
             ->where('status', 'active')
-            ->with('car')
-            ->get();
+            ->first();
 
-        return view('parking.create', compact('cars', 'zones', 'streets', 'activeSessions'));
+        return view('parking.create', compact('cars', 'zones', 'streets', 'activeSession'));
     }
 
     public function store(Request $request)
@@ -46,21 +45,12 @@ class ParkingSessionController extends Controller
 
         $car = Car::findOrFail($validated['car_id']);
         if ($car->user_id !== auth()->id()) {
-            return back()->withErrors(['car_id' => 'Selección de auto inválida.']);
+            return back()->withErrors(['car_id' => 'Invalid car selection.']);
         }
 
         $street = Street::findOrFail($validated['street_id']);
         if ($street->zone_id !== (int)$validated['zone_id']) {
             return back()->withErrors(['street_id' => 'La calle no pertenece a la zona.']);
-        }
-
-        $activeSession = ParkingSession::where('user_id', auth()->id())
-            ->where('car_id', $validated['car_id'])
-            ->where('status', 'active')
-            ->first();
-
-        if ($activeSession) {
-            return redirect()->back()->withErrors(['error' => 'Este auto ya tiene un estacionamiento activo. Finaliza el anterior primero o selecciona otro auto.']);
         }
 
         $zone = Zone::findOrFail($validated['zone_id']);
@@ -107,46 +97,18 @@ class ParkingSessionController extends Controller
     public function show($parkingSession = null)
     {
         if ($parkingSession) {
+            // Mostrar detalles de un estacionamiento específico
             $session = ParkingSession::where('user_id', auth()->id())
                 ->where('id', $parkingSession)
-                ->with('car', 'street.zone')
                 ->firstOrFail();
             if ($session->user_id !== auth()->id()) {
                 abort(403, 'No tienes permiso para ver este estacionamiento.');
             }
-
-            // Calcular tiempo restante si está activo
-            $timeLeft = null;
-            if ($session->status === 'active') {
-                $start = Carbon::parse($session->start_time);
-                $end = $start->copy()->addMinutes($session->duration);
-                $now = Carbon::now();
-                $timeLeft = max(0, $end->diffInSeconds($now));
-            }
-
-            return view('parking.show', compact('session', 'timeLeft'));
+            return view('parking.show', compact('session'));
         } else {
+            // Mostrar historial de todos los estacionamientos
             $sessions = ParkingSession::where('user_id', auth()->id())->orderBy('start_time', 'desc')->get();
             return view('parking.show', compact('sessions'));
         }
-    }
-
-    public function endManual($id)
-    {
-        $session = ParkingSession::where('user_id', auth()->id())
-            ->where('id', $id)
-            ->where('status', 'active')
-            ->first();
-
-        if (!$session) {
-            return redirect()->back()->withErrors(['error' => 'No se encontró un estacionamiento activo para finalizar.']);
-        }
-
-        $session->update([
-            'status' => 'cancelled',
-            'end_time' => Carbon::now(),
-        ]);
-
-        return redirect()->back()->with('success', 'Estacionamiento cancelado correctamente.');
     }
 }
