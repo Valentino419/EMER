@@ -240,15 +240,6 @@
                     </div>
                 </div>
             </div>
-<<<<<<< HEAD
-            <div class="col-md-6">
-                <div class="card card-menu">
-                    <div class="card-body">
-                        <span class="emoji">📋</span>
-                        <h5 class="card-title">Historial de Estacionamientos</h5>
-                        <a href="{{ route('parking.show') }}" class="btn btn-primary">Ver Historial</a>
-                    </div>
-=======
         </div>
         <div class="col-md-4">
             <div class="card card-menu">
@@ -256,7 +247,6 @@
                     <span class="emoji">📋</span>
                     <h5 class="card-title">Historial de Estacionamientos</h5>
                     <a href="{{ route('parking.show') }}" class="btn btn-primary">Ver Historial</a>
->>>>>>> 746ce726e832a4b04449245a3db594b7c10cc243
                 </div>
             </div>
         </div>
