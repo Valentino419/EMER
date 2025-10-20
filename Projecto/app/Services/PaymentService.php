@@ -5,24 +5,22 @@ namespace App\Services;
 use MercadoPago\MercadoPagoConfig;
 use MercadoPago\Client\Payment\PaymentClient;
 use MercadoPago\Exceptions\MPApiException;
+use Illuminate\Support\Facades\Log;
 
 class PaymentService
 {
     public function __construct()
     {
-        // Set Mercado Pago access token
         MercadoPagoConfig::setAccessToken(config('services.mercadopago.access_token'));
     }
 
-    // This method is no longer needed for Mercado Pago (token is created client-side).
-    // If you need to pre-create something, you could generate a preference here, but for custom flow, skip.
     public function createIntentForParking($session)
     {
-        // Placeholder or remove; return null or an empty object if needed for compatibility
-        return (object) ['client_secret' => null]; // Adjust controller to not use client_secret
+        // Not needed for Mercado Pago custom flow; return for compatibility
+        return (object) ['client_secret' => null];
     }
 
-    public function confirmAndRecord($token, $model, $description)
+    public function confirmAndRecord($token, $model, $description, $paymentMethodId, $installments, $payerDetails)
     {
         try {
             $client = new PaymentClient();
@@ -30,37 +28,38 @@ class PaymentService
                 'transaction_amount' => (float) $model->amount,
                 'token' => $token,
                 'description' => $description,
-                'installments' => 1, // Default; can make dynamic
-                'payment_method_id' => 'visa', // Dynamic from form; adjust based on card detection
+                'installments' => (int) $installments,
+                'payment_method_id' => $paymentMethodId,
                 'payer' => [
-                    'email' => auth()->user()->email,
+                    'email' => $payerDetails['email'],
                     'identification' => [
-                        'type' => 'DNI', // From form
-                        'number' => '12345678', // From form
+                        'type' => $payerDetails['identification_type'],
+                        'number' => $payerDetails['identification_number'],
                     ],
                 ],
+                'currency_id' => config('services.mercadopago.currency', 'ARS'),
             ];
 
             $payment = $client->create($paymentData);
 
             if ($payment->status === 'approved') {
                 \App\Models\Payment::create([
-                    'mercadopago_id' => $payment->id, // Use mercadopago_id instead of stripe_id
+                    'mercadopago_id' => $payment->id, // Changed from stripe_id
                     'amount' => $payment->transaction_amount,
                     'currency' => $payment->currency_id,
                     'description' => $description,
                     'metodo_pago' => $model->metodo_pago ?? 'tarjeta',
-                    // Add session_id: 'session_id' => $model->id if polymorphic
+                    'session_id' => $model->id, // Link to session
                 ]);
                 return $payment;
             } else {
                 throw new \Exception('Payment not approved: ' . $payment->status);
             }
         } catch (MPApiException $e) {
-            \Log::error('Mercado Pago API error: ' . $e->getMessage());
+            Log::error('Mercado Pago API error: ' . $e->getMessage());
             throw $e;
         } catch (\Exception $e) {
-            \Log::error('Error confirming payment: ' . $e->getMessage());
+            Log::error('Error confirming payment: ' . $e->getMessage());
             throw $e;
         }
     }

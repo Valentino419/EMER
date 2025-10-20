@@ -62,37 +62,37 @@ class PaymentController extends Controller
 
     public function webhook(Request $request)
     {
-        $payload = $request->getContent();
-        $sigHeader = $request->header('Stripe-Signature');
         try {
-            $event = \Stripe\Webhook::constructEvent($payload, $sigHeader, env('STRIPE_WEBHOOK_SECRET'));
+            $payload = $request->getContent(); // Raw body for verification
+            $headers = $request->headers->all();
 
-            if ($event->type === 'payment_intent.succeeded') {
-                $metadata = $event->data->object->metadata;
-                $sessionId = $metadata->parking_id ?? null;
-                $infractionId = $metadata->infraction_id ?? null;
+            // Verify signature if needed (Mercado Pago provides a way; optional for test)
+            // $signature = $headers['x-signature'] ?? null;
+            // if (!hash_equals($expectedSignature, $signature)) { throw new \Exception('Invalid signature'); }
 
-                if ($sessionId) {
-                    $session = ParkingSession::find($sessionId);
-                    if ($session) {
-                        $paymentService = app(PaymentService::class);
-                        $paymentService->confirmAndRecord($event->data->object->id, $session, 'Pago por estacionamiento medido');
-                        $session->update(['payment_status' => 'completed', 'status' => 'active']);
-                    }
-                } elseif ($infractionId) {
-                    // Similar for Fine: Load Fine, confirm, update status
-                    $infraction = \App\Models\Infraction::find($infractionId);
-                    if ($infraction) {
-                        $paymentService = app(PaymentService::class);
-                        $paymentService->confirmAndRecord($event->data->object->id, $infraction, 'Pago por multa');
-                        $infraction->update(['payment_status' => 'completed']);
-                    }
+            $data = json_decode($payload, true);
+            if (! $data || ! isset($data['type']) || $data['type'] !== 'payment') {
+                return response('Ignored', 200);
+            }
+
+            $paymentId = $data['data']['id'];
+            $client = new \MercadoPago\Client\Payment\PaymentClient;
+            $payment = $client->get($paymentId);
+
+            if ($payment->status === 'approved') {
+                $session = \App\Models\ParkingSession::where('payment_id', $payment->id)->first();
+                if ($session && $session->payment_status === 'pending') {
+                    $session->update([
+                        'payment_status' => 'completed',
+                        'status' => 'active',
+                    ]);
+                    \Log::info('Webhook updated session', ['session_id' => $session->id, 'payment_id' => $payment->id]);
                 }
             }
 
             return response('OK', 200);
         } catch (\Exception $e) {
-            Log::error('Webhook error: '.$e->getMessage());
+            \Log::error('Mercado Pago webhook error: '.$e->getMessage());
 
             return response('Error', 400);
         }

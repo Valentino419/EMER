@@ -84,7 +84,7 @@ class ParkingSessionController extends Controller
                 // No PaymentIntent creation here for Mercado Pago (handled in confirm)
                 // Return checkout view with public key for JS
                 return view('parking.checkout', [
-                    'publicKey' => config('services.mercadopago.public_key'), // For client-side JS
+                    'publicKey' =>env('MERCADO_PAGO_PUBLIC_KEY'), // For client-side JS
                     'session' => $session,
                 ]);
             });

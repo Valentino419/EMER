@@ -1,22 +1,19 @@
 <?php
-use App\Models\Zone;
-use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\CarController;
-use App\Http\Controllers\InfractionController;
-use App\Http\Controllers\InspectorController;
-use App\Http\Controllers\ZoneController;
-use App\Http\Controllers\ScheduleController;
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\ParkingSessionController;
-use App\Http\Controllers\PaymentController;
-use App\Http\Controllers\Auth\AuthenticatedSessionController;
-use App\Http\Controllers\Auth\LoginController;
-use App\Http\Controllers\Auth\RegisterController;
+
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\NewPasswordController;
+use App\Http\Controllers\CarController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\InfractionController;
+use App\Http\Controllers\InspectorController;
+use App\Http\Controllers\ParkingSessionController;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\StreetController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\ZoneController;
+use App\Models\Zone;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/dashboard.inspector', [InspectorController::class, 'index'])->name('dashboard.inspector');
 
@@ -26,8 +23,6 @@ Route::resource('schedule', ScheduleController::class);
 Route::resource('street', StreetController::class);
 Route::resource('zones', ZoneController::class);
 Route::post('schedules/check-active', [ScheduleController::class, 'checkActiveSchedule']);
-
-
 
 Route::resource('cars', CarController::class)->names([
     'create' => 'cars.create',
@@ -61,7 +56,6 @@ Route::resource('users', UserController::class)->names([
     'destroy' => 'user.destroy',
 ]);
 
-
 Route::get('/check-zone', [ZoneController::class, 'checkZone']);
 Route::post('/check-zone', [ZoneController::class, 'checkZone']);
 
@@ -74,13 +68,17 @@ Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLink
 Route::get('/reset-password/{token}', [NewPasswordController::class, 'create'])->name('password.reset');
 Route::post('/reset-password', [NewPasswordController::class, 'store'])->name('password.store');
 Route::resource('payment', PaymentController::class);
-Route::post('payment/confirm', [PaymentController::class, 'confirm'])->name('payment.confirm');
-Route::post('/stripe/webhook', [PaymentController::class, 'webhook'])->name('stripe.webhook');
+
 Route::fallback(function () {
     return redirect()->route('login');
 });
 Route::get('/zones/{zone}/rate', function (Zone $zone) {
-return Zone::where('id', $zone->id)->get(['rate']);});
-
+    return Zone::where('id', $zone->id)->get(['rate']);
+});
+Route::post('/payment/confirm', [PaymentController::class, 'confirm'])->name('payment.confirm');
+// In routes/web.php
+Route::post('/mercadopago/webhook', [PaymentController::class, 'webhook'])
+    ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class])
+    ->name('mercadopago.webhook');
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';
