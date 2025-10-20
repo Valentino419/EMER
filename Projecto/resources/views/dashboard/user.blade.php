@@ -65,11 +65,6 @@
             background-color: #ffffff;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
         }
 
         .card-menu:hover {
@@ -80,11 +75,6 @@
         .card-menu .card-body {
             padding: 25px;
             text-align: center;
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
         }
 
         .card-menu .emoji {
@@ -98,7 +88,6 @@
             font-weight: 500;
             color: #2c3e50;
             margin-bottom: 15px;
-            text-align: center;
         }
 
         .btn {
@@ -106,8 +95,6 @@
             font-weight: 500;
             border-radius: 5px;
             transition: background-color 0.3s ease, transform 0.2s ease;
-            display: block;
-            margin: 0 auto;
         }
 
         .btn-primary {
@@ -143,15 +130,12 @@
             z-index: 1000;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             display: none;
+            /* Oculto por defecto, se muestra con JS */
         }
 
         #active-parking-widget h5 {
             margin: 0 0 10px 0;
             font-size: 1.1em;
-        }
-
-        #active-parking-widget p {
-            margin: 0 0 10px 0;
         }
 
         #active-parking-widget button {
@@ -172,8 +156,7 @@
                 flex-direction: column;
             }
 
-            .col-md-4,
-            .col-md-6 {
+            .col-md-4 {
                 width: 100%;
                 margin-bottom: 20px;
             }
@@ -193,8 +176,8 @@
     </nav>
 
     <div class="container">
-        <h1 class="text-center mb-4">Dashboard Usuario</h1>
-        <p class="text-center text-muted mb-5">Consulta y gestiona tus autos, pagos y notificaciones.</p>
+    <h1 class="text-center mb-4">Dashboard Usuario</h1>
+    <p class="text-center text-muted mb-5">Consulta y gestiona tus autos, pagos y notificaciones.</p>
         @if (session('success'))
             <div class="bg-green-100 text-green-800 p-4 rounded mb-4">
                 {{ session('success') }}
@@ -209,109 +192,109 @@
                 </ul>
             </div>
         @endif
-        <div class="row g-4 justify-content-center">
-            <div class="col-md-4">
-                <div class="card card-menu">
-                    <div class="card-body">
-                        <span class="emoji">🚗</span>
-                        <h5 class="card-title">Mis Autos</h5>
-                        <a href="{{ route('cars.index') }}" class="btn btn-primary">Ver Autos</a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-4">
-                <div class="card card-menu">
-                    <div class="card-body">
-                        <span class="emoji">🅿️</span>
-                        <h5 class="card-title">Iniciar estacionamiento</h5>
-                        <a href="{{ route('parking.create') }}" class="btn btn-success">Iniciar</a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-4">
-                <div class="card card-menu">
-                    <div class="card-body">
-                        <span class="emoji">⚠️</span>
-                        <h5 class="card-title">Multas</h5>
-                        <a href="{{ route('infractions.index') }}" class="btn btn-primary">Ver Infracciones</a>
-                    </div>
-                </div>
-            </div>
-
-<<<<<<< HEAD
-            <!-- Fila combinada para Zonas e Historial -->
-=======
->>>>>>> 746ce726e832a4b04449245a3db594b7c10cc243
-            <div class="col-md-6">
-                <div class="card card-menu">
-                    <div class="card-body">
-                        <span class="emoji">🌍</span>
-                        <h5 class="card-title">Zonas</h5>
-                        <a href="{{ route('zone.index') }}" class="btn btn-primary">Gestionar Zonas</a>
-                    </div>
-                </div>
-            </div>
-<<<<<<< HEAD
-            <div class="col-md-6">
-                <div class="card card-menu">
-                    <div class="card-body">
-                        <span class="emoji">📋</span>
-                        <h5 class="card-title">Historial de Estacionamientos</h5>
-                        <a href="{{ route('parking.show') }}" class="btn btn-primary">Ver Historial</a>
-                    </div>
-=======
-        </div>
+    <div class="row g-4 justify-content-center">
         <div class="col-md-4">
+            <div class="card card-menu">
+                <div class="card-body">
+                    <span class="emoji">🚗</span>
+                    <h5 class="card-title">Mis Autos</h5>
+                    <a href="{{ route('cars.index') }}" class="btn btn-primary">Ver Autos</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card card-menu">
+                <div class="card-body">
+                    <span class="emoji">🅿️</span>
+                    <h5 class="card-title">Iniciar estacionamiento</h5>
+                    <a href="{{ route('parking.create') }}" class="btn btn-success">Iniciar</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card card-menu">
+                <div class="card-body">
+                    <span class="emoji">⚠️</span>
+                    <h5 class="card-title">Multas</h5>
+                    <a href="{{ route('infractions.index') }}" class="btn btn-primary">Ver Infracciones</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fila combinada para Zonas e Historial -->
+        <div class="col-md-6">
+            <div class="card card-menu">
+                <div class="card-body">
+                    <span class="emoji">🌍</span>
+                    <h5 class="card-title">Zonas</h5>
+                    <a href="{{ route('zone.index') }}" class="btn btn-primary">Gestionar Zonas</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
             <div class="card card-menu">
                 <div class="card-body">
                     <span class="emoji">📋</span>
                     <h5 class="card-title">Historial de Estacionamientos</h5>
                     <a href="{{ route('parking.show') }}" class="btn btn-primary">Ver Historial</a>
->>>>>>> 746ce726e832a4b04449245a3db594b7c10cc243
                 </div>
             </div>
         </div>
-
-        <!-- Ventanitas de estacionamientos activos -->
-        @php
-            $activeSessions = ParkingSession::where('user_id', auth()->id())
-                ->where('status', 'active')
-                ->with('car')
-                ->get();
-        @endphp
-        @foreach ($activeSessions as $session)
-            <?php
-                $start = Carbon::parse($session->start_time);
-                $end = $start->copy()->addMinutes($session->duration);
-                $now = Carbon::now();
-                $timeLeft = max(0, $end->diffInSeconds($now));
-                $hours = floor($timeLeft / 3600);
-                $minutes = floor(($timeLeft % 3600) / 60);
-                $seconds = $timeLeft % 60;
-            ?>
-            <div id="active-parking-widget-{{ $session->id }}" style="display: block;">
-                <h5>Estacionamiento Activo ({{ $session->car->license_plate ?? $session->car->car_plate }})</h5>
-                <p>Tiempo restante: {{ $hours }}h {{ $minutes }}m {{ $seconds }}s</p>
-                <button id="go-to-parking-{{ $session->id }}" class="btn btn-light btn-sm mt-2">Ver Detalles</button>
-                <form action="{{ route('parking.end', $session->id) }}" method="POST" style="display: inline;">
-                    @csrf
-                    @method('POST')
-                    <button type="submit" class="btn btn-danger btn-sm mt-2">Finalizar</button>
-                </form>
-            </div>
-            <script>
-                document.getElementById('go-to-parking-{{ $session->id }}')?.addEventListener('click', function() {
-                    window.location.href = '{{ route('parking.show', $session->id) }}';
-                });
-            </script>
-        @endforeach
     </div>
+
+    <!-- Ventanita de estacionamiento activo (oculta por defecto) -->
+    <div id="active-parking-widget">
+        <h5>Estacionamiento Activo</h5>
+        <p id="dashboard-timer">Cargando...</p>
+        <button id="go-to-parking" class="btn btn-light btn-sm mt-2">Ver Detalles</button>
+        <button id="end-parking" class="btn btn-danger btn-sm mt-2">Finalizar</button>
+    </div>
+</div>
+
+<script>
+    let dashboardTimeLeft = localStorage.getItem('parkingTimeLeft') ? parseInt(localStorage.getItem('parkingTimeLeft')) : 0;
+    let dashboardTimerInterval;
+
+    const activeParkingWidget = document.getElementById('active-parking-widget');
+    if (dashboardTimeLeft > 0) {
+        activeParkingWidget.style.display = 'block';
+        updateDashboardTimer();
+        dashboardTimerInterval = setInterval(updateDashboardTimer, 1000);
+    }
+
+    function updateDashboardTimer() {
+        if (dashboardTimeLeft > 0) {
+            dashboardTimeLeft--;
+            localStorage.setItem('parkingTimeLeft', dashboardTimeLeft);
+            const hours = Math.floor(dashboardTimeLeft / 3600);
+            const minutes = Math.floor((dashboardTimeLeft % 3600) / 60);
+            const seconds = dashboardTimeLeft % 60;
+            document.getElementById('dashboard-timer').textContent = `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')} restantes`;
+        } else {
+            clearInterval(dashboardTimerInterval);
+            document.getElementById('dashboard-timer').textContent = 'Tiempo terminado';
+            localStorage.removeItem('parkingTimeLeft');
+            localStorage.removeItem('parkingSessionId');
+            activeParkingWidget.style.display = 'none';
+        }
+    }
+
+    document.getElementById('go-to-parking')?.addEventListener('click', function() {
+        window.location.href = '{{ route('parking.create') }}';
+    });
+
+    document.getElementById('end-parking')?.addEventListener('click', function() {
+        dashboardTimeLeft = 0;
+        localStorage.removeItem('parkingTimeLeft');
+        localStorage.removeItem('parkingSessionId');
+        clearInterval(dashboardTimerInterval);
+        activeParkingWidget.style.display = 'none';
+        alert('Estacionamiento finalizado manualmente.');
+    });
+</script>
+
 </body>
-<<<<<<< HEAD
-</html>
-=======
 
 </html>
->>>>>>> 746ce726e832a4b04449245a3db594b7c10cc243
