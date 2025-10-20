@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-use App\Http\Controllers\UserController;
+use App\Http\Controllers\UserController;git
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\CarController;
 use App\Http\Controllers\DashboardController;
@@ -12,6 +12,13 @@ use App\Http\Controllers\ParkingSessionController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\StreetController;
+
+use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\Auth\NewPasswordController;
+
+use App\Http\Controllers\ZoneController;
+use App\Models\Zone;
+
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 Route::get('/dashboard', [DashboardController::class, 'user'])->name('dashboard');
