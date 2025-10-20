@@ -1,27 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <title>Gestión de Zonas</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
-            background-color: #f0f4f8;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', sans-serif;
         }
 
         .container {
-            max-width: 1200px;
-            margin-top: 40px;
-            padding: 20px;
-            background-color: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+            max-width: 1100px;
+            margin: 30px auto;
+            padding: 0 15px;
         }
 
-        h2 {
+        h1 {
             color: #1a3c6d;
-            font-weight: 700;
+            font-weight: 600;
             margin-bottom: 20px;
         }
 
@@ -32,126 +31,128 @@
         }
 
         .table th {
-            background-color: #007bff;
+            background-color: #4a90e2;
             color: white;
             font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            padding: 16px;
+            padding: 12px;
         }
 
         .table td {
-            padding: 16px;
+            padding: 12px;
             vertical-align: middle;
-            color: #333;
-        }
-
-        .table-striped tbody tr:nth-of-type(odd) {
-            background-color: #f8fafc;
-        }
-
-        .table-hover tbody tr:hover {
-            background-color: #e6f0fa;
-            transition: background-color 0.3s ease;
         }
 
         .btn-primary {
-            background-color: #007bff;
+            background-color: #4a90e2;
             border: none;
-            padding: 8px 18px;
-            font-weight: 500;
-            border-radius: 6px;
-            transition: background-color 0.3s ease, transform 0.2s ease;
+            padding: 6px 12px;
+            border-radius: 5px;
         }
 
         .btn-primary:hover {
-            background-color: #0056b3;
-            transform: translateY(-2px);
+            background-color: #357abd;
         }
 
-        .btn-danger {
-            background-color: #dc3545;
+        .btn-secondary {
+            background-color: #6c757d;
             border: none;
-            padding: 8px 18px;
-            font-weight: 500;
-            border-radius: 6px;
-            transition: background-color 0.3s ease, transform 0.2s ease;
+            padding: 6px 12px;
+            border-radius: 5px;
         }
 
-        .btn-danger:hover {
-            background-color: #b02a37;
-            transform: translateY(-2px);
+        .btn-secondary:hover {
+            background-color: #5a6268;
         }
 
         .alert-success {
-            border-radius: 8px;
+            border-radius: 5px;
             margin-bottom: 20px;
-            background-color: #d4edda;
-            color: #155724;
+        }
+        .back-arrow {
+            display: inline-block;
+            font-size: 32px;
+            font-weight: bold;
+            color: #1a3c6d;
+            text-decoration: none;
+            margin-bottom: 15px;
+            background: #fff;
+            border-radius: 50%;
+            padding: 8px 14px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
         }
 
-        /* Responsive */
-        @media (max-width: 768px) {
-            .container {
-                padding: 15px;
-            }
-
-            .table {
-                display: block;
-                overflow-x: auto;
-                white-space: nowrap;
-            }
-
-            .table th, .table td {
-                min-width: 120px;
-            }
+        .back-arrow:hover {
+            background: #007bff;
+            color: #fff;
+            transform: scale(1.1);
         }
+        
     </style>
-    </head>
-<head>
-    <title>Gestion de zonas</title>
 </head>
+
 <body>
     <div class="container">
-        <h2>Zonas</h2>
-        <hr>
+        <h1 class="text-center mb-4">
+            @if(Auth::check() && (Auth::user()->role?->name === 'admin' || Auth::user()->role?->name === 'inspector'))
+                Gestión de Zonas
+            @else
+                Mis Zonas
+            @endif
+        </h1>
+
+         <a href="{{ route('dashboard') }}" class="back-arrow" title="Volver al inicio" aria-label="Volver al inicio">
+            &#8592;
+        </a>      
+
         @if (session('success'))
-            <div class="alert alert-success">
-                {{ session('success') }}
-            </div>
+            <div class="alert alert-success">{{ session('success') }}</div>
         @endif
 
-        <a href="{{ route('zone.create') }}" class="btn btn-primary">Nuevas zonas</a>
-        <hr>
-        <table class="table table-striped table-hover">
+        <!-- Botón de crear solo para admin/inspector -->
+        @if(Auth::check() && (Auth::user()->role?->name === 'admin' || Auth::user()->role?->name === 'inspector'))
+            <a href="{{ route('zone.create') }}" class="btn btn-primary mb-3">Nueva Zona</a>
+        @endif
+
+        <table class="table table-striped">
             <thead>
                 <tr>
-                    <th>Nombre</th> 
-                    <th>Numeracion (altura)</th> 
-                    <th>Acciones</th> 
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Cantidad de Calles</th>
+                    @if(Auth::check() && (Auth::user()->role?->name === 'admin' || Auth::user()->role?->name === 'inspector'))
+                        <th>Acciones</th>
+                    @endif
                 </tr>
             </thead>
             <tbody>
+                @forelse ($zones as $zone)
                     <tr>
-
-                        @foreach ($zones as $zone)
-                        
-                        <td>{{ $zone->name }}</td> 
-                        <td>{{ $zone->numeration}}</td> 
-                    
-                        <td>
-                            <a href="{{ route('zone.edit' , $zone->id)}}" class="btn btn-primary btn-sm">Editar</a>
-                            <form action="{{ route('zone.destroy', $zone->id) }}" method="POST">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-primary btn-danger btn-sm">Eliminar</button>     
-                            </form>
-                        </td>
+                        <td>{{ $zone->id }}</td>
+                        <td>{{ $zone->name }}</td>
+                        <td>{{ $zone->streets->count() }}</td>
+                        @if(Auth::check() && (Auth::user()->role?->name === 'admin' || Auth::user()->role?->name === 'inspector'))
+                            <td>
+                                <a href="{{ route('zone.show', $zone) }}" class="btn btn-primary btn-sm">Ver Calles</a>
+                                <a href="{{ route('zone.edit', $zone) }}" class="btn btn-primary btn-sm">Editar</a>
+                                <form action="{{ route('zone.destroy', $zone) }}" method="POST" style="display:inline;">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro?');">Eliminar</button>
+                                </form>
+                            </td>
+                        @else
+                            <td>
+                                <a href="{{ route('zone.show', $zone) }}" class="btn btn-primary btn-sm">Ver Calles</a>
+                            </td>
+                        @endif
                     </tr>
-
-                @endforeach
+                @empty
+                    <tr>
+                        <td colspan="@if(Auth::check() && (Auth::user()->role?->name === 'admin' || Auth::user()->role?->name === 'inspector')) 4 @else 3 @endif" class="text-center">No hay zonas registradas.</td>
+                    </tr>
+                @endforelse
             </tbody>
-
         </table>
     </div>
 </body>

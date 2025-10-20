@@ -47,20 +47,7 @@
             <button class="btn btn-outline-danger btn-sm">Cerrar sesión</button>
         </form>
     </nav>
-    @if (session('success'))
-        <div class="bg-green-100 text-green-800 p-4 rounded mb-4">
-            {{ session('success') }}
-        </div>
-    @endif
-    @if ($errors->any())
-        <div class="alert alert-danger">
-            <ul class="mb-0">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
+
     <div class="container mt-5">
         <h1 class="mb-4 text-center">Dashboard Administrador</h1>
         <p class="text-center">Selecciona una opción para gestionar el sistema:</p>
@@ -90,3 +77,25 @@
                     </div>
                 </a>
             </div>
+            <div class="col-md-6"> 
+                <div class="card card-menu">
+                    <div class="card-body">
+                        <span class="emoji">🌍</span> 
+                        <h5 class="card-title">Zonas</h5>
+                        <a href="{{ route('zone.index') }}" class="btn btn-primary">Gestionar Zonas</a>
+                    </div>
+                </div>
+            </div>
+          
+    <div class="col-md-6">
+        <div class="card card-menu">
+            <div class="card-body">
+                <span class="emoji">👥</span>
+                <h5 class="card-title">Usuarios Logueados</h5>
+                <a href="{{ route('user.logged') }}" class="btn btn-primary">Ver Usuarios Logueados</a>
+            </div>
+        </div>
+    </div>
+
+          
+       

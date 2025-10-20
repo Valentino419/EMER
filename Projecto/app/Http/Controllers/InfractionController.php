@@ -3,148 +3,135 @@
 namespace App\Http\Controllers;
 
 use App\Models\Car;
-use App\Models\Infraction;
 use App\Models\User;
+use App\Models\Infraction;
+use App\Notifications\InfraccionNotification;
 use App\Traits\LicensePlateValidator;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
 
 class InfractionController extends Controller
 {
     use LicensePlateValidator;
 
-    // Mostrar listado de infracciones del inspector logueado
     public function index(Request $request)
     {
-        $user = auth()->user();
+         $query = Infraction::with('car');
 
-        if ($user->role->name === 'admin' || $user->role->name === 'inspector') {
-            // Inspector/Admin ven todas
-            $infractions = Infraction::with(['car', 'inspector'])
-                ->latest()
-                ->paginate(10);
-        } else {
-            // Usuario común: recopila sus patentes y filtra infracciones por coincidencia de patente
-            $userPlates = $user->cars()->pluck('car_plate')->toArray(); // Obtiene array de patentes del usuario
+            if (Auth::user()->role->name !== 'admin' && Auth::user()->role->name !== 'inspector') {
+             $query->whereHas('car', fn($q) => $q->where('user_id', Auth::id()));
+            }
 
-            $infractions = Infraction::with(['car', 'inspector'])
-                ->whereHas('car', function ($query) use ($userPlates) {
-                    $query->whereIn('car_plate', $userPlates); // Filtra por patente en lugar de user_id
-                })
-                ->latest()
-                ->paginate(10);
-        }
+            if ($request->filled('search')) {
+              $query->whereHas('car', fn($q) => $q->where('car_plate', 'like', '%' . $request->search . '%'));
+            }
 
-        return view('infractions.index', compact('infractions'));
+        $infractions = $query->latest()->paginate(10);
+
+   
+        $user = Auth::user();
+        $user->unreadNotifications()
+         ->where('type', InfraccionNotification::class)
+         ->update(['read_at' => now()]);
+
+        return view('infractions.index', compact('infractions', 'user'));
     }
 
-
-    // Formulario para crear nueva infracción (solo admin o inspector)
-    public function create()
-    {
-        $user = auth()->user();
-
-        // Traemos autos que pueda usar el inspector
-        $cars = Car::all();
-        $infractions = Infraction::all();
-        $inspectors = User::all();
-
-        return view('infractions.admin.create', compact('cars', 'infractions', 'inspectors'));
-    }
-
-    // Guardar nueva infracción
     public function store(Request $request)
     {
-        //dd($request->all());
+        if (Auth::user()->role->name !== 'admin' && Auth::user()->role->name !== 'inspector') {
+            abort(403);
+        }
+        $request->validate([
+            'car_plate' => 'required|string|max:10',
+            'fine' => 'nullable|integer|min:0',
+            'date' => 'nullable|date',
+            'status' => 'nullable|in:pending,paid,canceled',
+        ]);
+        $plate = $this->validateAndCleanLicensePlate($request->car_plate);
+        if (!$plate['valid']) {
+            return back()->withErrors(['car_plate' => 'Patente inválida'])->withInput();
+        }
+        $car = Car::firstOrCreate(
+            ['car_plate' => $plate['cleaned']],
+            ['user_id' => Auth::id()]
+        );
 
-        $plate = $request->input('car_plate');
-        $result = $this->validateAndCleanLicensePlate($plate); // Now this works!
-        //DD($result);
-        if (! $result['valid']) {
-            return back()->withErrors(['car_plate' => 'Invalid license plate format']);
+        $infraction = Infraction::create([
+            'user_id' => auth()->id(), // Inspector como user_id
+            'car_id' => $car->id,
+            'fine' => 5000,
+            'date' => now()->format('Y-m-d'),
+            'status' => 'pending',
+        ]);
+
+        // Notificar al propietario del auto si existe
+        if ($car->user_id && $car->user_id != 0) {
+            $user = User::find($car->user_id);
+            if ($user && $user->email) {
+                $user->notify(new InfraccionNotification([
+                    'car_plate' => $car->car_plate,
+                    'date' => $infraction->date,
+                    'hour' => now()->format('H:i'),
+                    'ubication' => 'No especificado',
+                    'infraccion_id' => $infraction->id,
+                ]));
+                \Log::info('Notificación enviada a usuario ID: ' . $user->id); // Depuración
+            } else {
+                \Log::warning('No se encontró usuario para car_id: ' . $car->id);
+            }
+        } else {
+            \Log::warning('El auto no tiene un user_id válido: ' . $car->id);
         }
 
-        // Search for existing car
-        $car = Car::where('car_plate', $result['cleaned'])
-            ->first(); // Use exact match for better performance
-
-        if (! $car) {
-            $car = Car::create([
-                'user_id' => 0,
-                'car_plate' => $result['cleaned'],
-            ]);
-        }
-        // dd($car);
-        try {
-            // Create the infraction
-            Infraction::create([
-                'user_id' => auth()->id(),
-                'car_id' => $car->id,
-                'fine' => 5000,
-                'date' => now()->format('Y-m-d'),
-                'status' => 'pending',
-            ]);
-
-            return redirect()
-                ->route('infractions.index')
-                ->with('success', 'Infracción registrada correctamente para ' . $car->car_plate);
-        } catch (\Exception $e) {
-            return back()->withErrors([
-                'car_plate' => 'Error creating infraction: ' . $e->getMessage(),
-            ]);
-        }
+        return redirect()->route('infractions.index')->with('success', 'Infracción registrada');
     }
 
-    // Editar infracción (solo si pertenece al inspector)
     public function edit(Infraction $infraction)
     {
-        $user = auth()->user();
-
-        if ($infraction->user_id != $user->id) {
-            abort(403, 'No tiene permiso para editar esta infracción.');
+        if (Auth::user()->role->name !== 'admin' && $infraction->user_id !== Auth::id()) {
+            abort(403);
         }
-
-        $cars = Car::all();
+        $cars= Car::with('user')->get();
 
         return view('infractions.edit', compact('infraction', 'cars'));
     }
 
-    // Actualizar infracción
     public function update(Request $request, Infraction $infraction)
     {
-        $user = auth()->user();
-
-        if ($infraction->user_id != $user->id) {
-            abort(403, 'No tiene permiso para actualizar esta infracción.');
+        if (Auth::user()->role->name !== 'admin' && $infraction->user_id !== Auth::id()) {
+            abort(403);
         }
-
         $request->validate([
-            'car_id' => 'required|exists:cars,id',
+            'car_plate' => 'required|string|max:10',
             'fine' => 'required|integer|min:0',
             'date' => 'required|date',
-            'status' => 'required|string|max:255',
+            'status' => 'required|in:pending,paid,canceled',
         ]);
-
+        $plate = $this->validateAndCleanLicensePlate($request->car_plate);
+        if (!$plate['valid']) {
+            return back()->withErrors(['car_plate' => 'Patente inválida'])->withInput();
+        }
+        $car = Car::firstOrCreate(
+            ['car_plate' => $plate['cleaned']],
+            ['user_id' => Auth::id()]
+        );
         $infraction->update([
-            'car_id' => $request->car_id,
+            'car_id' => $car->id,
             'fine' => $request->fine,
             'date' => $request->date,
             'status' => $request->status,
         ]);
-
-        return redirect()->route('infractions.index')->with('success', 'Infracción actualizada correctamente.');
+        return redirect()->route('infractions.index')->with('success', 'Infracción actualizada');
     }
 
-    // Eliminar infracción (solo si pertenece al inspector)
     public function destroy(Infraction $infraction)
     {
-        $user = auth()->user();
-
-        if ($infraction->user_id != $user->id) {
-            abort(403, 'No tiene permiso para eliminar esta infracción.');
+        if (Auth::user()->role->name !== 'admin' && $infraction->user_id !== Auth::id()) {
+            abort(403);
         }
-
         $infraction->delete();
-
-        return redirect()->route('infractions.index')->with('success', 'Infracción eliminada correctamente.');
+        return redirect()->route('infractions.index')->with('success', 'Infracción eliminada');
     }
 }

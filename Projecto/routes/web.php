@@ -1,7 +1,9 @@
 <?php
 
-use App\Http\Controllers\Auth\ForgotPasswordController;
-use App\Http\Controllers\Auth\NewPasswordController;
+use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\CarController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InfractionController;
@@ -10,19 +12,31 @@ use App\Http\Controllers\ParkingSessionController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\StreetController;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\ZoneController;
-use App\Models\Zone;
-use Illuminate\Support\Facades\Route;
-
-Route::get('/dashboard.inspector', [InspectorController::class, 'index'])->name('dashboard.inspector');
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+Route::get('/dashboard', [DashboardController::class, 'user'])->name('dashboard');
+
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.user');
+});
 Route::resource('payment', PaymentController::class);
+
 Route::resource('schedule', ScheduleController::class);
+
 Route::resource('street', StreetController::class);
+
 Route::resource('zones', ZoneController::class);
+
+Route::resource('users', UserController::class);
+
 Route::post('schedules/check-active', [ScheduleController::class, 'checkActiveSchedule']);
+
+Route::resource('zone', ZoneController::class)->names([
+    'index' => 'zone.index',
+    'create' => 'zone.create',
+    'edit' => 'zone.edit',
+]);
 
 Route::resource('cars', CarController::class)->names([
     'create' => 'cars.create',
@@ -56,18 +70,30 @@ Route::resource('users', UserController::class)->names([
     'destroy' => 'user.destroy',
 ]);
 
+Route::get('/user/logged', [UserController::class, 'logged'])->middleware('auth')->name('user.logged');
+
+
 Route::get('/check-zone', [ZoneController::class, 'checkZone']);
 Route::post('/check-zone', [ZoneController::class, 'checkZone']);
 
 // Rutas para parking sessions (usa ParkingSessionController para create inicial)
 Route::get('/parking/create', [ParkingSessionController::class, 'create'])->name('parking.create');
 Route::post('/parking', [ParkingSessionController::class, 'store'])->name('parking.store'); // Crea sesión pending
+Route::post('/parking/show', [ParkingSessionController::class, 'show'])->name('parking.show');
+Route::get('/parking/{parkingSession?}', [ParkingSessionController::class, 'show'])->name('parking.show');
+
 
 Route::get('/forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
 Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
 Route::get('/reset-password/{token}', [NewPasswordController::class, 'create'])->name('password.reset');
 Route::post('/reset-password', [NewPasswordController::class, 'store'])->name('password.store');
-Route::resource('payment', PaymentController::class);
+
+// Rutas para notificaciones
+Route::get('/notifications', [NotificationController::class, 'userNotifications'])->name('notifications.user')->middleware('auth');
+Route::get('/admin/notifications', [NotificationController::class, 'index'])->name('notifications.index')->middleware('auth');
+Route::post('/admin/notifications', [NotificationController::class, 'store'])->name('notifications.store')->middleware('auth');
+Route::post('/admin/notifications/{infraccionId}/send', [NotificationController::class, 'sendInfraccion'])->name('notifications.send')->middleware('auth');
+Route::post('/admin/notifications/user/{userId}/send', [NotificationController::class, 'sendUserInfracciones'])->name('notifications.sendUser')->middleware('auth');
 
 Route::fallback(function () {
     return redirect()->route('login');

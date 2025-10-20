@@ -245,8 +245,27 @@
         color: #6c757d;
         cursor: not-allowed;
     }
+    .back-arrow {
+            display: inline-block;
+            font-size: 32px;
+            font-weight: bold;
+            color: #1a3c6d;
+            text-decoration: none;
+            margin-bottom: 15px;
+            background: #fff;
+            border-radius: 50%;
+            padding: 8px 14px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
+        }
 
-    @media (max-width: 768px) {
+        .back-arrow:hover {
+            background: #007bff;
+            color: #fff;
+            transform: scale(1.1);
+        }
+
+        @media (max-width: 768px) {
         .container {
             padding: 15px;
         }
@@ -278,7 +297,11 @@
 </style>
 
 <body>
+
     <div class="container">
+        <a href="{{ route('dashboard') }}" class="back-arrow" title="Volver al inicio">
+            &#8592;
+        </a>
         <h2>Lista de Inspectores</h2>
         <hr>
 
@@ -330,7 +353,7 @@
             </tbody>
         </table>
 
-        <!-- Pagination Links -->
+        <!-- modal editar -->
         {{ $inspectors->appends(request()->query())->links('pagination::bootstrap-5') }}
     </div>
 

@@ -2,89 +2,77 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Zone;
+use App\Models\Street;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ZoneController extends Controller
 {
-
+    /**
+     * Display a listing of zones based on user role.
+     */
     public function index()
     {
-        return Zone::with(['schedules, streets'])->get();
+        if (Auth::check() && Auth::user()->role === 'user') {
+            $zones = Auth::user()->zones()->with('streets')->get(); // Solo zonas asignadas al usuario
+        } else {
+            $zones = Zone::with('streets')->get(); // Todas las zonas para admin/inspector
+        }
+        return view('zone.index', compact('zones'));
     }
 
-     /**
-      * Show the form for creating a new resource.
-      */
-     public function create()
+    /**
+     * Display the specified zone based on user role.
+     */
+    public function show(Zone $zone)
     {
-        $zones= Zone::all();
-        return view('Zone.create', compact('zones'));
+        if (Auth::check() && Auth::user()->role === 'user') {
+            // Verificar que la zona pertenece al usuario
+            if (!Auth::user()->zones()->where('id', $zone->id)->exists()) {
+                abort(403, 'No tienes acceso a esta zona.');
+            }
+        }
+
+        $zone->load('streets'); // Carga las calles para la zona seleccionada
+        return view('zone.show', compact('zone'));
     }
 
-     /**
-      * Store a newly created resource in storage.
-      */
-     public function store(Request $request)
-     {
+    /**
+     * Show the form for creating a new zone.
+     */
+    public function create()
+    {
+        return view('zone.create');
+    }
+
+    /**
+     * Store a newly created zone in storage.
+     */
+    public function store(Request $request)
+    {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'numeration' => 'required|integer',
-
-        ]);
-        return Zone::create($validated);
-         
-     }
-
-     /**
-      * Display the specified resource.
-      */
-     public function show(Zone $zone)
-     {
-         return $zone->load(['streets, schedules']);
-     }
-
-     /**
-      * Show the form for editing the specified resource.
-      */
-     public function edit(string $id)
-     {
-         $zone= Zone::findOrFail($id);
-         return view('zone.edit', compact('zone'));
-     }
-
-     /**
-      * Update the specified resource in storage.
-      */
-     public function update(Request $request, Zone $zone)
-     {
-        $validated = $request->validate([
-            'name' => 'string|max:255',
-            'numeration' => 'integer',
         ]);
 
-        $zone->update($validated);
-        return $zone;
+        Zone::create($validated);
+        return redirect()->route('zone.index')->with('success', 'Zona creada exitosamente.');
     }
 
-     /**
-      * Remove the specified resource from storage.
-      */
-     public function destroy(Zone $zone)
-     {
-        $zone->delete();
-        return response()->noContent();
-     }
-
-    public function checkZone(Request $request)
+    /**
+     * Show the form for editing the specified zone.
+     */
+    public function edit(Zone $zone)
     {
-        $validated = $request->validate([
-            'zone_id' => 'required|exists:zones,id',
-        ]);
-
-        $zone = Zone::with(['streets', 'schedules'])->findOrFail($validated['zone_id']);
-        return view('zones.check', compact('zone'));
+        return view('zone.edit', compact('zone'));
     }
- }
 
-
+    /**
+     * Remove the specified zone from storage.
+     */
+    public function destroy(Zone $zone)
+    {
+        $zone->delete();
+        return redirect()->route('zone.index')->with('success', 'Zona eliminada exitosamente.');
+    }
+}

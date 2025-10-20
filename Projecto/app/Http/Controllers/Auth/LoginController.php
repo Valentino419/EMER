@@ -14,7 +14,7 @@ class LoginController extends Controller
     // Mostrar el formulario de login
     public function showLoginForm()
     {
-        return view('auth.login'); // tu vista de login
+       return redirect()->route('login');; // tu vista de login
     }
 
     // Procesar el login
