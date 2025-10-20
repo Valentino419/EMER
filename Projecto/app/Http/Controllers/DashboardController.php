@@ -15,11 +15,11 @@ class DashboardController extends Controller
        
         // Si hay usuario autenticado, contar sus notificaciones de infracción sin leer
         $unreadCount = 0;
-        if ($user) {
+      /*  if ($user) {
             $unreadCount = $user->unreadNotifications()
             ->where('type', 'App\\Notifications\\InfraccionNotification')
             ->count();
-        }
+        }*/
     
         // Render role-specific view
           return view("dashboard.{$role}", [
