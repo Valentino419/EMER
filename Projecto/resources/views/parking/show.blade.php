@@ -75,6 +75,17 @@
             transition: background-color 0.3s ease, transform 0.2s ease;
         }
 
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+            border: none;
+            padding: 8px 18px;
+            font-weight: 500;
+            border-radius: 6px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
         .btn-danger:hover {
             background-color: #b02a37;
             transform: translateY(-2px);
@@ -133,9 +144,11 @@
         }
     </style>
 
+
     <div class="container">
         <h2>Estacionamientos</h2>
-            <a href="{{ route('dashboard') }}" class="back-arrow" title="Volver al inicio" aria-label="Volver al inicio">
+
+        <a href="{{ route('dashboard') }}" class="back-arrow" title="Volver al inicio" aria-label="Volver al inicio">
             &#8592;
         </a>
 
@@ -166,6 +179,8 @@
                         <th>Zona</th>
                         <td>{{ $session->street->zone->name }}</td>
                     </tr>
+                   
+                    <tr>
                     <tr>
                         <th>Calle</th>
                         <td>{{ $session->street->name }}</td>
@@ -228,6 +243,7 @@
                 </thead>
                 <tbody>
                     @foreach($sessions as $session)
+                
                         <tr>
                             <td>{{ $session->id }}</td>
                             <td>{{ $session->license_plate }}</td>
@@ -245,9 +261,9 @@
                                     <span class="badge bg-secondary">Pendiente</span>
                                 @endif
                             </td>
-                            <td>
-                                <a href="{{ route('parking.show', $session->id) }}" class="btn btn-primary btn-sm">Detalles</a>
-                            </td>
+                          
+                            <td><a href="{{ route('parking.show', $session->id) }}"
+                                    class="btn btn-primary btn-sm">Detalles</a></td>
                         </tr>
                     @endforeach
                 </tbody>
