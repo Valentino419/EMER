@@ -1,6 +1,11 @@
 <?php
+
 namespace App\Http\Controllers;
 
+use App\Models\Car;
+use App\Models\ParkingSession;
+use App\Models\Street;
+use App\Models\Zone;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Notification;
@@ -12,7 +17,7 @@ class DashboardController extends Controller
         $user = Auth::user();
         $role = $user->role ? $user->role->name : 'user';
         $data = $this->getDashboardData($role);
-       
+
         // Si hay usuario autenticado, contar sus notificaciones de infracción sin leer
         $unreadCount = 0;
       /*  if ($user) {
@@ -22,18 +27,16 @@ class DashboardController extends Controller
         }*/
     
         // Render role-specific view
-          return view("dashboard.{$role}", [
+        return view("dashboard.{$role}", [
             'user' => $user,
             'role' => $role,
             'data' => $data,
-            'unreadCount'=> $unreadCount,
+            'unreadCount' => $unreadCount,
         ]);
-        
     }
 
     private function getDashboardData($role)
     {
-        
         switch ($role) {
             case 'admin':
                 return [
@@ -54,12 +57,27 @@ class DashboardController extends Controller
                 ];
             case 'user':
             default:
+                $cars = Car::where('user_id', Auth::id())->get();
+                $zones = Zone::all();
+                $streets = Street::all();
+                $activeSessions = ParkingSession::where('user_id', Auth::id())
+                    ->where('status', 'active')
+                    ->with(['car', 'street.zone'])
+                    ->get();
+
                 return [
                     'title' => 'Dashboard Usuario',
                     'widgets' => [
-                        ['name' => 'Ver Perfil', 'link' => route('user.profile')],
-                        ['name' => 'Mis Órdenes', 'link' => route('user.orders')],
+                        ['name' => 'Mis Autos', 'link' => route('cars.index')],
+                        ['name' => 'Iniciar Estacionamiento', 'link' => route('parking.create')],
+                        ['name' => 'Multas', 'link' => route('infractions.index')],
+                        ['name' => 'Zonas', 'link' => route('zone.index')],
+                        ['name' => 'Historial de Estacionamientos', 'link' => route('parking.show')],
                     ],
+                    'cars' => $cars,
+                    'zones' => $zones,
+                    'streets' => $streets,
+                    'activeSessions' => $activeSessions,
                 ];
         }
     }
