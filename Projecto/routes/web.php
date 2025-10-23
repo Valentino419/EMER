@@ -89,6 +89,10 @@ Route::post('/parking', [ParkingSessionController::class, 'store'])->name('parki
 Route::get('/parking/{parkingSession?}', [ParkingSessionController::class, 'show'])->name('parking.show');
 Route::get('/api/parking/check-active/{carId}', [ParkingSessionController::class, 'checkActive'])->middleware('auth');
 
+// Reemplaza las rutas de pago
+Route::get('/payment/confirm/{sessionId}', [PaymentController::class, 'confirm'])->name('payment.confirm');
+Route::post('/payment/webhook', [PaymentController::class, 'webhook'])->name('payment.webhook');
+Route::get('/payment/receipt/{sessionId}', [PaymentController::class, 'show'])->name('payment.receipt');
 
 Route::get('/forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
 Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');

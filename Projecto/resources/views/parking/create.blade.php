@@ -1,4 +1,4 @@
-```php
+
 @extends('layouts.app')
 
 @section('content')
@@ -328,7 +328,7 @@
                     </div>
 
                     <input type="hidden" name="timezone_offset" id="timezone_offset">
-                    <button type="button" id="start-parking" class="btn-blue">Pagar e Iniciar</button>
+                    <button type="button" id="start-parking" class="btn-blue">Iniciar Estacionamiento</button>
                     <div id="active-warning" class="active-warning" style="display: none;">Tienes un estacionamiento activo para esta patente. Finalízalo antes de iniciar otro.</div>
                 </div>
             </div>
@@ -565,4 +565,3 @@
         @endif
     </script>
 @endsection
-```
