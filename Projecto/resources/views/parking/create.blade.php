@@ -1,3 +1,4 @@
+```php
 @extends('layouts.app')
 
 @section('content')
@@ -166,7 +167,7 @@
             max-width: 350px;
             flex: 1 1 auto;
             padding: 15px;
-            background-color: ##bad8ff !important;
+            background-color: #bad8ff !important;
             color: #2c3e50;
             border: 1px solid rgba(0, 0, 0, 0.1);
             border-radius: 8px;
@@ -327,7 +328,7 @@
                     </div>
 
                     <input type="hidden" name="timezone_offset" id="timezone_offset">
-                    <button type="button" id="start-parking" class="btn-blue">Iniciar Estacionamiento</button>
+                    <button type="button" id="start-parking" class="btn-blue">Pagar e Iniciar</button>
                     <div id="active-warning" class="active-warning" style="display: none;">Tienes un estacionamiento activo para esta patente. Finalízalo antes de iniciar otro.</div>
                 </div>
             </div>
@@ -341,7 +342,7 @@
                     <div id="active-parking-widget-{{ $session->id }}" class="active-parking-widget">
                         <h3><span class="emoji">🚗</span> Estacionamiento Activo</h3>
                         <p><strong>Vehículo:</strong> {{ $session->car->license_plate ?? $session->car->car_plate }}</p>
-                        <p><strong>Zona:</strong> {{ $session->street->zone->name }}</p>
+                        <p><strong>Zona:</strong> {{ $session->zone->name }}</p>
                         <p><strong>Calle:</strong> {{ $session->street->name }}</p>
                         <p><strong>Hora de inicio:</strong> {{ $session->start_time->format('d/m/Y H:i') }}</p>
                         <p><strong>Duración:</strong> {{ $session->duration }} minutos</p>
@@ -440,7 +441,7 @@
             }
         });
 
-        // Iniciar estacionamiento
+        // Iniciar estacionamiento con pago
         document.getElementById('start-parking').addEventListener('click', async function(e) {
             e.preventDefault();
             const carId = document.getElementById('car_id').value;
@@ -473,15 +474,23 @@
         @if(isset($activeSessions) && $activeSessions->isNotEmpty())
             @foreach ($activeSessions as $session)
                 timers[{{ $session->id }}] = {
-                    timeLeft: {{ $session->duration * 60 - now()->diffInSeconds($session->start_time) }},
+                    startTime: new Date('{{ $session->start_time->toIso8601String() }}').getTime(),
+                    duration: {{ $session->duration }},
                     interval: null
                 };
                 (function(sessionId) {
                     const widget = document.getElementById('active-parking-widget-' + sessionId);
                     const timerElement = document.getElementById('timer-' + sessionId);
-                    if (timers[sessionId].timeLeft > 0) {
+                    const now = new Date().getTime();
+                    const endTime = timers[sessionId].startTime + timers[sessionId].duration * 60 * 1000;
+                    let timeLeft = Math.floor((endTime - now) / 1000);
+                    if (timeLeft > 0) {
                         widget.style.display = 'block';
+                        timers[sessionId].timeLeft = timeLeft;
                         timers[sessionId].interval = setInterval(() => updateTimer(sessionId, timerElement, widget), 1000);
+                    } else {
+                        widget.style.display = 'none';
+                        expireSession(sessionId);
                     }
                 })({{ $session->id }});
             @endforeach
@@ -493,13 +502,33 @@
                 const hours = Math.floor(timers[sessionId].timeLeft / 3600);
                 const minutes = Math.floor((timers[sessionId].timeLeft % 3600) / 60);
                 const seconds = timers[sessionId].timeLeft % 60;
-                timerElement.textContent = `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')} restantes`;
+                timerElement.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')} restantes`;
             } else {
                 clearInterval(timers[sessionId].interval);
                 timerElement.textContent = 'Tiempo terminado';
                 widget.style.display = 'none';
-                alert('El tiempo de estacionamiento ha terminado.');
+                expireSession(sessionId);
             }
+        }
+
+        function expireSession(sessionId) {
+            fetch(`/parking/expire/${sessionId}`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json',
+                },
+            }).then(response => response.json())
+              .then(data => {
+                  if (data.success) {
+                      alert('El tiempo de estacionamiento ha terminado.');
+                      window.location.reload();
+                  } else {
+                      console.error('Error al expirar sesión:', data.message);
+                  }
+              }).catch(error => {
+                  console.error('Error de red al expirar sesión:', error);
+              });
         }
 
         // Manejar finalización de estacionamientos
@@ -536,3 +565,4 @@
         @endif
     </script>
 @endsection
+```

@@ -167,7 +167,7 @@
             max-width: 350px;
             flex: 1 1 auto;
             padding: 15px;
-            background-color: ##bad8ff !important;
+            background-color: #bad8ff !important;
             color: #2c3e50;
             border: 1px solid rgba(0, 0, 0, 0.1);
             border-radius: 8px;
@@ -326,15 +326,23 @@
         @if(isset($data['activeSessions']) && $data['activeSessions']->isNotEmpty())
             @foreach ($data['activeSessions'] as $session)
                 timers[{{ $session->id }}] = {
-                    timeLeft: {{ $session->duration * 60 - now()->diffInSeconds($session->start_time) }},
+                    startTime: new Date('{{ $session->start_time->toIso8601String() }}').getTime(),
+                    duration: {{ $session->duration }},
                     interval: null
                 };
                 (function(sessionId) {
                     const widget = document.getElementById('active-parking-widget-' + sessionId);
                     const timerElement = document.getElementById('dashboard-timer-' + sessionId);
-                    if (timers[sessionId].timeLeft > 0) {
+                    const now = new Date().getTime();
+                    const endTime = timers[sessionId].startTime + timers[sessionId].duration * 60 * 1000;
+                    let timeLeft = Math.floor((endTime - now) / 1000);
+                    if (timeLeft > 0) {
                         widget.style.display = 'block';
+                        timers[sessionId].timeLeft = timeLeft;
                         timers[sessionId].interval = setInterval(() => updateTimer(sessionId, timerElement, widget), 1000);
+                    } else {
+                        widget.style.display = 'none';
+                        expireSession(sessionId);
                     }
                 })({{ $session->id }});
             @endforeach
@@ -346,13 +354,32 @@
                 const hours = Math.floor(timers[sessionId].timeLeft / 3600);
                 const minutes = Math.floor((timers[sessionId].timeLeft % 3600) / 60);
                 const seconds = timers[sessionId].timeLeft % 60;
-                timerElement.textContent = `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')} restantes`;
+                timerElement.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')} restantes`;
             } else {
                 clearInterval(timers[sessionId].interval);
                 timerElement.textContent = 'Tiempo terminado';
                 widget.style.display = 'none';
-                alert('El tiempo de estacionamiento ha terminado.');
+                expireSession(sessionId);
             }
+        }
+
+        function expireSession(sessionId) {
+            fetch(`/parking/expire/${sessionId}`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json',
+                },
+            }).then(response => response.json())
+              .then(data => {
+                  if (data.success) {
+                      alert('El tiempo de estacionamiento ha terminado.');
+                  } else {
+                      console.error('Error al expirar sesión:', data.message);
+                  }
+              }).catch(error => {
+                  console.error('Error de red al expirar sesión:', error);
+              });
         }
 
         // Manejar finalización de estacionamientos
@@ -373,16 +400,14 @@
                             alert(data.message);
                             clearInterval(timers[{{ $session->id }}].interval);
                             document.getElementById('active-parking-widget-{{ $session->id }}').style.display = 'none';
-                            localStorage.removeItem('parkingTimeLeft');
-                            localStorage.removeItem('parkingSessionId');
                             window.location.reload();
                         } else {
-                            alert(data.message || 'Error desconocido al finalizar el estacionamiento. Código: ' + response.status);
+                            alert(data.message || `Error desconocido al finalizar el estacionamiento. Código: ${response.status}`);
                             console.error('Respuesta del servidor:', data, 'Estado:', response.status);
                         }
                     } catch (error) {
                         console.error('Error al finalizar estacionamiento:', error);
-                        alert('Error al finalizar el estacionamiento: ' + error.message);
+                        alert(`Error al finalizar el estacionamiento: ${error.message}`);
                     }
                 });
             @endforeach
