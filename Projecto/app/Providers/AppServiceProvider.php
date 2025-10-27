@@ -3,21 +3,16 @@
 namespace App\Providers;
 use Stripe\Stripe;
 use Illuminate\Support\ServiceProvider;
+use MercadoPago\SDK;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
     public function register(): void
     {
         //
     }
 
-    /**
-     * Bootstrap any application services.
-     */
-    public function boot()
+    public function boot(): void 
     {
         Stripe::setApiKey(env('STRIPE_SECRET'));
     }

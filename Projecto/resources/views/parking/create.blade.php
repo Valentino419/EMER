@@ -1,65 +1,101 @@
 @extends('layouts.app')
 
 @section('content')
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
     <style>
         body {
-            background-color: #f0f4f8;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #ffffff !important;
+            font-family: 'Segoe UI', sans-serif;
         }
 
         .custom-card {
             max-width: 900px;
             margin: 40px auto;
-            padding: 30px;
-            background-color: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+            padding: 25px;
+            background-color: #ffffff !important;
+            border: 2px solid rgba(0, 0, 0, 0.15);
+            border-radius: 15px;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+            transition: box-shadow 0.2s, transform 0.2s;
+        }
+
+        .custom-card:hover {
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+            transform: translateY(-2px);
         }
 
         h2 {
             color: #1a3c6d;
-            font-weight: 700;
+            font-weight: 600;
             margin-bottom: 20px;
+            font-size: 1.6em;
         }
 
         label {
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 5px;
+            font-weight: 500;
+            color: #2c3e50;
+            margin-bottom: 6px;
             display: block;
+            font-size: 0.95em;
         }
 
         select,
         input[type="number"],
-        input[type="text"] {
+        input[type="text"],
+        input[type="time"] {
             width: 100%;
-            padding: 10px 12px;
-            border: 1px solid #ced4da;
-            border-radius: 6px;
-            margin-bottom: 20px;
-            font-size: 15px;
-            transition: border-color 0.3s;
+            padding: 8px 12px;
+            border: 1px solid #d1d9e6;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-size: 0.95em;
+            font-family: 'Segoe UI', sans-serif;
+            transition: border-color 0.3s, box-shadow 0.3s;
         }
 
         select:focus,
         input:focus {
-            border-color: #007bff;
+            border-color: #4a90e2;
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
             outline: none;
         }
 
         .btn-blue {
-            background-color: #007bff;
+            background: linear-gradient(135deg, #00b4db, #0083b0) !important;
             color: white;
             font-weight: 600;
-            padding: 10px 20px;
+            padding: 12px 20px;
             border: none;
-            border-radius: 8px;
+            border-radius: 5px;
             cursor: pointer;
-            transition: background-color 0.3s, transform 0.2s;
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 1em;
+            transition: all 0.3s;
+            width: 100%;
+            box-shadow: 0 4px 12px rgba(0, 180, 219, 0.3);
         }
 
         .btn-blue:hover {
-            background-color: #0056b3;
+            background: linear-gradient(135deg, #0083b0, #00607d) !important;
+            transform: translateY(-1px);
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+            font-weight: 500;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 0.9em;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        .btn-danger:hover {
+            background-color: #b02a37;
             transform: translateY(-2px);
         }
 
@@ -72,74 +108,119 @@
 
         .form-header h2 {
             margin: 0;
+            font-size: 1.6em;
         }
 
         .form-section {
-            border-radius: 8px;
+            border-radius: 10px;
             overflow: hidden;
+            background-color: #f9fafb;
         }
 
         .form-section .form-title {
-            background-color: #007bff;
+            background-color: #4a90e2;
             color: #fff;
-            padding: 12px;
+            padding: 10px;
             font-weight: 600;
-            font-size: 16px;
+            font-size: 0.95em;
+            font-family: 'Segoe UI', sans-serif;
         }
 
         .form-section .form-body {
-            padding: 20px;
+            padding: 15px;
         }
 
         .back-arrow {
             display: inline-block;
-            font-size: 32px;
+            font-size: 24px;
             font-weight: bold;
-            color: #1a3c6d;
+            color: #4a90e2;
             text-decoration: none;
             margin-bottom: 15px;
             background: #fff;
             border-radius: 50%;
-            padding: 8px 14px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            padding: 6px 12px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
             transition: all 0.3s ease;
         }
 
         .back-arrow:hover {
-            background: #007bff;
+            background: #4a90e2;
             color: #fff;
             transform: scale(1.1);
         }
 
-        #timer {
-            font-size: 24px;
-            font-weight: bold;
-            color: #2c3e50;
-            margin-top: 20px;
-            text-align: center;
+        .active-sessions-section {
+            margin-top: 25px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
         }
 
-        .active-warning {
-            color: #dc3545;
-            font-weight: 600;
-            margin-top: 10px;
-            text-align: center;
-        }
-
-        .details-section {
-            margin-top: 20px;
-            padding: 15px;
-            background-color: #f1f1f1;
-            border-radius: 8px;
-        }
-
-        .details-section h3 {
+        .active-sessions-section h3 {
             color: #1a3c6d;
-            margin-bottom: 10px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            width: 100%;
         }
 
-        .details-section p {
-            margin: 5px 0;
+        .active-parking-widget {
+            max-width: 350px;
+            flex: 1 1 auto;
+            padding: 15px;
+            background-color: #bad8ff !important;
+            color: #2c3e50;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .active-parking-widget:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+        }
+
+        .active-parking-widget h3 {
+            margin: 0 0 10px 0;
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #1a3c6d;
+        }
+
+        .active-parking-widget p {
+            margin: 6px 0;
+            font-size: 0.9em;
+        }
+
+        .active-parking-widget button {
+            width: 100%;
+            margin-top: 8px;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .emoji {
+            margin-right: 6px;
+            font-size: 1em;
+        }
+
+        @media (max-width: 768px) {
+            .custom-card {
+                margin: 15px;
+                padding: 15px;
+            }
+
+            .active-sessions-section {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .active-parking-widget {
+                width: 90%;
+                margin-left: auto;
+                margin-right: auto;
+            }
         }
     </style>
 
@@ -153,8 +234,9 @@
                 {{ session('success') }}
             </div>
         @endif
+
         @if ($errors->any())
-            <div class="alert alert-danger">
+            <div class="bg-red-100 text-red-800 p-4 rounded mb-4">
                 <ul class="mb-0">
                     @foreach ($errors->all() as $error)
                         <li>{{ $error }}</li>
@@ -164,16 +246,18 @@
         @endif
 
         <a href="{{ route('dashboard') }}" class="back-arrow" title="Volver al inicio" aria-label="Volver al inicio">
-            &#8592;
+            ←
         </a>
 
-        <form id="parking-form" action="{{ route('parking.store') }}" method="POST" @if($activeSession) style="display: none;" @endif>
+        <!-- FORMULARIO DIRECTO A PAGO -->
+        <form action="{{ route('payment.initiate') }}" method="POST" id="parking-form">
             @csrf
 
             <div class="form-section">
                 <div class="form-title">Datos del Estacionamiento</div>
                 <div class="form-body">
-                    <!-- Car -->
+
+                    <!-- Vehículo -->
                     <div class="mb-4">
                         <label for="car_id">Vehículo</label>
                         <select name="car_id" id="car_id" class="form-select" required>
@@ -182,53 +266,47 @@
                                 <option value="{{ $car->id }}">{{ $car->license_plate ?? $car->car_plate }}</option>
                             @endforeach
                         </select>
-                        @error('car_id')
-                            <div class="text-red-600">{{ $message }}</div>
-                        @enderror
+                        @error('car_id') <div class="text-red-600">{{ $message }}</div> @enderror
                     </div>
 
-                    <!-- Zone -->
+                    <!-- Zona -->
                     <div class="mb-4">
                         <label for="zone_id">Zona</label>
                         <select name="zone_id" id="zone_id" class="form-control" required>
                             <option value="">Selecciona una zona</option>
                             @foreach ($zones as $zone)
                                 <option value="{{ $zone->id }}" data-rate="{{ $zone->rate ?? 5.0 }}">
-                                    {{ $zone->name }}</option>
+                                    {{ $zone->name }}
+                                </option>
                             @endforeach
                         </select>
-                        @error('zone_id')
-                            <div class="text-red-600">{{ $message }}</div>
-                        @enderror
+                        @error('zone_id') <div class="text-red-600">{{ $message }}</div> @enderror
                     </div>
 
-                    <!-- Street -->
+                    <!-- Calle -->
                     <div class="mb-4">
                         <label for="street_id">Calle</label>
                         <select name="street_id" id="street_id" class="form-control" required>
                             <option value="">Seleccione una calle</option>
                             @foreach ($streets as $street)
                                 <option value="{{ $street->id }}" data-zone-id="{{ $street->zone_id }}">
-                                    {{ $street->name }}</option>
+                                    {{ $street->name }}
+                                </option>
                             @endforeach
                         </select>
-                        @error('street_id')
-                            <div class="text-red-600">{{ $message }}</div>
-                        @enderror
+                        @error('street_id') <div class="text-red-600">{{ $message }}</div> @enderror
                     </div>
 
-                    <!-- Start Time -->
+                    <!-- Hora de inicio -->
                     <div class="mb-4">
                         <label for="start_time">Hora de inicio</label>
                         <input type="time" name="start_time" id="start_time" class="form-control" required>
-                        @error('start_time')
-                            <div class="text-red-600">{{ $message }}</div>
-                        @endif
+                        @error('start_time') <div class="text-red-600">{{ $message }}</div> @enderror
                     </div>
 
-                    <!-- Duration -->
+                    <!-- Duración -->
                     <div class="mb-4">
-                        <label for="duration">Duración (minutos)</label>
+                        <label for="duration">Duración</label>
                         <select name="duration" id="duration" class="form-control" required>
                             <option value="">Selecciona una duración</option>
                             <option value="60">1 hora</option>
@@ -238,157 +316,120 @@
                             <option value="360">6 horas</option>
                             <option value="480">8 horas</option>
                         </select>
-                        @error('duration')
-                            <div class="text-red-600">{{ $message }}</div>
-                        @endif
+                        @error('duration') <div class="text-red-600">{{ $message }}</div> @enderror
                     </div>
 
-                    <!-- Amount Preview -->
+                    <!-- Monto estimado -->
                     <div class="mb-4">
                         <label>Monto Estimado</label>
-                        <p id="amount-preview">ARS 0.00</p>
+                        <p id="amount-preview" class="font-bold text-lg">$00.00</p>
                     </div>
-                    <script>
-                        // Update the updateAmount function
-                        function updateAmount(rate) {
-                            const duration = document.getElementById('duration').value;
-                            const amount = duration ? (duration / 60) * rate : 0;
-                            document.getElementById('amount-preview').textContent = `ARS ${amount.toFixed(2)}`;
-                        }
-                    </script>
-                    <!-- Hidden -->
+
                     <input type="hidden" name="timezone_offset" id="timezone_offset">
 
-                    <button type="button" id="start-parking" class="btn-blue">Iniciar Estacionamiento</button>
-                    <div id="active-warning" class="active-warning" style="display: none;">Tienes un estacionamiento activo. Finalízalo antes de iniciar otro.</div>
+                    <!-- BOTÓN DIRECTO A PAGO -->
+                    <button type="submit" class="btn-blue">
+                        Pagar y Iniciar <span id="amount-button">$00.00</span>
+                    </button>
                 </div>
             </div>
         </form>
 
-        <div id="timer" style="display: none;">Tiempo restante: --:--</div>
+        <!-- SESIONES ACTIVAS -->
+        @if (isset($activeSessions) && $activeSessions->isNotEmpty())
+            <div class="active-sessions-section mt-6">
+                <h3>Sesiones de Estacionamiento Activas</h3>
+                @foreach ($activeSessions as $session)
+                    <div id="active-parking-widget-{{ $session->id }}" class="active-parking-widget">
+                        <h3>Estacionamiento Activo</h3>
+                        <p><strong>Vehículo:</strong> {{ $session->car->license_plate ?? $session->car->car_plate }}</p>
+                        <p><strong>Zona:</strong> {{ $session->zone->name }}</p>
+                        <p><strong>Calle:</strong> {{ $session->street->name }}</p>
+                        <p><strong>Inicio:</strong> {{ $session->start_time->format('d/m/Y H:i') }}</p>
+                        <p><strong>Duración:</strong> {{ $session->duration }} min</p>
+                        <p><strong>Monto:</strong> ${{ number_format($session->amount, 2) }}</p>
+                        <p id="timer-{{ $session->id }}" class="font-mono font-bold">Cargando...</p>
 
-        <!-- Sección de detalles del estacionamiento activo -->
-        @if($activeSession)
-            <div class="details-section">
-                <h3>Detalles del Estacionamiento Activo</h3>
-                <p><strong>Vehículo:</strong> {{ $activeSession->car->license_plate ?? $activeSession->car->car_plate }}</p>
-                <p><strong>Zona:</strong> {{ $activeSession->street->zone->name }}</p>
-                <p><strong>Calle:</strong> {{ $activeSession->street->name }}</p>
-                <p><strong>Hora de inicio:</strong> {{ $activeSession->start_time }}</p>
-                <p><strong>Duración:</strong> {{ $activeSession->duration }} minutos</p>
-                <p><strong>Monto estimado:</strong> ${{ number_format($activeSession->amount, 2) }}</p>
-                <p><strong>Estado:</strong> {{ $activeSession->status }}</p>
+                        <form action="{{ route('parking.end', $session->id) }}" method="POST">
+                            @csrf
+                            <button type="submit" class="btn-danger">Finalizar</button>
+                        </form>
+                    </div>
+                @endforeach
             </div>
         @endif
     </div>
 
     <script>
-        // Set start_time min and value to client's local current time
+        // Configuración inicial
         const now = new Date();
         const currentTime = now.toTimeString().slice(0, 5);
-        document.getElementById('start_time').min = currentTime;
         document.getElementById('start_time').value = currentTime;
+        document.getElementById('start_time').min = currentTime;
         document.getElementById('timezone_offset').value = now.getTimezoneOffset();
 
-        // Zone change: Filter streets, get rate
+        // Actualizar calles y monto
         document.getElementById('zone_id').addEventListener('change', async function() {
             const zoneId = this.value;
             const streetSelect = document.getElementById('street_id');
+            const rate = this.selectedOptions[0]?.dataset.rate || 5.0;
 
             if (zoneId) {
                 try {
                     const response = await fetch(`/api/zones/${zoneId}/streets`);
                     const streets = await response.json();
                     streetSelect.innerHTML = '<option value="">Seleccione una calle</option>';
-                    streets.forEach(street => {
-                        const option = document.createElement('option');
-                        option.value = street.id;
-                        option.textContent = street.name;
-                        option.setAttribute('data-zone-id', street.zone_id);
-                        streetSelect.appendChild(option);
+                    streets.forEach(s => {
+                        const opt = new Option(s.name, s.id);
+                        opt.dataset.zoneId = s.zone_id;
+                        streetSelect.add(opt);
                     });
-
-                    const rateResponse = await fetch(`/api/zones/${zoneId}/rate`);
-                    const rateData = await rateResponse.json();
-                    updateAmount(rateData.rate || 5.0);
-                } catch (error) {
-                    console.error('Error fetching data:', error);
+                } catch (e) {
+                    console.error(e);
                 }
-            } else {
-                streetSelect.innerHTML = '<option value="">Seleccione una calle</option>';
-                @foreach ($streets as $street)
-                    streetSelect.innerHTML += `<option value="{{ $street->id }}" data-zone-id="{{ $street->zone_id }}">{{ $street->name }}</option>`;
-                @endforeach
-                updateAmount(5.0); // Default rate
             }
+            updateAmount(rate);
         });
 
-        // Duration change: Update amount
-        document.getElementById('duration').addEventListener('change', function() {
-            const zoneSelect = document.getElementById('zone_id');
-            const selectedOption = zoneSelect.options[zoneSelect.selectedIndex];
-            const rate = selectedOption ? selectedOption.getAttribute('data-rate') || 5.0 : 5.0;
+        document.getElementById('duration').addEventListener('change', () => {
+            const rate = document.getElementById('zone_id').selectedOptions[0]?.dataset.rate || 5.0;
             updateAmount(rate);
         });
 
         function updateAmount(rate) {
-            const duration = document.getElementById('duration').value;
-            const amount = duration ? (duration / 60) * rate : 0;
-            document.getElementById('amount-preview').textContent = `$${amount.toFixed(2)}`;
+            const duration = parseInt(document.getElementById('duration').value) || 0;
+            const amount = (duration / 60) * rate;
+            const formatted = `$${amount.toFixed(2)}`;
+            document.getElementById('amount-preview').textContent = formatted;
+            document.getElementById('amount-button').textContent = formatted;
         }
 
-        // Temporizador y persistencia
-        let timerInterval;
-        let timeLeft = localStorage.getItem('parkingTimeLeft') ? parseInt(localStorage.getItem('parkingTimeLeft')) : 0;
-        let sessionId = localStorage.getItem('parkingSessionId') || null;
+        // Temporizadores
+        @if (isset($activeSessions))
+            @foreach ($activeSessions as $session)
+                (function() {
+                    const end = new Date('{{ $session->start_time->toIso8601String() }}').getTime() + ({{ $session->duration }} * 60000);
+                    const timerEl = document.getElementById('timer-{{ $session->id }}');
+                    const widget = document.getElementById('active-parking-widget-{{ $session->id }}');
 
-        // Restaurar temporizador al cargar la página
-        if (timeLeft > 0 && sessionId) {
-            document.getElementById('timer').style.display = 'block';
-            document.getElementById('parking-form').style.display = 'none';
-            document.getElementById('active-warning').style.display = 'block';
-            timerInterval = setInterval(updateTimer, 1000);
-        }
-
-        document.getElementById('start-parking').addEventListener('click', function(e) {
-            e.preventDefault();
-            if (timeLeft > 0) {
-                alert('Ya tienes un estacionamiento activo. Finalízalo antes de iniciar otro.');
-                return;
-            }
-            document.getElementById('parking-form').submit();
-        });
-
-        // Iniciar temporizador después de guardar en el controlador
-        @if(session('sessionData'))
-            const sessionData = @json(session('sessionData'));
-            timeLeft = sessionData.duration * 60;
-            sessionId = @json(session('parkingSessionId'));
-            localStorage.setItem('parkingTimeLeft', timeLeft);
-            localStorage.setItem('parkingSessionId', sessionId);
-            document.getElementById('timer').style.display = 'block';
-            document.getElementById('parking-form').style.display = 'none';
-            document.getElementById('active-warning').style.display = 'block';
-            timerInterval = setInterval(updateTimer, 1000);
+                    const update = () => {
+                        const left = Math.max(0, Math.floor((end - Date.now()) / 1000));
+                        if (left === 0) {
+                            timerEl.textContent = 'Tiempo terminado';
+                            widget.style.opacity = '0.7';
+                            clearInterval(interval);
+                            setTimeout(() => location.reload(), 2000);
+                            return;
+                        }
+                        const h = String(Math.floor(left / 3600)).padStart(2, '0');
+                        const m = String(Math.floor((left % 3600) / 60)).padStart(2, '0');
+                        const s = String(left % 60).padStart(2, '0');
+                        timerEl.textContent = `${h}:${m}:${s} restantes`;
+                    };
+                    update();
+                    const interval = setInterval(update, 1000);
+                })();
+            @endforeach
         @endif
-
-        function updateTimer() {
-            if (timeLeft > 0) {
-                timeLeft--;
-                localStorage.setItem('parkingTimeLeft', timeLeft);
-                const hours = Math.floor(timeLeft / 3600);
-                const minutes = Math.floor((timeLeft % 3600) / 60);
-                const seconds = timeLeft % 60;
-                document.getElementById('timer').textContent = `Tiempo restante: ${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-            } else {
-                clearInterval(timerInterval);
-                document.getElementById('timer').textContent = 'Tiempo terminado!';
-                alert('El tiempo de estacionamiento ha terminado.');
-                localStorage.removeItem('parkingTimeLeft');
-                localStorage.removeItem('parkingSessionId');
-                document.getElementById('parking-form').style.display = 'block';
-                document.getElementById('active-warning').style.display = 'none';
-            }
-        }
     </script>
 @endsection
