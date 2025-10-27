@@ -19,9 +19,16 @@ class ParkingSessionController extends Controller
         $zones = Zone::all();
         $streets = Street::all();
 
+        // Expirar sesiones vencidas automáticamente
+        ParkingSession::where('user_id', auth()->id())
+            ->where('status', 'active')
+            ->whereRaw('end_time <= ?', [now()])
+            ->update(['status' => 'expired']);
+
+        // Cargar sesiones activas
         $activeSessions = ParkingSession::where('user_id', auth()->id())
             ->where('status', 'active')
-            ->with(['car', 'street.zone'])
+            ->with(['car', 'zone', 'street'])
             ->get();
 
         return view('parking.create', compact('cars', 'zones', 'streets', 'activeSessions'));
@@ -29,29 +36,27 @@ class ParkingSessionController extends Controller
 
     public function store(Request $request)
     {
-        if (!auth()->check()) {
-            return redirect()->back()->withErrors(['error' => 'Debes iniciar sesión.']);
-        }
-
         $validated = $request->validate([
             'car_id' => 'required|exists:cars,id',
             'zone_id' => 'required|exists:zones,id',
             'street_id' => 'required|exists:streets,id',
             'start_time' => 'required|date_format:H:i',
-            'duration' => 'required|integer|min:30|max:1440',
+            'duration' => 'required|integer|in:60,120,180,240,360,480',
             'timezone_offset' => 'required|integer',
         ]);
 
         $car = Car::findOrFail($validated['car_id']);
         if ($car->user_id !== auth()->id()) {
-            return back()->withErrors(['car_id' => 'Selección de vehículo inválida.']);
+            return back()->withErrors(['car_id' => 'Vehículo inválido.']);
         }
 
-        $existingSession = ParkingSession::where('car_id', $validated['car_id'])
+        // Verificar sesión activa
+        if (ParkingSession::where('car_id', $validated['car_id'])
+            ->where('user_id', auth()->id())
             ->where('status', 'active')
-            ->first();
-        if ($existingSession) {
-            return back()->withErrors(['car_id' => 'Ya tienes un estacionamiento activo para esta patente.']);
+            ->exists()
+        ) {
+            return back()->withErrors(['car_id' => 'Ya tienes un estacionamiento activo.']);
         }
 
         $street = Street::findOrFail($validated['street_id']);
@@ -60,60 +65,65 @@ class ParkingSessionController extends Controller
         }
 
         $zone = Zone::findOrFail($validated['zone_id']);
-        $rate = $zone->getCurrentRate();
+        $rate = $zone->rate ?? 100.0;
 
         $offsetMinutes = $validated['timezone_offset'];
-        $tzString = sprintf('%+03d:00', - ($offsetMinutes / 60));
+        $tzString = sprintf('%+03d:00', -$offsetMinutes / 60);
         $startDateTime = Carbon::createFromFormat('H:i', $validated['start_time'], $tzString)
             ->setDateFrom(Carbon::now($tzString));
 
-        $amount = ($validated['duration'] / 60) * $rate;
+        $durationInMinutes = (int) $validated['duration'];
+        $endDateTime = $startDateTime->copy()->addMinutes($durationInMinutes);
+        $amount = ($durationInMinutes / 60) * $rate;
 
-        try {
-            $sessionId = DB::transaction(function () use ($validated, $startDateTime, $rate, $amount, $car) {
-                $session = ParkingSession::create([
-                    'user_id' => auth()->id(),
-                    'car_id' => $validated['car_id'],
-                    'street_id' => $validated['street_id'],
-                    'license_plate' => $car->license_plate ?? strtoupper($car->car_plate),
-                    'start_time' => $startDateTime,
-                    'duration' => $validated['duration'],
-                    'rate' => $rate,
-                    'amount' => $amount,
-                    'payment_status' => 'pending',
-                    'status' => 'active',
-                    'metodo_pago' => 'tarjeta',
-                ]);
+        // GUARDAR DATOS EN SESIÓN
+        session([
+            'parking_data' => [
+                'car_id' => $validated['car_id'],
+                'zone_id' => $validated['zone_id'],
+                'street_id' => $validated['street_id'],
+                'start_time' => $startDateTime,
+                'end_time' => $endDateTime,
+                'duration' => $durationInMinutes,
+                'rate' => $rate,
+                'amount' => $amount,
+                'license_plate' => $car->license_plate ?? strtoupper($car->car_plate ?? 'N/A'),
+            ]
+        ]);
 
-                Log::info('Sesión de estacionamiento activa creada', ['id' => $session->id]);
-                return $session->id;
-            });
+        return redirect()->route('payment.initiate');
+    }
+    public function show()
+    {
+        $sessions = ParkingSession::where('user_id', auth()->id())
+            ->with(['car', 'zone', 'street'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
 
-            return redirect()->back()->with('success', 'Estacionamiento iniciado correctamente.')
-                ->with('sessionData', [
-                    'duration' => $validated['duration'],
-                    'start_time' => $validated['start_time'],
-                ])->with('parkingSessionId', $sessionId);
-        } catch (\Exception $e) {
-            Log::error('Error al iniciar: ' . $e->getMessage());
-            return back()->withErrors(['error' => 'Error al iniciar: ' . $e->getMessage()]);
-        }
+        return view('parking.show', compact('sessions'));
     }
 
-    public function show($parkingSession = null)
+    public function expire($id)
     {
-        if ($parkingSession) {
-            $session = ParkingSession::where('user_id', auth()->id())
-                ->where('id', $parkingSession)
-                ->firstOrFail();
-            if ($session->user_id !== auth()->id()) {
-                abort(403, 'No tienes permiso para ver este estacionamiento.');
-            }
-            return view('parking.show', compact('session'));
-        } else {
-            $sessions = ParkingSession::where('user_id', auth()->id())->orderBy('start_time', 'desc')->get();
-            return view('parking.show', compact('sessions'));
+        $session = ParkingSession::where('id', $id)
+            ->where('user_id', auth()->id())
+            ->where('status', 'active')
+            ->first();
+
+        if (!$session) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Sesión no encontrada o ya finalizada.'
+            ], 404);
         }
+
+        $session->update(['status' => 'expired']);
+        Log::info('Sesión expirada automáticamente', ['session_id' => $id]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Sesión expirada correctamente.'
+        ]);
     }
 
     public function end(Request $request, $id)
@@ -126,55 +136,61 @@ class ParkingSessionController extends Controller
         if (!$session) {
             return response()->json([
                 'success' => false,
-                'message' => 'Sesión no encontrada o ya finalizada.',
+                'message' => 'Sesión no encontrada o ya finalizada.'
             ], 404);
         }
 
         try {
-            DB::transaction(function () use ($session) {
-                $session->status = 'cancelled';
-                $session->end_time = Carbon::now();
-                $session->save();
-                Log::info('Sesión de estacionamiento cancelada', ['id' => $session->id]);
-            });
+            $session->update([
+                'status' => 'cancelled',
+                'end_time' => now() // Actualiza el fin real
+            ]);
+
+            Log::info('Estacionamiento finalizado manualmente', ['session_id' => $id]);
 
             return response()->json([
                 'success' => true,
-                'message' => 'Estacionamiento finalizado correctamente.',
+                'message' => 'Estacionamiento finalizado correctamente.'
             ]);
         } catch (\Exception $e) {
-            Log::error('Error al cancelar sesión: ' . $e->getMessage());
+            Log::error('Error al finalizar estacionamiento', [
+                'session_id' => $id,
+                'error' => $e->getMessage()
+            ]);
+
             return response()->json([
                 'success' => false,
-                'message' => 'Error al finalizar el estacionamiento: ' . $e->getMessage(),
+                'message' => 'Error al finalizar: ' . $e->getMessage()
             ], 500);
         }
     }
 
+    // app/Http/Controllers/ParkingSessionController.php
+
     public function checkActive($carId)
     {
         try {
-            if (!is_numeric($carId)) {
-                return response()->json([
-                    'active' => false,
-                    'message' => 'ID de vehículo inválido.',
-                ], 400);
-            }
-
-            $activeSession = ParkingSession::where('car_id', $carId)
+            $active = ParkingSession::where('car_id', $carId)
                 ->where('user_id', auth()->id())
                 ->where('status', 'active')
                 ->exists();
 
-            return response()->json([
-                'active' => $activeSession,
-            ]);
+            return response()->json(['active' => $active]);
         } catch (\Exception $e) {
-            Log::error('Error al verificar sesión activa: ' . $e->getMessage());
-            return response()->json([
-                'active' => false,
-                'message' => 'Error interno al verificar la sesión activa.',
-            ], 500);
+            \Log::error('Error en checkActive', ['error' => $e->getMessage()]);
+            return response()->json(['error' => 'Error interno'], 500);
         }
+    }
+
+    public function getStreetsByZone($zoneId)
+    {
+        $streets = Street::where('zone_id', $zoneId)->get();
+        return response()->json($streets);
+    }
+
+    public function getZoneRate($zoneId)
+    {
+        $zone = Zone::findOrFail($zoneId);
+        return response()->json(['rate' => $zone->rate ?? 5.0]);
     }
 }

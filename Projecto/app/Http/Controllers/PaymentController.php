@@ -2,97 +2,151 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\ParkingSession;
-use App\Models\Payment;
-use App\Services\PaymentService;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Stripe\PaymentIntent;
+use MercadoPago\SDK;
+use MercadoPago\Preference;
+use MercadoPago\Item;
 
 class PaymentController extends Controller
 {
-    public function show()
+    public function initiate()
     {
-        $session = ParkingSession::where('user_id', auth()->id())
-            ->where('payment_status', 'completed')
-            ->latest()
-            ->first();
+        $data = session('parking_data');
 
-        if (!$session) {
-            return view('parking.show', ['noSession' => true]);
+        if (!$data) {
+            return redirect()->route('parking.create')
+                ->withErrors(['error' => 'Datos de estacionamiento perdidos. Intenta de nuevo.']);
         }
 
-        return view('parking.show', compact('session'));
-    }
+        $preference = new Preference();
+        $item = new Item();
+        $item->title = "Estacionamiento - {$data['license_plate']}";
+        $item->quantity = 1;
+        $item->unit_price = floatval($data['amount']);
+        $item->currency_id = 'ARS';
+        $preference->items = [$item];
 
-    public function confirm(Request $request)
-    {
-        $validated = $request->validate([
-            'session_id' => 'required|exists:parking_sessions,id', // Renamed for clarity
-            'payment_intent' => 'required|string',
+        $preference->back_urls = [
+            'success' => route('payment.success'),
+            'failure' => route('payment.failure'),
+            'pending' => route('payment.pending'),
+        ];
+        $preference->auto_return = 'approved';
+        $preference->external_reference = 'parking_' . auth()->id() . '_' . time();
+
+        $preference->save();
+
+        // Guardar para verificar después
+        session(['preference_id' => $preference->id]);
+
+        Log::info('Preferencia MP creada', [
+            'preference_id' => $preference->id,
+            'amount' => $data['amount'],
+            'user_id' => auth()->id()
         ]);
 
-        try {
-            $session = ParkingSession::where('id', $validated['session_id'])
-                ->where('user_id', auth()->id())
-                ->where('payment_status', 'pending')
-                ->firstOrFail();
-
-            $paymentService = app(PaymentService::class);
-            $paymentService->confirmAndRecord($validated['payment_intent'], $session, 'Pago por estacionamiento medido');
-
-            // Activate session
-            $session->update([
-                'payment_status' => 'completed',
-                'status' => 'active',
-                'payment_id' => $validated['payment_intent'],
-            ]);
-
-            Log::info('Payment confirmed', ['session_id' => $session->id]);
-
-            return redirect()->route('parking.show')->with('success', 'Pago confirmado. Estacionamiento activo hasta ' . $session->end_time->format('H:i'));
-
-        } catch (\Exception $e) {
-            Log::error('Error in confirm: ' . $e->getMessage());
-            return redirect()->back()->withErrors(['error' => 'Error al confirmar: ' . $e->getMessage()]);
-        }
+        return redirect($preference->init_point);
     }
 
+    /**
+     * Pago aprobado → crea sesión ACTIVE
+     */
+    public function success()
+    {
+        $data = session('parking_data');
+        if (!$data) {
+            return redirect()->route('parking.create')
+                ->withErrors(['error' => 'Datos perdidos. Intenta de nuevo.']);
+        }
+
+        $paymentId = request('payment_id');
+        if (!$paymentId) {
+            return $this->failure();
+        }
+
+        try {
+            $payment = \MercadoPago\Payment::find_by_id($paymentId);
+
+            if ($payment->status === 'approved') {
+                DB::transaction(function () use ($data, $paymentId) {
+                    ParkingSession::create([
+                        'user_id' => auth()->id(),
+                        'car_id' => $data['car_id'],
+                        'zone_id' => $data['zone_id'],
+                        'street_id' => $data['street_id'],
+                        'license_plate' => $data['license_plate'],
+                        'start_time' => $data['start_time'],
+                        'end_time' => $data['end_time'],
+                        'duration' => $data['duration'],
+                        'rate' => $data['rate'],
+                        'amount' => $data['amount'],
+                        'status' => 'active',
+                        'payment_status' => 'completed',
+                        'payment_id' => $paymentId,
+                    ]);
+                });
+
+                // Limpiar datos temporales
+                session()->forget(['parking_data', 'preference_id']);
+
+                Log::info('Estacionamiento iniciado tras pago', [
+                    'payment_id' => $paymentId,
+                    'amount' => $data['amount']
+                ]);
+
+                return redirect()->route('parking.create')
+                    ->with('success', '¡Pago exitoso! Tu estacionamiento está activo.');
+            }
+        } catch (\Exception $e) {
+            Log::error('Error verificando pago', [
+                'payment_id' => $paymentId,
+                'error' => $e->getMessage()
+            ]);
+        }
+
+        return $this->failure();
+    }
+
+    /**
+     * Pago rechazado
+     */
+    public function failure()
+    {
+        session()->forget(['parking_data', 'preference_id']);
+
+        return redirect()->route('parking.create')
+            ->withErrors(['error' => 'El pago fue rechazado. Intenta nuevamente.']);
+    }
+
+    /**
+     * Pago pendiente
+     */
+    public function pending()
+    {
+        return redirect()->route('parking.create')
+            ->with('info', 'Pago pendiente. Te avisaremos cuando se acredite.');
+    }
+
+    /**
+     * Webhook (opcional, para producción)
+     */
     public function webhook(Request $request)
     {
-        $payload = $request->getContent();
-        $sigHeader = $request->header('Stripe-Signature');
-        try {
-            $event = \Stripe\Webhook::constructEvent($payload, $sigHeader, env('STRIPE_WEBHOOK_SECRET'));
+        $payload = $request->all();
 
-            if ($event->type === 'payment_intent.succeeded') {
-                $metadata = $event->data->object->metadata;
-                $sessionId = $metadata->parking_id ?? null;
-                $infractionId = $metadata->infraction_id ?? null;
-
-                if ($sessionId) {
-                    $session = ParkingSession::find($sessionId);
-                    if ($session) {
-                        $paymentService = app(PaymentService::class);
-                        $paymentService->confirmAndRecord($event->data->object->id, $session, 'Pago por estacionamiento medido');
-                        $session->update(['payment_status' => 'completed', 'status' => 'active']);
-                    }
-                } elseif ($infractionId) {
-                    // Similar for Fine: Load Fine, confirm, update status
-                    $infraction = \App\Models\Infraction::find($infractionId);
-                    if ($infraction) {
-                        $paymentService = app(PaymentService::class);
-                        $paymentService->confirmAndRecord($event->data->object->id, $infraction, 'Pago por multa');
-                        $infraction->update(['payment_status' => 'completed']);
-                    }
-                }
+        if ($request->query('topic') === 'payment') {
+            $paymentId = $request->query('data.id');
+            try {
+                $payment = \MercadoPago\Payment::find_by_id($paymentId);
+                Log::info('Webhook recibido', ['payment_id' => $paymentId, 'status' => $payment->status]);
+            } catch (\Exception $e) {
+                Log::error('Error en webhook', ['error' => $e->getMessage()]);
             }
-
-            return response('OK', 200);
-        } catch (\Exception $e) {
-            Log::error('Webhook error: ' . $e->getMessage());
-            return response('Error', 400);
         }
+
+        return response()->json(['status' => 'received']);
     }
 }
