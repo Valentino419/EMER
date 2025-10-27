@@ -19,12 +19,11 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\StreetController;
 
-Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-Route::get('/dashboard', [DashboardController::class, 'user'])->name('dashboard');
-
+Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard'); // Primera definición
+// Elimino la duplicada Route::get('/dashboard', [DashboardController::class, 'user'])->name('dashboard');
 
 Route::middleware(['auth'])->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.user');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.user'); // Renombré a dashboard.user
 });
 
 Route::resource('schedule', ScheduleController::class);
@@ -34,7 +33,6 @@ Route::resource('street', StreetController::class);
 Route::resource('zones', ZoneController::class);
 
 Route::resource('users', UserController::class);
-
 
 Route::resource('zone', ZoneController::class)->names([
     'index' => 'zone.index',
@@ -47,6 +45,7 @@ Route::resource('cars', CarController::class)->names([
     'edit' => 'cars.edit',
     'update' => 'cars.update',
 ]);
+
 Route::resource('infractions', InfractionController::class)->names([
     'index' => 'infractions.index',
     'create' => 'infractions.create',
@@ -76,32 +75,24 @@ Route::resource('users', UserController::class)->names([
 
 Route::get('/user/logged', [UserController::class, 'logged'])->middleware('auth')->name('user.logged');
 
-
 Route::get('/check-zone', [ZoneController::class, 'checkZone']);
 Route::post('/check-zone', [ZoneController::class, 'checkZone']);
 
-// Rutas para parking sessions 
+// Rutas para parking sessions
 Route::get('/parking/create', [ParkingSessionController::class, 'create'])->name('parking.create');
-Route::post('/parking/{id}/end', [ParkingSessionController::class, 'end'])->name('parking.end');
-Route::post('/parking', [ParkingSessionController::class, 'store'])->name('parking.store'); // Crea sesión pending
-Route::get('/parking/{parkingSession?}', [ParkingSessionController::class, 'show'])->name('parking.show');
-
-
+Route::post('/parking', [ParkingSessionController::class, 'store'])->name('parking.store');
+Route::post('/parking/{id}/end', [ParkingSessionController::class, 'end'])->name('parking.end'); 
+Route::get('/parking/{parkingSession?}', [ParkingSessionController::class, 'show'])->name('parking.show'); 
 
 Route::get('/api/parking/check-active/{carId}', [ParkingSessionController::class, 'checkActive'])
     ->middleware('auth')
     ->name('parking.check-active');
-    
-// rutas de pago
-Route::post('/payment/initiate', [PaymentController::class, 'initiate'])
-    ->name('payment.initiate');
-Route::get('/payment/success', [PaymentController::class, 'success'])
-    ->name('payment.success');
-Route::get('/payment/failure', [PaymentController::class, 'failure'])
-    ->name('payment.failure');
-Route::get('/payment/pending', [PaymentController::class, 'pending'])
-    ->name('payment.pending');
 
+// Rutas de pago
+Route::post('/payment/initiate', [PaymentController::class, 'initiate'])->name('payment.initiate');
+Route::get('/payment/success', [PaymentController::class, 'success'])->name('payment.success');
+Route::get('/payment/failure', [PaymentController::class, 'failure'])->name('payment.failure');
+Route::get('/payment/pending', [PaymentController::class, 'pending'])->name('payment.pending');
 
 // Rutas para notificaciones
 Route::get('/notifications', [NotificationController::class, 'userNotifications'])->name('notifications.user')->middleware('auth');
@@ -114,5 +105,5 @@ Route::fallback(function () {
     return redirect()->route('login');
 });
 
-require __DIR__.'/settings.php';
-require __DIR__.'/auth.php';
+require __DIR__ . '/settings.php';
+require __DIR__ . '/auth.php';

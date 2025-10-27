@@ -36,6 +36,8 @@ class ParkingSessionController extends Controller
 
     public function store(Request $request)
     {
+        Log::info('Entrando a store', ['request' => $request->all()]);
+
         $validated = $request->validate([
             'car_id' => 'required|exists:cars,id',
             'zone_id' => 'required|exists:zones,id',
@@ -50,7 +52,6 @@ class ParkingSessionController extends Controller
             return back()->withErrors(['car_id' => 'Vehículo inválido.']);
         }
 
-        // Verificar sesión activa
         if (ParkingSession::where('car_id', $validated['car_id'])
             ->where('user_id', auth()->id())
             ->where('status', 'active')
@@ -61,22 +62,20 @@ class ParkingSessionController extends Controller
 
         $street = Street::findOrFail($validated['street_id']);
         if ($street->zone_id !== (int)$validated['zone_id']) {
-            return back()->withErrors(['street_id' => 'La calle no pertenece a la zona.']);
+            return back()->withErrors(['street_id' => 'Calle no válida.']);
         }
 
         $zone = Zone::findOrFail($validated['zone_id']);
-        $rate = $zone->rate ?? 100.0;
+        $rate = $zone->rate ?? 5.0;
 
         $offsetMinutes = $validated['timezone_offset'];
-        $tzString = sprintf('%+03d:00', -$offsetMinutes / 60);
+        $tzString = sprintf('%+03d:00', - ($offsetMinutes / 60));
         $startDateTime = Carbon::createFromFormat('H:i', $validated['start_time'], $tzString)
             ->setDateFrom(Carbon::now($tzString));
-
-        $durationInMinutes = (int) $validated['duration'];
+        $durationInMinutes = (int)$validated['duration'];
         $endDateTime = $startDateTime->copy()->addMinutes($durationInMinutes);
         $amount = ($durationInMinutes / 60) * $rate;
 
-        // GUARDAR DATOS EN SESIÓN
         session([
             'parking_data' => [
                 'car_id' => $validated['car_id'],
@@ -91,8 +90,12 @@ class ParkingSessionController extends Controller
             ]
         ]);
 
-        return redirect()->route('payment.initiate');
+        Log::info('Redirigiendo a payment.initiate con formulario', ['session' => session('parking_data')]);
+
+        // Crear un formulario oculto para enviar los datos como POST
+        return view('payment.redirect', ['parking_data' => session('parking_data')]);
     }
+    
     public function show()
     {
         $sessions = ParkingSession::where('user_id', auth()->id())
