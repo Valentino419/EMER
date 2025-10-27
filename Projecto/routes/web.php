@@ -5,19 +5,20 @@ use Inertia\Inertia;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\CarController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InfractionController;
 use App\Http\Controllers\InspectorController;
-use App\Http\Controllers\ZoneController;
-use App\Http\Controllers\ScheduleController;
-use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ParkingSessionController;
 use App\Http\Controllers\PaymentController;
-use App\Http\Controllers\Auth\AuthenticatedSessionController;
-use App\Http\Controllers\Auth\LoginController;
-use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\ScheduleController;
+use App\Http\Controllers\StreetController;
+
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\NewPasswordController;
-use App\Http\Controllers\StreetController;
+
+use App\Http\Controllers\ZoneController;
+use App\Models\Zone;
+
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 Route::get('/dashboard', [DashboardController::class, 'user'])->name('dashboard');
@@ -113,6 +114,13 @@ Route::post('/admin/notifications/user/{userId}/send', [NotificationController::
 Route::fallback(function () {
     return redirect()->route('login');
 });
-
+Route::get('/zones/{zone}/rate', function (Zone $zone) {
+    return Zone::where('id', $zone->id)->get(['rate']);
+});
+Route::post('/payment/confirm', [PaymentController::class, 'confirm'])->name('payment.confirm');
+// In routes/web.php
+Route::post('/mercadopago/webhook', [PaymentController::class, 'webhook'])
+    ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class])
+    ->name('mercadopago.webhook');
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';

@@ -37,7 +37,7 @@ class Zone extends Model
             ->where('end_hour', '>=', $currentTime)
             ->first();
 
-        return $schedule ? $schedule->rate : 100;
+        return $schedule ? $schedule->rate : $this->rate;
     }
 }
 
