@@ -8,8 +8,7 @@ use App\Models\Street;
 use App\Models\Zone;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Log; // ← AÑADIDO
 
 class ParkingSessionController extends Controller
 {
@@ -76,26 +75,42 @@ class ParkingSessionController extends Controller
         $endDateTime = $startDateTime->copy()->addMinutes($durationInMinutes);
         $amount = ($durationInMinutes / 60) * $rate;
 
-        session([
-            'parking_data' => [
-                'car_id' => $validated['car_id'],
-                'zone_id' => $validated['zone_id'],
-                'street_id' => $validated['street_id'],
-                'start_time' => $startDateTime,
-                'end_time' => $endDateTime,
-                'duration' => $durationInMinutes,
-                'rate' => $rate,
-                'amount' => $amount,
-                'license_plate' => $car->license_plate ?? strtoupper($car->car_plate ?? 'N/A'),
-            ]
+        // CREAR LA SESIÓN EN LA BASE DE DATOS
+        $parkingSession = ParkingSession::create([
+            'car_id' => $validated['car_id'],
+            'zone_id' => $validated['zone_id'],
+            'street_id' => $validated['street_id'],
+            'user_id' => auth()->id(),
+            'start_time' => $startDateTime,
+            'end_time' => $endDateTime,
+            'duration' => $durationInMinutes,
+            'amount' => $amount,
+            'status' => 'pending',
+            'payment_status' => 'pending',
+            'metodo_pago' => 'tarjeta',
+            'license_plate' => $car->license_plate ?? $car->car_plate ?? 'N/A',
         ]);
 
-        Log::info('Redirigiendo a payment.initiate con formulario', ['session' => session('parking_data')]);
+        Log::info('Sesión creada', ['session_id' => $parkingSession->id]);
 
-        // Crear un formulario oculto para enviar los datos como POST
-        return view('payment.redirect', ['parking_data' => session('parking_data')]);
+        // GUARDAR EN SESIÓN PARA EL PAGO
+        session([
+            'parking_session_id' => $parkingSession->id,
+            'parking_amount' => $amount,
+        ]);
+
+        // LOG ANTES DEL REDIRECT
+        Log::info('REDIRIGIENDO A PAGO', [
+            'session_id' => $parkingSession->id,
+            'amount' => $amount,
+            'route' => route('payment.initiate'),
+            'url' => url(route('payment.initiate'))
+        ]);
+
+        // REDIRECT FINAL
+        return redirect()->route('payment.initiate');
     }
-    
+
     public function show()
     {
         $sessions = ParkingSession::where('user_id', auth()->id())
@@ -146,7 +161,7 @@ class ParkingSessionController extends Controller
         try {
             $session->update([
                 'status' => 'cancelled',
-                'end_time' => now() // Actualiza el fin real
+                'end_time' => now()
             ]);
 
             Log::info('Estacionamiento finalizado manualmente', ['session_id' => $id]);
@@ -168,8 +183,6 @@ class ParkingSessionController extends Controller
         }
     }
 
-    // app/Http/Controllers/ParkingSessionController.php
-
     public function checkActive($carId)
     {
         try {
@@ -180,7 +193,7 @@ class ParkingSessionController extends Controller
 
             return response()->json(['active' => $active]);
         } catch (\Exception $e) {
-            \Log::error('Error en checkActive', ['error' => $e->getMessage()]);
+            Log::error('Error en checkActive', ['error' => $e->getMessage()]);
             return response()->json(['error' => 'Error interno'], 500);
         }
     }
