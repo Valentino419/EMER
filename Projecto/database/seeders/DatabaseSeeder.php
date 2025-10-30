@@ -22,7 +22,7 @@ class DatabaseSeeder extends Seeder
         User::factory(10)->create();
           
          
-        // $this->call(ZoneSeeder::class);
+         $this->call(ZoneSeeder::class);
         // $this->call(CarSeeder::class);
        
     }

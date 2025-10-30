@@ -2,16 +2,18 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
+use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
+use Illuminate\Auth\Events\Login;
+use App\Providers\SendWelcomeOnLogin;
 
 class AppServiceProvider extends ServiceProvider
 {
     /**
      * Register any application services.
      */
+   
     public function register(): void
     {
-        //
     }
 
     /**
@@ -21,4 +23,10 @@ class AppServiceProvider extends ServiceProvider
     {
         //
     }
+    
+    protected $listen = [
+    \Illuminate\Auth\Events\Login::class => [
+        \App\Listeners\SendWelcomeOnLogin::class,
+    ],
+];
 }

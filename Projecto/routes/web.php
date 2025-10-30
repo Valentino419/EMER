@@ -84,9 +84,10 @@ Route::post('/check-zone', [ZoneController::class, 'checkZone']);
 
 // Rutas para parking sessions (usa ParkingSessionController para create inicial)
 Route::get('/parking/create', [ParkingSessionController::class, 'create'])->name('parking.create');
+Route::post('/parking/{id}/end', [ParkingSessionController::class, 'end'])->name('parking.end');
 Route::post('/parking', [ParkingSessionController::class, 'store'])->name('parking.store'); // Crea sesión pending
-Route::post('/parking/show', [ParkingSessionController::class, 'show'])->name('parking.show');
 Route::get('/parking/{parkingSession?}', [ParkingSessionController::class, 'show'])->name('parking.show');
+Route::get('/api/parking/check-active/{carId}', [ParkingSessionController::class, 'checkActive'])->middleware('auth');
 
 
 Route::get('/forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');

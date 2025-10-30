@@ -1,14 +1,15 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>EMER - Dashboard Usuario</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
-            background-color: #f8f9fa;
+            background-color: #ffffff !important;
             font-family: 'Segoe UI', sans-serif;
             margin: 0;
             padding: 0;
@@ -46,6 +47,7 @@
             max-width: 1100px;
             margin: 30px auto;
             padding: 0 15px;
+            background-color: #ffffff !important;
         }
 
         h1 {
@@ -57,6 +59,7 @@
         .text-muted {
             font-size: 0.95em;
             margin-bottom: 30px;
+            color: #6b7280;
         }
 
         .card-menu {
@@ -65,11 +68,6 @@
             background-color: #ffffff;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
         }
 
         .card-menu:hover {
@@ -80,11 +78,6 @@
         .card-menu .card-body {
             padding: 25px;
             text-align: center;
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
         }
 
         .card-menu .emoji {
@@ -98,65 +91,122 @@
             font-weight: 500;
             color: #2c3e50;
             margin-bottom: 15px;
-            text-align: center;
         }
 
-        .btn {
+        .card-menu .btn {
             padding: 8px 20px;
             font-weight: 500;
             border-radius: 5px;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-            display: block;
-            margin: 0 auto;
+            border: 2px solid rgba(0, 0, 0, 0.15);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
         }
 
-        .btn-primary {
+        .card-menu .btn-primary {
             background-color: #4a90e2;
-            border: none;
-        }
-
-        .btn-primary:hover {
-            background-color: #357abd;
-            transform: translateY(-1px);
-        }
-
-        .btn-success {
-            background-color: #28a745;
-            border: none;
-        }
-
-        .btn-success:hover {
-            background-color: #218838;
-            transform: translateY(-1px);
-        }
-
-        #active-parking-widget {
-            position: fixed;
-            bottom: 0;
-            right: 0;
-            margin: 20px;
-            padding: 15px;
-            background-color: #4a90e2;
+            border-color: rgba(0, 0, 0, 0.15);
             color: white;
-            border-radius: 8px;
-            min-width: 200px;
-            z-index: 1000;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            display: none;
         }
 
-        #active-parking-widget h5 {
+        .card-menu .btn-primary:hover {
+            background-color: #357abd;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.25);
+        }
+
+        .card-menu .btn-success {
+            background-color: #28a745;
+            border-color: rgba(0, 0, 0, 0.15);
+            color: white;
+        }
+
+        .card-menu .btn-success:hover {
+            background-color: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.25);
+        }
+
+        .btn-light {
+            background-color: #e9ecef;
+            color: #2c3e50;
+            border: none;
+        }
+
+        .btn-light:hover {
+            background-color: #d1d9e6;
+            transform: translateY(-1px);
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+        }
+
+        .btn-danger:hover {
+            background-color: #b02a37;
+            transform: translateY(-2px);
+        }
+
+        .active-sessions-section {
+            margin-top: 30px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .active-sessions-section h3 {
+            color: #1a3c6d;
+            font-weight: 600;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            width: 100%;
+        }
+
+        .active-parking-widget {
+            max-width: 350px;
+            flex: 1 1 auto;
+            padding: 15px;
+            background-color: ##bad8ff !important;
+            color: #2c3e50;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .active-parking-widget:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+        }
+
+        .active-parking-widget h5 {
             margin: 0 0 10px 0;
             font-size: 1.1em;
+            font-weight: 600;
+            color: #1a3c6d;
         }
 
-        #active-parking-widget p {
-            margin: 0 0 10px 0;
+        .active-parking-widget p {
+            margin: 5px 0;
+            font-size: 0.9em;
         }
 
-        #active-parking-widget button {
+        .active-parking-widget button {
             width: 100%;
             margin-top: 5px;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .emoji {
+            margin-right: 6px;
+            font-size: 1em;
+        }
+
+        .alert-success,
+        .alert-danger {
+            border-radius: 8px;
+            margin-bottom: 20px;
         }
 
         @media (max-width: 768px) {
@@ -177,6 +227,17 @@
                 width: 100%;
                 margin-bottom: 20px;
             }
+
+            .active-sessions-section {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .active-parking-widget {
+                width: 90%;
+                margin-left: auto;
+                margin-right: auto;
+            }
         }
     </style>
 </head>
@@ -184,7 +245,7 @@
 <body>
     <nav class="navbar">
         <span class="navbar-text">
-            Bienvenido, <strong>{{ Auth::user()->name ?? 'Usuario' }}</strong>
+            Bienvenido, <strong>{{ $user->name ?? 'Usuario' }}</strong>
         </span>
         <form action="{{ route('logout') }}" method="POST" class="mb-0">
             @csrf
@@ -193,102 +254,140 @@
     </nav>
 
     <div class="container">
-        <h1 class="text-center mb-4">Dashboard Usuario</h1>
+        <h1 class="text-center mb-4">{{ $data['title'] }}</h1>
         <p class="text-center text-muted mb-5">Consulta y gestiona tus autos, pagos y notificaciones.</p>
 
+        @if (session('success'))
+            <div class="alert alert-success">
+                {{ session('success') }}
+            </div>
+        @endif
+        @if ($errors->any())
+            <div class="alert alert-danger">
+                <ul class="mb-0">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
         <div class="row g-4 justify-content-center">
-            <div class="col-md-4">
-                <div class="card card-menu">
-                    <div class="card-body">
-                        <span class="emoji">🚗</span>
-                        <h5 class="card-title">Mis Autos</h5>
-                        <a href="{{ route('cars.index') }}" class="btn btn-primary">Ver Autos</a>
+            @foreach ($data['widgets'] as $widget)
+                <div class="col-md-4">
+                    <div class="card card-menu">
+                        <div class="card-body">
+                            <span class="emoji">
+                                @if ($widget['name'] == 'Mis Autos') 🚗
+                                @elseif ($widget['name'] == 'Iniciar Estacionamiento') 🅿️
+                                @elseif ($widget['name'] == 'Multas') ⚠️
+                                @elseif ($widget['name'] == 'Zonas') 🌍
+                                @elseif ($widget['name'] == 'Historial de Estacionamientos') 📋
+                                @else 🛠️
+                                @endif
+                            </span>
+                            <h5 class="card-title">{{ $widget['name'] }}</h5>
+                            <a href="{{ $widget['link'] }}" class="btn {{ $widget['name'] == 'Iniciar Estacionamiento' ? 'btn-success' : 'btn-primary' }}">Ir</a>
+                        </div>
                     </div>
                 </div>
-            </div>
-
-            <div class="col-md-4">
-                <div class="card card-menu">
-                    <div class="card-body">
-                        <span class="emoji">🅿️</span>
-                        <h5 class="card-title">Iniciar estacionamiento</h5>
-                        <a href="{{ route('parking.create') }}" class="btn btn-success">Iniciar</a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-4">
-                <div class="card card-menu">
-                    <div class="card-body">
-                        <span class="emoji">⚠️</span>
-                        <h5 class="card-title">Multas</h5>
-                        <a href="{{ route('infractions.index') }}" class="btn btn-primary">Ver Infracciones</a>
-                    </div>
-                </div>
-            </div>
-
-<<<<<<< HEAD
-            <!-- Fila combinada para Zonas e Historial -->
-=======
->>>>>>> 746ce726e832a4b04449245a3db594b7c10cc243
-            <div class="col-md-6">
-                <div class="card card-menu">
-                    <div class="card-body">
-                        <span class="emoji">🌍</span>
-                        <h5 class="card-title">Zonas</h5>
-                        <a href="{{ route('zone.index') }}" class="btn btn-primary">Gestionar Zonas</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card card-menu">
-                <div class="card-body">
-                    <span class="emoji">📋</span>
-                    <h5 class="card-title">Historial de Estacionamientos</h5>
-                    <a href="{{ route('parking.show') }}" class="btn btn-primary">Ver Historial</a>
-                </div>
-            </div>
+            @endforeach
         </div>
 
-        <!-- Ventanitas de estacionamientos activos -->
-        @php
-            $activeSessions = ParkingSession::where('user_id', auth()->id())
-                ->where('status', 'active')
-                ->with('car')
-                ->get();
-        @endphp
-        @foreach ($activeSessions as $session)
-            <?php
-                $start = Carbon::parse($session->start_time);
-                $end = $start->copy()->addMinutes($session->duration);
-                $now = Carbon::now();
-                $timeLeft = max(0, $end->diffInSeconds($now));
-                $hours = floor($timeLeft / 3600);
-                $minutes = floor(($timeLeft % 3600) / 60);
-                $seconds = $timeLeft % 60;
-            ?>
-            <div id="active-parking-widget-{{ $session->id }}" style="display: block;">
-                <h5>Estacionamiento Activo ({{ $session->car->license_plate ?? $session->car->car_plate }})</h5>
-                <p>Tiempo restante: {{ $hours }}h {{ $minutes }}m {{ $seconds }}s</p>
-                <button id="go-to-parking-{{ $session->id }}" class="btn btn-light btn-sm mt-2">Ver Detalles</button>
-                <form action="{{ route('parking.end', $session->id) }}" method="POST" style="display: inline;">
-                    @csrf
-                    @method('POST')
-                    <button type="submit" class="btn btn-danger btn-sm mt-2">Finalizar</button>
-                </form>
+        <!-- Sesiones activas -->
+        @if(isset($data['activeSessions']) && $data['activeSessions']->isNotEmpty())
+            <div class="active-sessions-section">
+                <h3>Sesiones de Estacionamiento Activas</h3>
+                @foreach ($data['activeSessions'] as $session)
+                    <div id="active-parking-widget-{{ $session->id }}" class="active-parking-widget">
+                        <h5><span class="emoji">🚗</span> Estacionamiento Activo</h5>
+                        <p><strong>Vehículo:</strong> {{ $session->car->license_plate ?? $session->car->car_plate }}</p>
+                        <p><strong>Zona:</strong> {{ $session->street->zone->name }}</p>
+                        <p><strong>Calle:</strong> {{ $session->street->name }}</p>
+                        <p><strong>Hora de inicio:</strong> {{ $session->start_time->format('d/m/Y H:i') }}</p>
+                        <p><strong>Duración:</strong> {{ $session->duration }} minutos</p>
+                        <p><strong>Monto:</strong> ${{ number_format($session->amount, 2) }}</p>
+                        <p id="dashboard-timer-{{ $session->id }}">Cargando...</p>
+                        <button class="btn btn-light btn-sm mt-2" onclick="window.location.href='{{ route('parking.create') }}'">Ver Detalles</button>
+                        <form id="end-parking-form-{{ $session->id }}" action="{{ route('parking.end', $session->id) }}" method="POST">
+                            @csrf
+                            @method('POST')
+                            <button type="submit" class="btn btn-danger btn-sm mt-2">Finalizar</button>
+                        </form>
+                    </div>
+                @endforeach
             </div>
-            <script>
-                document.getElementById('go-to-parking-{{ $session->id }}')?.addEventListener('click', function() {
-                    window.location.href = '{{ route('parking.show', $session->id) }}';
-                });
-            </script>
-        @endforeach
+        @endif
     </div>
-</body>
-<<<<<<< HEAD
-</html>
-=======
 
+
+    <script>
+        // Temporizadores para sesiones activas
+        const timers = {};
+        @if(isset($data['activeSessions']) && $data['activeSessions']->isNotEmpty())
+            @foreach ($data['activeSessions'] as $session)
+                timers[{{ $session->id }}] = {
+                    timeLeft: {{ $session->duration * 60 - now()->diffInSeconds($session->start_time) }},
+                    interval: null
+                };
+                (function(sessionId) {
+                    const widget = document.getElementById('active-parking-widget-' + sessionId);
+                    const timerElement = document.getElementById('dashboard-timer-' + sessionId);
+                    if (timers[sessionId].timeLeft > 0) {
+                        widget.style.display = 'block';
+                        timers[sessionId].interval = setInterval(() => updateTimer(sessionId, timerElement, widget), 1000);
+                    }
+                })({{ $session->id }});
+            @endforeach
+        @endif
+
+        function updateTimer(sessionId, timerElement, widget) {
+            if (timers[sessionId].timeLeft > 0) {
+                timers[sessionId].timeLeft--;
+                const hours = Math.floor(timers[sessionId].timeLeft / 3600);
+                const minutes = Math.floor((timers[sessionId].timeLeft % 3600) / 60);
+                const seconds = timers[sessionId].timeLeft % 60;
+                timerElement.textContent = `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')} restantes`;
+            } else {
+                clearInterval(timers[sessionId].interval);
+                timerElement.textContent = 'Tiempo terminado';
+                widget.style.display = 'none';
+                alert('El tiempo de estacionamiento ha terminado.');
+            }
+        }
+
+        // Manejar finalización de estacionamientos
+        @if(isset($data['activeSessions']) && $data['activeSessions']->isNotEmpty())
+            @foreach ($data['activeSessions'] as $session)
+                document.getElementById('end-parking-form-{{ $session->id }}').addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    try {
+                        const response = await fetch(this.action, {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                'Accept': 'application/json',
+                            },
+                        });
+                        const data = await response.json();
+                        if (response.ok && data.success) {
+                            alert(data.message);
+                            clearInterval(timers[{{ $session->id }}].interval);
+                            document.getElementById('active-parking-widget-{{ $session->id }}').style.display = 'none';
+                            localStorage.removeItem('parkingTimeLeft');
+                            localStorage.removeItem('parkingSessionId');
+                            window.location.reload();
+                        } else {
+                            alert(data.message || 'Error desconocido al finalizar el estacionamiento. Código: ' + response.status);
+                            console.error('Respuesta del servidor:', data, 'Estado:', response.status);
+                        }
+                    } catch (error) {
+                        console.error('Error al finalizar estacionamiento:', error);
+                        alert('Error al finalizar el estacionamiento: ' + error.message);
+                    }
+                });
+            @endforeach
+        @endif
+    </script>
+</body>
 </html>
->>>>>>> 746ce726e832a4b04449245a3db594b7c10cc243
