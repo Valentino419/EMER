@@ -124,9 +124,10 @@ Route::middleware(['auth'])->group(function () {
         ->name('notifications.sendUser');
 });
 
+Route::post('/webhook/mercadopago', [App\Http\Controllers\PaymentController::class, 'webhook'])->name('webhook.mercadopago');
 
 //Route::fallback(function () {
-  //  return redirect()->route('login');
+//  return redirect()->route('login');
 //});
 
 
