@@ -2,151 +2,89 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ParkingSession;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use MercadoPago\SDK;
-use MercadoPago\Preference;
-use MercadoPago\Item;
 
 class PaymentController extends Controller
 {
     public function initiate()
     {
-        $data = session('parking_data');
-
-        if (!$data) {
-            return redirect()->route('parking.create')
-                ->withErrors(['error' => 'Datos de estacionamiento perdidos. Intenta de nuevo.']);
-        }
-
-        $preference = new Preference();
-        $item = new Item();
-        $item->title = "Estacionamiento - {$data['license_plate']}";
-        $item->quantity = 1;
-        $item->unit_price = floatval($data['amount']);
-        $item->currency_id = 'ARS';
-        $preference->items = [$item];
-
-        $preference->back_urls = [
-            'success' => route('payment.success'),
-            'failure' => route('payment.failure'),
-            'pending' => route('payment.pending'),
-        ];
-        $preference->auto_return = 'approved';
-        $preference->external_reference = 'parking_' . auth()->id() . '_' . time();
-
-        $preference->save();
-
-        // Guardar para verificar después
-        session(['preference_id' => $preference->id]);
-
-        Log::info('Preferencia MP creada', [
-            'preference_id' => $preference->id,
-            'amount' => $data['amount'],
-            'user_id' => auth()->id()
+        Log::info('INICIANDO PAGO MP', [
+            'session_id' => session('parking_session_id'),
+            'amount' => session('parking_amount'),
+            'url' => url(''),
+            'token' => substr(env('MERCADOPAGO_ACCESS_TOKEN'), 0, 20) . '...'
         ]);
 
-        return redirect($preference->init_point);
+        $sessionId = session('parking_session_id');
+        $amount = session('parking_amount');
+
+        if (!$sessionId || !$amount) {
+            Log::error('FALTAN DATOS DE SESIÓN');
+            return redirect()->route('parking.create')
+                ->with('error', 'No se pudo iniciar el pago. Intenta de nuevo.');
+        }
+
+        $response = Http::withToken(env('MERCADOPAGO_ACCESS_TOKEN'))
+            ->post('https://api.mercadopago.com/checkout/preferences', [
+                'items' => [
+                    [
+                        'title' => 'Estacionamiento EMER',
+                        'quantity' => 1,
+                        'currency_id' => 'ARS',
+                        'unit_price' => (float)$amount,
+                    ]
+                ],
+                'back_urls' => [
+                    'success' => url(route('payment.success')),
+                    'failure' => url(route('payment.failure')),
+                    'pending' => url(route('payment.pending'))
+                ],
+                'external_reference' => (string)$sessionId,
+                'notification_url' => url('/webhook/mercadopago'),
+            ]);
+
+        if ($response->failed()) {
+            Log::error('ERROR MERCADO PAGO', [
+                'status' => $response->status(),
+                'body' => $response->body(),
+                'request' => $response->transferStats?->getRequest()?->getBody()->getContents()
+            ]);
+            return redirect()->route('parking.create')
+                ->with('error', 'Error al conectar con Mercado Pago. Intenta más tarde.');
+        }
+
+        $preference = $response->json();
+        $initPoint = $preference['init_point'] ?? null;
+
+        if (!$initPoint) {
+            Log::error('NO HAY INIT_POINT', $preference);
+            return redirect()->route('parking.create')
+                ->with('error', 'No se pudo generar el enlace de pago.');
+        }
+
+        Log::info('REDIRIGIENDO A MP', ['init_point' => $initPoint]);
+
+        session()->forget(['parking_session_id', 'parking_amount']);
+
+        return redirect($initPoint);
     }
 
-    /**
-     * Pago aprobado → crea sesión ACTIVE
-     */
     public function success()
     {
-        $data = session('parking_data');
-        if (!$data) {
-            return redirect()->route('parking.create')
-                ->withErrors(['error' => 'Datos perdidos. Intenta de nuevo.']);
-        }
-
-        $paymentId = request('payment_id');
-        if (!$paymentId) {
-            return $this->failure();
-        }
-
-        try {
-            $payment = \MercadoPago\Payment::find_by_id($paymentId);
-
-            if ($payment->status === 'approved') {
-                DB::transaction(function () use ($data, $paymentId) {
-                    ParkingSession::create([
-                        'user_id' => auth()->id(),
-                        'car_id' => $data['car_id'],
-                        'zone_id' => $data['zone_id'],
-                        'street_id' => $data['street_id'],
-                        'license_plate' => $data['license_plate'],
-                        'start_time' => $data['start_time'],
-                        'end_time' => $data['end_time'],
-                        'duration' => $data['duration'],
-                        'rate' => $data['rate'],
-                        'amount' => $data['amount'],
-                        'status' => 'active',
-                        'payment_status' => 'completed',
-                        'payment_id' => $paymentId,
-                    ]);
-                });
-
-                // Limpiar datos temporales
-                session()->forget(['parking_data', 'preference_id']);
-
-                Log::info('Estacionamiento iniciado tras pago', [
-                    'payment_id' => $paymentId,
-                    'amount' => $data['amount']
-                ]);
-
-                return redirect()->route('parking.create')
-                    ->with('success', '¡Pago exitoso! Tu estacionamiento está activo.');
-            }
-        } catch (\Exception $e) {
-            Log::error('Error verificando pago', [
-                'payment_id' => $paymentId,
-                'error' => $e->getMessage()
-            ]);
-        }
-
-        return $this->failure();
+        return redirect()->route('parking.create')
+            ->with('success', '¡Pago realizado con éxito!');
     }
 
-    /**
-     * Pago rechazado
-     */
     public function failure()
     {
-        session()->forget(['parking_data', 'preference_id']);
-
         return redirect()->route('parking.create')
-            ->withErrors(['error' => 'El pago fue rechazado. Intenta nuevamente.']);
+            ->with('error', 'El pago fue rechazado.');
     }
 
-    /**
-     * Pago pendiente
-     */
     public function pending()
     {
         return redirect()->route('parking.create')
-            ->with('info', 'Pago pendiente. Te avisaremos cuando se acredite.');
-    }
-
-    /**
-     * Webhook (opcional, para producción)
-     */
-    public function webhook(Request $request)
-    {
-        $payload = $request->all();
-
-        if ($request->query('topic') === 'payment') {
-            $paymentId = $request->query('data.id');
-            try {
-                $payment = \MercadoPago\Payment::find_by_id($paymentId);
-                Log::info('Webhook recibido', ['payment_id' => $paymentId, 'status' => $payment->status]);
-            } catch (\Exception $e) {
-                Log::error('Error en webhook', ['error' => $e->getMessage()]);
-            }
-        }
-
-        return response()->json(['status' => 'received']);
+            ->with('success', 'Pago pendiente. Te avisaremos cuando se acredite.');
     }
 }
