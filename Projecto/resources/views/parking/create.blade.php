@@ -4,6 +4,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <style>
+        /* [Mantené los estilos existentes sin cambios] */
         body {
             background-color: #ffffff !important;
             font-family: 'Segoe UI', sans-serif;
@@ -249,14 +250,11 @@
             ←
         </a>
 
-        <!-- FORMULARIO DIRECTO A PAGO -->
-        <form action="{{ route('payment.initiate') }}" method="POST" id="parking-form">
+        <form action="{{ route('parking.store') }}" method="POST" id="parking-form">
             @csrf
-
             <div class="form-section">
                 <div class="form-title">Datos del Estacionamiento</div>
                 <div class="form-body">
-
                     <!-- Vehículo -->
                     <div class="mb-4">
                         <label for="car_id">Vehículo</label>
@@ -266,7 +264,9 @@
                                 <option value="{{ $car->id }}">{{ $car->license_plate ?? $car->car_plate }}</option>
                             @endforeach
                         </select>
-                        @error('car_id') <div class="text-red-600">{{ $message }}</div> @enderror
+                        @error('car_id')
+                            <div class="text-red-600">{{ $message }}</div>
+                        @enderror
                     </div>
 
                     <!-- Zona -->
@@ -276,11 +276,12 @@
                             <option value="">Selecciona una zona</option>
                             @foreach ($zones as $zone)
                                 <option value="{{ $zone->id }}" data-rate="{{ $zone->rate ?? 5.0 }}">
-                                    {{ $zone->name }}
-                                </option>
+                                    {{ $zone->name }}</option>
                             @endforeach
                         </select>
-                        @error('zone_id') <div class="text-red-600">{{ $message }}</div> @enderror
+                        @error('zone_id')
+                            <div class="text-red-600">{{ $message }}</div>
+                        @enderror
                     </div>
 
                     <!-- Calle -->
@@ -290,18 +291,21 @@
                             <option value="">Seleccione una calle</option>
                             @foreach ($streets as $street)
                                 <option value="{{ $street->id }}" data-zone-id="{{ $street->zone_id }}">
-                                    {{ $street->name }}
-                                </option>
+                                    {{ $street->name }}</option>
                             @endforeach
                         </select>
-                        @error('street_id') <div class="text-red-600">{{ $message }}</div> @enderror
+                        @error('street_id')
+                            <div class="text-red-600">{{ $message }}</div>
+                        @enderror
                     </div>
 
                     <!-- Hora de inicio -->
                     <div class="mb-4">
                         <label for="start_time">Hora de inicio</label>
                         <input type="time" name="start_time" id="start_time" class="form-control" required>
-                        @error('start_time') <div class="text-red-600">{{ $message }}</div> @enderror
+                        @error('start_time')
+                            <div class="text-red-600">{{ $message }}</div>
+                        @enderror
                     </div>
 
                     <!-- Duración -->
@@ -316,21 +320,19 @@
                             <option value="360">6 horas</option>
                             <option value="480">8 horas</option>
                         </select>
-                        @error('duration') <div class="text-red-600">{{ $message }}</div> @enderror
+                        @error('duration')
+                            <div class="text-red-600">{{ $message }}</div>
+                        @enderror
                     </div>
 
                     <!-- Monto estimado -->
                     <div class="mb-4">
                         <label>Monto Estimado</label>
-                        <p id="amount-preview" class="font-bold text-lg">$00.00</p>
+                        <p id="amount-preview" class="font-bold text-lg">$0.00</p>
                     </div>
 
                     <input type="hidden" name="timezone_offset" id="timezone_offset">
-
-                    <!-- BOTÓN DIRECTO A PAGO -->
-                    <button type="submit" class="btn-blue">
-                        Pagar y Iniciar <span id="amount-button">$00.00</span>
-                    </button>
+                    <button type="submit" class="btn-blue">Pagar y Iniciar <span id="amount-button">$0.00</span></button>
                 </div>
             </div>
         </form>
@@ -361,75 +363,84 @@
     </div>
 
     <script>
-        // Configuración inicial
-        const now = new Date();
-        const currentTime = now.toTimeString().slice(0, 5);
-        document.getElementById('start_time').value = currentTime;
-        document.getElementById('start_time').min = currentTime;
-        document.getElementById('timezone_offset').value = now.getTimezoneOffset();
+        document.addEventListener('DOMContentLoaded', () => {
+            const now = new Date();
+            document.getElementById('start_time').value = now.toTimeString().slice(0, 5);
+            document.getElementById('start_time').min = now.toTimeString().slice(0, 5);
+            document.getElementById('timezone_offset').value = now.getTimezoneOffset();
 
-        // Actualizar calles y monto
-        document.getElementById('zone_id').addEventListener('change', async function() {
-            const zoneId = this.value;
-            const streetSelect = document.getElementById('street_id');
-            const rate = this.selectedOptions[0]?.dataset.rate || 5.0;
+            const updateAmount = () => {
+                const zoneRate = document.getElementById('zone_id')?.selectedOptions[0]?.dataset.rate || 5.0;
+                const duration = parseInt(document.getElementById('duration')?.value) || 0;
+                const amount = (duration / 60) * zoneRate;
+                const formatted = `$${amount.toFixed(2)}`;
+                document.getElementById('amount-preview').textContent = formatted;
+                document.getElementById('amount-button').textContent = formatted;
+            };
 
-            if (zoneId) {
-                try {
-                    const response = await fetch(`/api/zones/${zoneId}/streets`);
-                    const streets = await response.json();
+            document.getElementById('zone_id').addEventListener('change', async function() {
+                const zoneId = this.value;
+                const streetSelect = document.getElementById('street_id');
+                const rate = this.selectedOptions[0]?.dataset.rate || 5.0;
+
+                if (zoneId) {
+                    try {
+                        const response = await fetch(`/api/zones/${zoneId}/streets`);
+                        const streets = await response.json();
+                        streetSelect.innerHTML = '<option value="">Seleccione una calle</option>';
+                        streets.forEach(s => {
+                            const opt = new Option(s.name, s.id);
+                            opt.dataset.zoneId = s.zone_id;
+                            streetSelect.add(opt);
+                        });
+                    } catch (e) {
+                        console.error(e);
+                        streetSelect.innerHTML = '<option value="">Seleccione una calle</option>';
+                        @foreach ($streets as $street)
+                            streetSelect.innerHTML +=
+                                `<option value="{{ $street->id }}" data-zone-id="{{ $street->zone_id }}">{{ $street->name }}</option>`;
+                        @endforeach
+                    }
+                } else {
                     streetSelect.innerHTML = '<option value="">Seleccione una calle</option>';
-                    streets.forEach(s => {
-                        const opt = new Option(s.name, s.id);
-                        opt.dataset.zoneId = s.zone_id;
-                        streetSelect.add(opt);
-                    });
-                } catch (e) {
-                    console.error(e);
+                    @foreach ($streets as $street)
+                        streetSelect.innerHTML +=
+                            `<option value="{{ $street->id }}" data-zone-id="{{ $street->zone_id }}">{{ $street->name }}</option>`;
+                    @endforeach
                 }
-            }
-            updateAmount(rate);
+                updateAmount(rate);
+            });
+
+            document.getElementById('duration').addEventListener('change', updateAmount);
+            updateAmount(); // Inicializa
+
+            // Temporizadores para sesiones activas
+            @if (isset($activeSessions))
+                @foreach ($activeSessions as $session)
+                    (function() {
+                        const end = new Date('{{ $session->start_time->toIso8601String() }}').getTime() + ({{ $session->duration }} * 60000);
+                        const timerEl = document.getElementById('timer-{{ $session->id }}');
+                        const widget = document.getElementById('active-parking-widget-{{ $session->id }}');
+
+                        const update = () => {
+                            const left = Math.max(0, Math.floor((end - Date.now()) / 1000));
+                            if (left === 0) {
+                                timerEl.textContent = 'Tiempo terminado';
+                                widget.style.opacity = '0.7';
+                                clearInterval(interval);
+                                setTimeout(() => location.reload(), 2000);
+                                return;
+                            }
+                            const h = String(Math.floor(left / 3600)).padStart(2, '0');
+                            const m = String(Math.floor((left % 3600) / 60)).padStart(2, '0');
+                            const s = String(left % 60).padStart(2, '0');
+                            timerEl.textContent = `${h}:${m}:${s} restantes`;
+                        };
+                        update();
+                        const interval = setInterval(update, 1000);
+                    })();
+                @endforeach
+            @endif
         });
-
-        document.getElementById('duration').addEventListener('change', () => {
-            const rate = document.getElementById('zone_id').selectedOptions[0]?.dataset.rate || 5.0;
-            updateAmount(rate);
-        });
-
-        function updateAmount(rate) {
-            const duration = parseInt(document.getElementById('duration').value) || 0;
-            const amount = (duration / 60) * rate;
-            const formatted = `$${amount.toFixed(2)}`;
-            document.getElementById('amount-preview').textContent = formatted;
-            document.getElementById('amount-button').textContent = formatted;
-        }
-
-        // Temporizadores
-        @if (isset($activeSessions))
-            @foreach ($activeSessions as $session)
-                (function() {
-                    const end = new Date('{{ $session->start_time->toIso8601String() }}').getTime() + ({{ $session->duration }} * 60000);
-                    const timerEl = document.getElementById('timer-{{ $session->id }}');
-                    const widget = document.getElementById('active-parking-widget-{{ $session->id }}');
-
-                    const update = () => {
-                        const left = Math.max(0, Math.floor((end - Date.now()) / 1000));
-                        if (left === 0) {
-                            timerEl.textContent = 'Tiempo terminado';
-                            widget.style.opacity = '0.7';
-                            clearInterval(interval);
-                            setTimeout(() => location.reload(), 2000);
-                            return;
-                        }
-                        const h = String(Math.floor(left / 3600)).padStart(2, '0');
-                        const m = String(Math.floor((left % 3600) / 60)).padStart(2, '0');
-                        const s = String(left % 60).padStart(2, '0');
-                        timerEl.textContent = `${h}:${m}:${s} restantes`;
-                    };
-                    update();
-                    const interval = setInterval(update, 1000);
-                })();
-            @endforeach
-        @endif
     </script>
 @endsection

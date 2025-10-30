@@ -7,6 +7,9 @@ use App\Models\Street;
 use App\Models\Schedule;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\PaymentController;
+
+Route::post('/webhook/mercadopago', [PaymentController::class, 'webhook']);
 
 Route::get('/zones/{zone}/streets', function (Zone $zone) {
     return Street::where('zone_id', $zone->id)->get(['id', 'name', 'zone_id','rate']);
