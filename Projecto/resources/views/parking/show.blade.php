@@ -215,9 +215,15 @@
                     </tr>
                     @if ($session->payment_id)
                         <tr>
-                            <th>ID de Pago (Stripe)</th>
-                            <td>{{ $session->payment_id }}</td>
+                            <th>Monto Pagado</th>
+                            <td>ARS {{ number_format($session->amount, 2) }}</td>
                         </tr>
+                        @if ($session->payment_id)
+                            <tr>
+                                <th>ID de Pago (Mercado Pago)</th>
+                                <td>{{ $session->payment_id }}</td>
+                            </tr>
+                        @endif
                     @endif
                 </tbody>
             </table>
