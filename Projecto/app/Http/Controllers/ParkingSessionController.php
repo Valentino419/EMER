@@ -8,8 +8,7 @@ use App\Models\Street;
 use App\Models\Zone;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Log; // ← AÑADIDO
 
 class ParkingSessionController extends Controller
 {
@@ -36,6 +35,8 @@ class ParkingSessionController extends Controller
 
     public function store(Request $request)
     {
+        Log::info('Entrando a store', ['request' => $request->all()]);
+
         $validated = $request->validate([
             'car_id' => 'required|exists:cars,id',
             'zone_id' => 'required|exists:zones,id',
@@ -50,7 +51,6 @@ class ParkingSessionController extends Controller
             return back()->withErrors(['car_id' => 'Vehículo inválido.']);
         }
 
-        // Verificar sesión activa
         if (ParkingSession::where('car_id', $validated['car_id'])
             ->where('user_id', auth()->id())
             ->where('status', 'active')
@@ -61,38 +61,56 @@ class ParkingSessionController extends Controller
 
         $street = Street::findOrFail($validated['street_id']);
         if ($street->zone_id !== (int)$validated['zone_id']) {
-            return back()->withErrors(['street_id' => 'La calle no pertenece a la zona.']);
+            return back()->withErrors(['street_id' => 'Calle no válida.']);
         }
 
         $zone = Zone::findOrFail($validated['zone_id']);
-        $rate = $zone->rate ?? 100.0;
+        $rate = $zone->rate ?? 5.0;
 
         $offsetMinutes = $validated['timezone_offset'];
-        $tzString = sprintf('%+03d:00', -$offsetMinutes / 60);
+        $tzString = sprintf('%+03d:00', - ($offsetMinutes / 60));
         $startDateTime = Carbon::createFromFormat('H:i', $validated['start_time'], $tzString)
             ->setDateFrom(Carbon::now($tzString));
-
-        $durationInMinutes = (int) $validated['duration'];
+        $durationInMinutes = (int)$validated['duration'];
         $endDateTime = $startDateTime->copy()->addMinutes($durationInMinutes);
         $amount = ($durationInMinutes / 60) * $rate;
 
-        // GUARDAR DATOS EN SESIÓN
-        session([
-            'parking_data' => [
-                'car_id' => $validated['car_id'],
-                'zone_id' => $validated['zone_id'],
-                'street_id' => $validated['street_id'],
-                'start_time' => $startDateTime,
-                'end_time' => $endDateTime,
-                'duration' => $durationInMinutes,
-                'rate' => $rate,
-                'amount' => $amount,
-                'license_plate' => $car->license_plate ?? strtoupper($car->car_plate ?? 'N/A'),
-            ]
+        // CREAR LA SESIÓN EN LA BASE DE DATOS
+        $parkingSession = ParkingSession::create([
+            'car_id' => $validated['car_id'],
+            'zone_id' => $validated['zone_id'],
+            'street_id' => $validated['street_id'],
+            'user_id' => auth()->id(),
+            'start_time' => $startDateTime,
+            'end_time' => $endDateTime,
+            'duration' => $durationInMinutes,
+            'amount' => $amount,
+            'status' => 'pending',
+            'payment_status' => 'pending',
+            'metodo_pago' => 'tarjeta',
+            'license_plate' => $car->license_plate ?? $car->car_plate ?? 'N/A',
         ]);
 
+        Log::info('Sesión creada', ['session_id' => $parkingSession->id]);
+
+        // GUARDAR EN SESIÓN PARA EL PAGO
+        session([
+            'parking_session_id' => $parkingSession->id,
+            'parking_amount' => $amount,
+        ]);
+
+        // LOG ANTES DEL REDIRECT
+        Log::info('REDIRIGIENDO A PAGO', [
+            'session_id' => $parkingSession->id,
+            'amount' => $amount,
+            'route' => route('payment.initiate'),
+            'url' => url(route('payment.initiate'))
+        ]);
+
+        // REDIRECT FINAL
         return redirect()->route('payment.initiate');
     }
+
     public function show()
     {
         $sessions = ParkingSession::where('user_id', auth()->id())
@@ -143,7 +161,7 @@ class ParkingSessionController extends Controller
         try {
             $session->update([
                 'status' => 'cancelled',
-                'end_time' => now() // Actualiza el fin real
+                'end_time' => now()
             ]);
 
             Log::info('Estacionamiento finalizado manualmente', ['session_id' => $id]);
@@ -165,8 +183,6 @@ class ParkingSessionController extends Controller
         }
     }
 
-    // app/Http/Controllers/ParkingSessionController.php
-
     public function checkActive($carId)
     {
         try {
@@ -177,7 +193,7 @@ class ParkingSessionController extends Controller
 
             return response()->json(['active' => $active]);
         } catch (\Exception $e) {
-            \Log::error('Error en checkActive', ['error' => $e->getMessage()]);
+            Log::error('Error en checkActive', ['error' => $e->getMessage()]);
             return response()->json(['error' => 'Error interno'], 500);
         }
     }
