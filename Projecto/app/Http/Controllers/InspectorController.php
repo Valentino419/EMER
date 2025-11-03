@@ -1,12 +1,13 @@
 <?php
 
 namespace App\Http\Controllers;
+
+use App\Models\Inspectors;
+use App\Models\Role;
+use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use App\Models\Inspectors;
-use App\Models\User;
-use App\Models\Role;
-use Illuminate\Http\Request;
 
 class InspectorController extends Controller
 {
@@ -17,8 +18,10 @@ class InspectorController extends Controller
         $query = User::with('role') // Eager-load the role relationship
             ->whereHas('role', function ($q) {
                 $q->where('name', 'inspector');
-            })
-            ->orderBy('name');
+
+            })->orWhereHas('role', function ($q) {
+                $q->where('name', 'admin');
+            })->orderBy('name');
 
         if ($search) {
             $query->where(function ($q) use ($search) {
@@ -55,11 +58,11 @@ class InspectorController extends Controller
         $validated['password'] = bcrypt($validated['password']);
         try {
             User::create($validated);
+
             return redirect()->route('inspectors.index')->with('success', 'Inspector creado con éxito.');
         } catch (\Exception $e) {
             return back()->withErrors(['error' => 'Error al crear el inspector.'])->withInput();
         }
-
 
         return redirect()->route('inspectors.index')->with('success', 'Inspector creado con éxito.');
     }
@@ -67,6 +70,7 @@ class InspectorController extends Controller
     public function edit(Inspectors $inspector)
     {
         $users = User::all();
+
         return view('inspectors.edit', compact('inspector', 'users'));
     }
 
@@ -75,8 +79,8 @@ class InspectorController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'surname' => 'required|string|max:255',
-            'dni' => 'required|string|max:20|unique:users,dni,' . $inspector->id,
-            'email' => 'required|email|max:255|unique:users,email,' . $inspector->id,
+            'dni' => 'required|string|max:20|unique:users,dni,'.$inspector->id,
+            'email' => 'required|email|max:255|unique:users,email,'.$inspector->id,
             'password' => 'nullable|string|min:8|confirmed',
             'role_id' => 'required|exists:roles,id',
         ], [
@@ -97,7 +101,7 @@ class InspectorController extends Controller
             DB::beginTransaction();
 
             // Only update password if provided
-            if (!empty($validated['password'])) {
+            if (! empty($validated['password'])) {
                 $validated['password'] = bcrypt($validated['password']);
             } else {
                 unset($validated['password']); // Remove password from update if not provided
@@ -110,8 +114,7 @@ class InspectorController extends Controller
             return redirect()->route('inspectors.index')->with('success', 'Inspector actualizado con éxito.');
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Error updating inspector: ' . $e->getMessage(), ['exception' => $e]);
-
+            Log::error('Error updating inspector: '.$e->getMessage(), ['exception' => $e]);
             return back()->withErrors(['error' => 'Error al actualizar el inspector. Por favor, intenta de nuevo.'])->withInput();
         }
     }
