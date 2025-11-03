@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+    
 
     <style>
         /* [Mantené los estilos existentes sin cambios] */
@@ -333,7 +333,7 @@
 
                     <input type="hidden" name="timezone_offset" id="timezone_offset">
                     <button type="submit" class="btn btn-success">
-                        Iniciar Estacionamiento 
+                        Iniciar Estacionamiento
                     </button>
                     <!--<button type="submit" class="btn-blue">Pagar y Iniciar <span id="amount-button">$0.00</span></button>-->
                 </div>
@@ -355,7 +355,8 @@
                         <p><strong>Monto:</strong> ${{ number_format($session->amount, 2) }}</p>
                         <p id="timer-{{ $session->id }}" class="font-mono font-bold">Cargando...</p>
 
-                        <form action="{{ route('parking.end', $session->id) }}" method="POST">
+                        <form id="end-parking-form-{{ $session->id }}" action="{{ route('parking.end', $session->id) }}"
+                            method="POST" onsubmit="event.preventDefault(); endParking({{ $session->id }})">
                             @csrf
                             <button type="submit" class="btn-danger">Finalizar</button>
                         </form>
@@ -365,91 +366,113 @@
         @endif
     </div>
 
- <script>
+  <script>
     document.addEventListener('DOMContentLoaded', () => {
         const now = new Date();
-        document.getElementById('start_time').value = now.toTimeString().slice(0, 5);
-        document.getElementById('start_time').min = now.toTimeString().slice(0, 5);
-        document.getElementById('timezone_offset').value = now.getTimezoneOffset();
+        const startTimeInput = document.getElementById('start_time');
+        const timezoneOffset = document.getElementById('timezone_offset');
+        const zoneSelect = document.getElementById('zone_id');
+        const streetSelect = document.getElementById('street_id');
+        const durationSelect = document.getElementById('duration');
+        const amountPreview = document.getElementById('amount-preview');
 
-        const updateAmount = () => {
-            const zoneRate = document.getElementById('zone_id')?.selectedOptions[0]?.dataset.rate || 5.0;
-            const duration = parseInt(document.getElementById('duration')?.value) || 0;
-            const amount = (duration / 60) * zoneRate;
-            const formatted = `$${amount.toFixed(2)}`;
-            document.getElementById('amount-preview').textContent = formatted;
-            // document.getElementById('amount-button').textContent = formatted;
+        // Inicialización
+        startTimeInput.value = now.toTimeString().slice(0, 5);
+        startTimeInput.min = now.toTimeString().slice(0, 5);
+        timezoneOffset.value = now.getTimezoneOffset();
+
+        // Datos pre-cargados
+        const streetsData = @json($streets->map(fn($s) => [
+            'id' => $s->id, 'name' => $s->name, 'zone_id' => $s->zone_id
+        ]));
+
+        const updateStreets = (zoneId) => {
+            streetSelect.innerHTML = '<option value="">Seleccione una calle</option>';
+            streetsData
+                .filter(s => !zoneId || s.zone_id == zoneId)
+                .forEach(s => {
+                    const opt = new Option(s.name, s.id);
+                    streetSelect.add(opt);
+                });
         };
 
-        document.getElementById('zone_id').addEventListener('change', async function() {
-            const zoneId = this.value;
-            const streetSelect = document.getElementById('street_id');
+        const updateAmount = () => {
+            const rate = parseFloat(zoneSelect.selectedOptions[0]?.dataset.rate) || 5.0;
+            const duration = parseInt(durationSelect.value) || 0;
+            const amount = (duration / 60) * rate;
+            amountPreview.textContent = `$${amount.toFixed(2)}`;
+        };
 
-            if (zoneId) {
-                try {
-                    const response = await fetch(`/api/zones/${zoneId}/streets`);
-                    const streets = await response.json();
-                    streetSelect.innerHTML = '<option value="">Seleccione una calle</option>';
-                    streets.forEach(s => {
-                        const opt = new Option(s.name, s.id);
-                        opt.dataset.zoneId = s.zone_id;
-                        streetSelect.add(opt);
-                    });
-                } catch (e) {
-                    console.error(e);
-                    streetSelect.innerHTML = '<option value="">Seleccione una calle</option>';
-                    @foreach ($streets as $street)
-                        streetSelect.innerHTML +=
-                            `<option value="{{ $street->id }}" data-zone-id="{{ $street->zone_id }}">{{ $street->name }}</option>`;
-                    @endforeach
-                }
-            } else {
-                streetSelect.innerHTML = '<option value="">Seleccione una calle</option>';
-                @foreach ($streets as $street)
-                    streetSelect.innerHTML +=
-                        `<option value="{{ $street->id }}" data-zone-id="{{ $street->zone_id }}">{{ $street->name }}</option>`;
-                @endforeach
-            }
+        zoneSelect.addEventListener('change', () => {
+            updateStreets(zoneSelect.value);
             updateAmount();
         });
 
-        document.getElementById('duration').addEventListener('change', updateAmount);
+        durationSelect.addEventListener('change', updateAmount);
+        updateStreets(); // inicial
         updateAmount();
 
-        // === CONTADOR EN VIVO (USANDO end_time DE LA BASE DE DATOS) ===
-        @if (isset($activeSessions) && $activeSessions->isNotEmpty())
-            @foreach ($activeSessions as $session)
-                (function() {
-                    const endTime = new Date('{{ $session->end_time->toIso8601String() }}').getTime();
-                    const timerEl = document.getElementById('timer-{{ $session->id }}');
-                    const widget = document.getElementById('active-parking-widget-{{ $session->id }}');
+        // Temporizadores
+        @foreach ($activeSessions as $session)
+            (function() {
+                const end = {{ $session->start_time->addMinutes($session->duration)->timestamp * 1000 }};
+                const timerEl = document.getElementById('timer-{{ $session->id }}');
+                const widget = document.getElementById('active-parking-widget-{{ $session->id }}');
 
-                    const updateTimer = () => {
-                        const now = Date.now();
-                        const diff = Math.floor((endTime - now) / 1000);
-
-                        if (diff <= 0) {
-                            timerEl.textContent = 'EXPIRED';
-                            timerEl.style.color = '#dc3545';
-                            timerEl.style.fontWeight = 'bold';
-                            widget.style.opacity = '0.6';
-                            clearInterval(interval);
-                            setTimeout(() => location.reload(), 3000);
-                            return;
-                        }
-
-                        const hours = String(Math.floor(diff / 3600)).padStart(2, '0');
-                        const minutes = String(Math.floor((diff % 3600) / 60)).padStart(2, '0');
-                        const seconds = String(diff % 60).padStart(2, '0');
-
-                        timerEl.textContent = `${hours}:${minutes}:${seconds} restantes`;
-                    };
-
-                    updateTimer();
-                    const interval = setInterval(updateTimer, 1000);
-                })();
-            @endforeach
-        @endif
+                const update = () => {
+                    const left = Math.max(0, Math.floor((end - Date.now()) / 1000));
+                    if (left === 0) {
+                        timerEl.textContent = 'Finalizado';
+                        widget.style.opacity = '0.6';
+                        clearInterval(interval);
+                        setTimeout(() => location.reload(), 3000);
+                        return;
+                    }
+                    const h = String(Math.floor(left / 3600)).padStart(2, '0');
+                    const m = String(Math.floor((left % 3600) / 60)).padStart(2, '0');
+                    const s = String(left % 60).padStart(2, '0');
+                    timerEl.textContent = `${h}:${m}:${s} restantes`;
+                };
+                update();
+                const interval = setInterval(update, 1000);
+            })();
+        @endforeach
     });
+
+    async function endParking(sessionId) {
+        const form = document.getElementById(`end-parking-form-${sessionId}`);
+        const widget = document.getElementById(`active-parking-widget-${sessionId}`);
+        const button = widget.querySelector('button');
+
+        try {
+            button.disabled = true;
+            button.textContent = 'Finalizando...';
+
+            const response = await fetch(form.action, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json'
+                },
+                body: new FormData(form)
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+                widget.style.transition = 'opacity 0.5s';
+                widget.style.opacity = '0.5';
+                setTimeout(() => widget.remove(), 800);
+            } else {
+                alert(data.message || 'Error');
+                button.disabled = false;
+                button.textContent = 'Finalizar';
+            }
+        } catch (e) {
+            alert('Error de conexión');
+            button.disabled = false;
+            button.textContent = 'Finalizar';
+        }
+    }
 </script>
 @endsection

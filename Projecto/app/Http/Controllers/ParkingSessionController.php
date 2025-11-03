@@ -35,7 +35,7 @@ class ParkingSessionController extends Controller
         return view('parking.create', compact('cars', 'zones', 'streets', 'activeSessions'));
     }
 
-    /*public function store(Request $request)
+   /* public function store(Request $request)
     {
         Log::info('Entrando a store', ['request' => $request->all()]);
 
@@ -204,7 +204,7 @@ class ParkingSessionController extends Controller
             return back()->withErrors(['error' => 'Error al iniciar el estacionamiento.']);
         }
     }
-                    
+
 
     public function show()
     {
