@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('zones', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->timestamps();
+        Schema::table('zones', function (Blueprint $table) {
+                
+            $table->integer('rate')->nullable();
+       
         });
     }
 
@@ -23,6 +23,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('zones');
+         Schema::table('zones', function (Blueprint $table) {
+            $table->dropColumn('rate');
+        });
     }
 };
