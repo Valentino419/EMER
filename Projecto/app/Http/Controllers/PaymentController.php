@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -12,8 +13,6 @@ class PaymentController extends Controller
         Log::info('INICIANDO PAGO MP', [
             'session_id' => session('parking_session_id'),
             'amount' => session('parking_amount'),
-            'url' => url(''),
-            'token' => substr(env('MERCADOPAGO_ACCESS_TOKEN'), 0, 20) . '...'
         ]);
 
         $sessionId = session('parking_session_id');
@@ -36,27 +35,33 @@ class PaymentController extends Controller
                     ]
                 ],
                 'back_urls' => [
-                    'success' => url(route('payment.success')),
-                    'failure' => url(route('payment.failure')),
-                    'pending' => url(route('payment.pending'))
+                    'success' => route('payment.success', [], true),
+                    'failure' => route('payment.failure', [], true),
+                    'pending' => route('payment.pending', [], true)
                 ],
+               // 'auto_return' => 'approved',
                 'external_reference' => (string)$sessionId,
-                'notification_url' => url('/webhook/mercadopago'),
+                'notification_url' => env('MERCADOPAGO_NOTIFICATION_URL'),
             ]);
 
+        Log::info('RESPONSE MP', [
+            'status' => $response->status(),
+            'body' => $response->body(),
+            'json' => $response->json()
+        ]);
+
         if ($response->failed()) {
-            Log::error('ERROR MERCADO PAGO', [
+            Log::error('ERROR API MP', [
                 'status' => $response->status(),
-                'body' => $response->body(),
-                'request' => $response->transferStats?->getRequest()?->getBody()->getContents()
+                'body' => $response->body()
             ]);
             return redirect()->route('parking.create')
-                ->with('error', 'Error al conectar con Mercado Pago. Intenta más tarde.');
+                ->with('error', 'Error de Mercado Pago. Intenta más tarde.');
         }
 
         $preference = $response->json();
-        $initPoint = $preference['init_point'] ?? null;
-
+        //$initPoint = $preference['init_point'] ?? null;
+        $initPoint = $preference['sandbox_init_point'] ?? null;
         if (!$initPoint) {
             Log::error('NO HAY INIT_POINT', $preference);
             return redirect()->route('parking.create')
@@ -73,7 +78,7 @@ class PaymentController extends Controller
     public function success()
     {
         return redirect()->route('parking.create')
-            ->with('success', '¡Pago realizado con éxito!');
+            ->with('success', '¡Pago exitoso! Estacionamiento activado.');
     }
 
     public function failure()
@@ -86,5 +91,15 @@ class PaymentController extends Controller
     {
         return redirect()->route('parking.create')
             ->with('success', 'Pago pendiente. Te avisaremos cuando se acredite.');
+    }
+
+    public function webhook(Request $request)
+    {
+        Log::info('WEBHOOK MP RECIBIDO', $request->all());
+
+        // Aquí podés actualizar el pago cuando MP te avise
+        // Ej: buscar por external_reference y cambiar status
+
+        return response()->json(['status' => 'ok']);
     }
 }
