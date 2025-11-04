@@ -8,7 +8,9 @@ use App\Models\Street;
 use App\Models\Zone;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log; // ← AÑADIDO
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+
 
 class ParkingSessionController extends Controller
 {
@@ -33,7 +35,7 @@ class ParkingSessionController extends Controller
         return view('parking.create', compact('cars', 'zones', 'streets', 'activeSessions'));
     }
 
-    public function store(Request $request)
+   /* public function store(Request $request)
     {
         Log::info('Entrando a store', ['request' => $request->all()]);
 
@@ -109,7 +111,125 @@ class ParkingSessionController extends Controller
 
         // REDIRECT FINAL
         return redirect()->route('payment.initiate');
+    }*/
+
+    public function store(Request $request)
+    {
+        if (!auth()->check()) {
+            return back()->withErrors(['error' => 'Debes iniciar sesión.']);
+        }
+
+        $validated = $request->validate([
+            'car_id' => 'required|exists:cars,id',
+            'zone_id' => 'required|exists:zones,id',
+            'street_id' => 'required|exists:streets,id',
+            'start_time' => 'required|date_format:H:i',
+            'duration' => 'required|integer|in:60,120,180,240,360,480',
+            'timezone_offset' => 'required|integer',
+        ]);
+
+        $car = Car::findOrFail($validated['car_id']);
+        if ($car->user_id !== auth()->id()) {
+            return back()->withErrors(['car_id' => 'Selección de vehículo inválida.']);
+        }
+
+        // Verificar si ya tiene una sesión activa
+        $existing = ParkingSession::where('car_id', $validated['car_id'])
+            ->where('user_id', auth()->id())
+            ->where('status', 'active')
+            ->first();
+
+        if ($existing) {
+            return back()->withErrors(['car_id' => 'Ya tienes un estacionamiento activo para esta patente.']);
+        }
+
+        $street = Street::findOrFail($validated['street_id']);
+        if ($street->zone_id !== (int)$validated['zone_id']) {
+            return back()->withErrors(['street_id' => 'La calle no pertenece a la zona seleccionada.']);
+        }
+
+        $zone = Zone::findOrFail($validated['zone_id']);
+        $rate = $zone->rate ?? 100;
+
+        // Construir fecha y hora con zona horaria del cliente
+        $offsetMinutes = $validated['timezone_offset'];
+        $tzString = sprintf('%+03d:00', - ($offsetMinutes / 60));
+        $startDateTime = Carbon::createFromFormat('H:i', $validated['start_time'], $tzString)
+            ->setDateFrom(Carbon::now($tzString));
+
+        $durationInMinutes = (int)$validated['duration'];
+        $endDateTime = $startDateTime->copy()->addMinutes($durationInMinutes);
+        $amount = ($durationInMinutes / 60) * $rate;
+
+        try {
+            DB::transaction(function () use (
+                $validated,
+                $car,
+                $startDateTime,
+                $endDateTime,
+                $durationInMinutes,
+                $rate,
+                $amount
+            ) {
+                ParkingSession::create([
+                    'user_id' => auth()->id(),
+                    'car_id' => $validated['car_id'],
+                    'zone_id' => $validated['zone_id'],
+                    'street_id' => $validated['street_id'],
+                    'license_plate' => $car->license_plate ?? strtoupper($car->car_plate ?? 'N/A'),
+                    'start_time' => $startDateTime,
+                    'end_time' => $endDateTime,
+                    'duration' => $durationInMinutes,
+                    'rate' => $rate,
+                    'amount' => $amount,
+                    'status' => 'active',
+                ]);
+
+                Log::info('Estacionamiento iniciado', [
+                    'user_id' => auth()->id(),
+                    'car_id' => $validated['car_id'],
+                    'duration' => $durationInMinutes,
+                    'amount' => $amount
+                ]);
+            });
+
+            return redirect()->route('parking.create')
+                ->with('success', '¡Estacionamiento activado! Contador iniciado.');
+        } catch (\Exception $e) {
+            Log::error('Error al iniciar estacionamiento', [
+                'error' => $e->getMessage(),
+                'user_id' => auth()->id()
+            ]);
+
+            return back()->withErrors(['error' => 'Error al iniciar el estacionamiento.']);
+        }
     }
+
+    public function extend(Request $request, ParkingSession $session)
+    {
+        if ($session->user_id !== auth()->id() || $session->start_time->addMinutes($session->duration) <= now()) {
+            return response()->json(['success' => false, 'message' => 'No permitido'], 400);
+        }
+
+        $extra = $request->extra_minutes;
+        $rate = $session->zone->rate ?? 100;
+        $extraAmount = ($extra / 60) * $rate;
+
+        $session->duration += $extra;
+        $session->amount += $extraAmount;
+        $session->save();
+
+        $newEnd = $session->start_time->copy()->addMinutes($session->duration);
+
+        return response()->json([
+            'success' => true,
+            'new_end_time' => $newEnd->timestamp * 1000,
+            'extra_amount' => $extraAmount,
+            'total_amount' => $session->amount,
+            'new_duration' => $session->duration,
+        ]);
+    }
+
 
     public function show()
     {

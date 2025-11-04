@@ -45,6 +45,71 @@ Route::middleware('auth')->group(function () {
 
     // ────── COMMON (all logged-in users) ──────
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Parking
+    Route::get('/parking/create', [ParkingSessionController::class, 'create'])->name('parking.create');
+    Route::post('/parking', [ParkingSessionController::class, 'store'])->name('parking.store');
+    Route::post('/parking/{id}/end', [ParkingSessionController::class, 'end'])->name('parking.end');
+    Route::get('/parking/{parkingSession?}', [ParkingSessionController::class, 'show'])->name('parking.show');
+    Route::post('/parking/{session}/extend', [ParkingSessionController::class, 'extend'])->name('parking.extend');
+
+    // API para verificar estacionamiento activo
+    Route::get('/api/parking/check-active/{carId}', [ParkingSessionController::class, 'checkActive'])
+        ->name('parking.check-active');
+
+    // Pago
+    Route::get('/payment/initiate', [PaymentController::class, 'initiate'])->name('payment.initiate');
+    Route::get('/payment/success', [PaymentController::class, 'success'])->name('payment.success');
+    Route::get('/payment/failure', [PaymentController::class, 'failure'])->name('payment.failure');
+    Route::get('/payment/pending', [PaymentController::class, 'pending'])->name('payment.pending');
+
+    // Zonas y Calles
+    Route::get('/check-zone', [ZoneController::class, 'checkZone']);
+    Route::post('/check-zone', [ZoneController::class, 'checkZone']);
+
+    // Recursos
+    Route::resource('schedule', ScheduleController::class);
+    Route::resource('street', StreetController::class);
+    Route::resource('zones', ZoneController::class);
+    Route::resource('zone', ZoneController::class)->names([
+        'index' => 'zone.index',
+        'create' => 'zone.create',
+        'edit' => 'zone.edit',
+    ]);
+
+    Route::resource('cars', CarController::class)->names([
+        'create' => 'cars.create',
+        'edit' => 'cars.edit',
+        'update' => 'cars.update',
+    ]);
+
+    Route::resource('infractions', InfractionController::class)->names([
+        'index' => 'infractions.index',
+        'create' => 'infractions.create',
+        'store' => 'infractions.store',
+        'edit' => 'infractions.edit',
+        'update' => 'infractions.update',
+        'destroy' => 'infractions.destroy',
+    ]);
+
+    Route::resource('inspectors', InspectorController::class)->names([
+        'index' => 'inspectors.index',
+        'create' => 'inspectors.create',
+        'store' => 'inspectors.store',
+        'edit' => 'inspectors.edit',
+        'update' => 'inspectors.update',
+        'destroy' => 'inspectors.destroy',
+    ]);
+
+    Route::resource('users', UserController::class)->names([
+        'index' => 'user.index',
+        'create' => 'user.create',
+        'store' => 'user.store',
+        'edit' => 'user.edit',
+        'update' => 'user.update',
+        'destroy' => 'user.destroy',
+    ]);
+
     Route::get('/user/logged', [UserController::class, 'logged'])->name('user.logged');
 
     // ────── USER (role:user) ──────
