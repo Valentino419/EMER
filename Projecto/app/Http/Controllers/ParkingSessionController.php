@@ -205,6 +205,31 @@ class ParkingSessionController extends Controller
         }
     }
 
+    public function extend(Request $request, ParkingSession $session)
+    {
+        if ($session->user_id !== auth()->id() || $session->start_time->addMinutes($session->duration) <= now()) {
+            return response()->json(['success' => false, 'message' => 'No permitido'], 400);
+        }
+
+        $extra = $request->extra_minutes;
+        $rate = $session->zone->rate ?? 100;
+        $extraAmount = ($extra / 60) * $rate;
+
+        $session->duration += $extra;
+        $session->amount += $extraAmount;
+        $session->save();
+
+        $newEnd = $session->start_time->copy()->addMinutes($session->duration);
+
+        return response()->json([
+            'success' => true,
+            'new_end_time' => $newEnd->timestamp * 1000,
+            'extra_amount' => $extraAmount,
+            'total_amount' => $session->amount,
+            'new_duration' => $session->duration,
+        ]);
+    }
+
 
     public function show()
     {
