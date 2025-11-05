@@ -138,6 +138,7 @@ Route::get('/zones/{zone}/rate', function (Zone $zone) {
 });
 Route::post('/payment/confirm', [PaymentController::class, 'confirm'])->name('payment.confirm');
 // In routes/web.php
+
 Route::post('/mercadopago/webhook', [PaymentController::class, 'webhook'])
     ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class])
     ->name('mercadopago.webhook');
