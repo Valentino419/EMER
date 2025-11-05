@@ -272,16 +272,6 @@
 
                 update();
                 interval = setInterval(update, 1000);
-
-                window[`restart_${s.id}`] = (newEnd, newDur, newAmt) => {
-                    endTime = newEnd;
-                    warned = false;
-                    btn.classList.add('hidden');
-                    document.getElementById(`dur-${s.id}`).textContent = newDur;
-                    document.getElementById(`amt-${s.id}`).textContent = number_format(newAmt, 0);
-                    clearInterval(interval);
-                    interval = setInterval(update, 1000);
-                };
             });
         });
 
@@ -342,9 +332,11 @@
                 const data = await res.json();
 
                 if (data.success) {
-                    window[`restart_${currentSessionId}`](data.new_end_time, data.new_duration, data.total_amount);
-                    closeModal();
-                    alert(`¡Extendido! +${extra} min por $${number_format(data.extra_amount,0)}`);
+                    if (data.redirect) {
+                        location.href = data.redirect;
+                    } else {
+                        closeModal();
+                    }
                 } else {
                     alert(data.message || 'Error');
                 }
