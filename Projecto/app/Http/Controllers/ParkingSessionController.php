@@ -35,7 +35,7 @@ class ParkingSessionController extends Controller
         return view('parking.create', compact('cars', 'zones', 'streets', 'activeSessions'));
     }
 
-   /* public function store(Request $request)
+    public function store(Request $request)
     {
         Log::info('Entrando a store', ['request' => $request->all()]);
 
@@ -111,7 +111,7 @@ class ParkingSessionController extends Controller
 
         // REDIRECT FINAL
         return redirect()->route('payment.initiate');
-    }*/
+    }
 
     public function store(Request $request)
     {
