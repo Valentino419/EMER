@@ -47,6 +47,10 @@
         .extend-modal-content { background: white; border-radius: 16px; padding: 1.5rem; max-width: 320px; width: 100%; box-shadow: 0 10px 30px rgba(0,0,0,.3); }
         .extend-btn { background: linear-gradient(135deg, #28a745, #1e7e34); color: white; font-weight: 600; padding: 10px; border: none; border-radius: 8px; font-size: .9em; margin-top: 8px; transition: all .3s; width: 100%; }
         .extend-btn:hover { background: linear-gradient(135deg, #218838, #1c6c2e); transform: translateY(-1px); }
+        #start_time {
+    background-color: #f0f0f0;
+    cursor: not-allowed;
+}
     </style>
 
     <div class="custom-card">
@@ -103,7 +107,7 @@
 
                     <div class="mb-4">
                         <label for="start_time">Hora de inicio</label>
-                        <input type="time" name="start_time" id="start_time" required>
+                        <input type="time" name="start_time" id="start_time"  required readonly>
                     </div>
 
                     <div class="mb-4">
