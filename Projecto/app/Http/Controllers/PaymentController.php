@@ -61,7 +61,7 @@ class PaymentController extends Controller
 
         $preference = $response->json();
         //$initPoint = $preference['init_point'] ?? null;
-        $initPoint = $preference['sandbox_init_point'] ?? null;
+        $initPoint = $preference['init_point'] ?? null;
         if (!$initPoint) {
             Log::error('NO HAY INIT_POINT', $preference);
             return redirect()->route('parking.create')

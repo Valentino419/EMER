@@ -232,7 +232,19 @@ Route::middleware('auth')->group(function () {
     });
 });
 
-// ──────────────────────────────────────────────────────────────
-//  SETTINGS (keep at the bottom)
-// ──────────────────────────────────────────────────────────────
+//Route::fallback(function () {
+//  return redirect()->route('login');
+//});
+
+
+require __DIR__ . '/settings.php';
+Route::get('/zones/{zone}/rate', function (Zone $zone) {
+    return Zone::where('id', $zone->id)->get(['rate']);
+});
+Route::post('/payment/confirm', [PaymentController::class, 'confirm'])->name('payment.confirm');
+// In routes/web.php
+
+Route::post('/mercadopago/webhook', [PaymentController::class, 'webhook'])
+    ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class])
+    ->name('mercadopago.webhook');
 require __DIR__.'/settings.php';
