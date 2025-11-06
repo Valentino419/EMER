@@ -8,7 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable; 
 use Laravel\Sanctum\HasApiTokens;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, HasApiTokens, Notifiable; 
@@ -39,7 +39,7 @@ class User extends Authenticatable
     }
     public function infractions()
     {
-        return $this->hasMany(Infraction::class, 'id_user');
+        return $this->hasManyThrough(Infraction::class, Car::class, 'user_id','car_id', 'id', 'id');
     }
     /**
      * The attributes that should be hidden for serialization.
@@ -57,7 +57,7 @@ class User extends Authenticatable
         'dni',
         'password', 
         'role_id',
-
+        'email_verified_at'
     ];
     /**
      * Get the attributes that should be cast.
