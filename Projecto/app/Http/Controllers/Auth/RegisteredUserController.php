@@ -19,6 +19,11 @@ class RegisteredUserController extends Controller
     public function create()
     {
         return view('auth.register');
+       $user->sendEmailVerificationNotification();
+
+
+    return redirect()->route('verification.notice')
+    ->with('status', '¡Listo! Revisa tu correo para activar tu cuenta.');
     }
 
     /**

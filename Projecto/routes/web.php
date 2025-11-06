@@ -46,11 +46,13 @@ Route::post('/mercadopago/webhook', [PaymentController::class, 'webhook'])
 // ──────────────────────────────────────────────────────────────
 //  AUTHENTICATED + ROLE-BASED GROUPS
 // ──────────────────────────────────────────────────────────────
-Route::middleware('auth')->group(function () {
+Route::middleware('auth', 'verified')->group(function () {
 
     // ────── COMMON (all logged-in users) ──────
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.user');
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-
+    
+    
     // Parking
     Route::get('/parking/create', [ParkingSessionController::class, 'create'])->name('parking.create');
     Route::post('/parking', [ParkingSessionController::class, 'store'])->name('parking.store');
@@ -240,6 +242,7 @@ Route::middleware('auth')->group(function () {
             ->name('notifications.send');
         Route::post('/admin/notifications/user/{userId}/send', [NotificationController::class, 'sendUserInfracciones'])
             ->name('notifications.sendUser');
+
     });
 });
 
@@ -247,7 +250,11 @@ Route::middleware('auth')->group(function () {
 //  return redirect()->route('login');
 // });
 
-require __DIR__.'/settings.php';
+ Route::get('/email/verify', function (){
+    return view('auth.verify-email');
+})->middleware('auth')->name('verification.notice');
+
+require __DIR__ . '/settings.php';
 Route::get('/zones/{zone}/rate', function (Zone $zone) {
     return Zone::where('id', $zone->id)->get(['rate']);
 });
