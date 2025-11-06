@@ -51,8 +51,7 @@ Route::middleware('auth', 'verified')->group(function () {
     // ────── COMMON (all logged-in users) ──────
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.user');
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    
-    
+
     // Parking
     Route::get('/parking/create', [ParkingSessionController::class, 'create'])->name('parking.create');
     Route::post('/parking', [ParkingSessionController::class, 'store'])->name('parking.store');
@@ -78,12 +77,6 @@ Route::middleware('auth', 'verified')->group(function () {
     Route::resource('schedule', ScheduleController::class);
     Route::resource('street', StreetController::class);
     Route::resource('zones', ZoneController::class);
-    Route::resource('zone', ZoneController::class)->names([
-        'index' => 'zone.index',
-        'create' => 'zone.create',
-        'edit' => 'zone.edit',
-    ]);
-
     Route::resource('cars', CarController::class)->names([
         'create' => 'cars.create',
         'edit' => 'cars.edit',
@@ -145,6 +138,7 @@ Route::middleware('auth', 'verified')->group(function () {
             ->name('payment.confirm');
 
         // Zone helpers
+
         Route::match(['get', 'post'], '/check-zone', [ZoneController::class, 'checkZone']);
         Route::get('/zones/{zone}/rate', fn (Zone $zone) => $zone->only('rate'));
 
@@ -160,7 +154,9 @@ Route::middleware('auth', 'verified')->group(function () {
             ->names([
                 'index' => 'infractions.index',
             ]);
+        // zone acces
 
+       // Route::resource('zones', ZoneController::class)->only(['index', 'show']);
         // User notifications
         Route::get('/notifications', [NotificationController::class, 'userNotifications'])
             ->name('notifications.user');
@@ -189,12 +185,6 @@ Route::middleware('auth', 'verified')->group(function () {
         // Full resources
         Route::resource('schedule', ScheduleController::class);
         Route::resource('street', StreetController::class);
-        Route::resource('zones', ZoneController::class);
-        Route::resource('zone', ZoneController::class)->names([
-            'index' => 'zone.index',
-            'create' => 'zone.create',
-            'edit' => 'zone.edit',
-        ]);
 
         // Users
         Route::resource('users', UserController::class)->names([
@@ -232,7 +222,8 @@ Route::middleware('auth', 'verified')->group(function () {
                 'edit' => 'cars.edit',
                 'update' => 'cars.update',
             ]);
-
+        // zone acces full CRUD
+        //Route::resource('zones', ZoneController::class);
         // Admin notifications
         Route::get('/admin/notifications', [NotificationController::class, 'index'])
             ->name('notifications.index');
@@ -250,11 +241,11 @@ Route::middleware('auth', 'verified')->group(function () {
 //  return redirect()->route('login');
 // });
 
- Route::get('/email/verify', function (){
+Route::get('/email/verify', function () {
     return view('auth.verify-email');
 })->middleware('auth')->name('verification.notice');
 
-require __DIR__ . '/settings.php';
+require __DIR__.'/settings.php';
 Route::get('/zones/{zone}/rate', function (Zone $zone) {
     return Zone::where('id', $zone->id)->get(['rate']);
 });

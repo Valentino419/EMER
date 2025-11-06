@@ -57,7 +57,7 @@ class ZoneController extends Controller
         ]);
 
         Zone::create($validated);
-        return redirect()->route('zone.index')->with('success', 'Zona creada exitosamente.');
+        return redirect()->route('zones.index')->with('success', 'Zona creada exitosamente.');
     }
 
     /**
@@ -74,6 +74,6 @@ class ZoneController extends Controller
     public function destroy(Zone $zone)
     {
         $zone->delete();
-        return redirect()->route('zone.index')->with('success', 'Zona eliminada exitosamente.');
+        return redirect()->route('zones.index')->with('success', 'Zona eliminada exitosamente.');
     }
 }
