@@ -82,7 +82,7 @@
                     <div class="card-body">
                         <span class="emoji">🌍</span> 
                         <h5 class="card-title">Zonas</h5>
-                        <a href="{{ route('zone.index') }}" class="btn btn-primary">Gestionar Zonas</a>
+                        <a href="{{ route('zones.index') }}" class="btn btn-primary">Gestionar Zonas</a>
                     </div>
                 </div>
             </div>

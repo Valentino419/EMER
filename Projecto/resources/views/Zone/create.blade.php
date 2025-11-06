@@ -31,7 +31,7 @@
 <div class="container">
     <h2 class="mb-4">Nueva Zonas</h2>
 
-    <form action="{{ route('zone.store') }}" method="POST">
+    <form action="{{ route('zones.store') }}" method="POST">
         @csrf
 
         <div class="mb-3">
@@ -45,7 +45,7 @@
         
 
         <button type="submit" class="btn btn-primary">Guardar</button>
-        <a href="{{ route('zone.index') }}" class="btn btn-secondary">Cancelar</a>
+        <a href="{{ route('zones.index') }}" class="btn btn-secondary">Cancelar</a>
     </form>
 </div>
 </body>
