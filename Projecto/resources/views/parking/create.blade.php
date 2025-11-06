@@ -402,10 +402,9 @@
                         <p id="amount-preview" class="font-bold text-lg">$0</p>
                     </div>
                     <div class="mb-4">
-                        <input type="hidden" name="mercadopago_enabled" value="0">
-                        <label> Habilitar mercado pago</label>
+                        <label>Habilitar Mercado Pago</label>
                         <label class="switch">
-                            <input type="checkbox" name ='mercadopago_enabled' id="mercadopago_enabled">
+                            <input type="checkbox" name="mercadopago_enabled" id="mercadopago_enabled"   value="1">
                             <span class="slider round"></span>
                         </label>
                     </div>
