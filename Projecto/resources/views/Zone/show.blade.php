@@ -74,8 +74,8 @@
                     <tr>
                         <td>{{ $street->id }}</td>
                         <td>{{ $street->name }}</td>
-                        <td>{{ $street->start_number }}</td>
-                        <td>{{ $street->end_number }}</td>
+                        <td>{{ $street->start_street }}</td>
+                        <td>{{ $street->end_street }}</td>
                         @if(Auth::check() && in_array(strtolower(Auth::user()->role?->name ?? ''), ['admin', 'inspector']))
                             <td>
                                 <a href="{{ route('street.edit', $street) }}" class="btn btn-primary btn-sm">Editar</a>
