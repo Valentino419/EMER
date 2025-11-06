@@ -29,9 +29,8 @@
 
 <body>
     
-        <h5 class="modal-title">Editar Inspector</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-    
+        <h5 class="modal-title">Editar Zona</h5>
+      
         <form action="{{ route('zone.update', $zone) }}" method="POST">
         @csrf
         @method('PUT')
@@ -44,8 +43,8 @@
         </div>
 
         <div class="mb-3">
-            <label for="numeration" class="form-label">Numeracion</label>
-            <input type="text" name="numeration" id="numeration" class="form-control" value="{{ $zone->numeration }}" required>
+            <label for="rate" class="form-label">Monto por Hora</label>
+            <input type="integer" name="rate" id="rate" class="form-control" value="{{ $zone->rate }}" required>
         </div>
 
         <div class="modal-footer">

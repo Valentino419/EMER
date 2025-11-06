@@ -53,6 +53,7 @@ class ZoneController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'rate'=> 'required|integer|max:255'
         ]);
 
         Zone::create($validated);
