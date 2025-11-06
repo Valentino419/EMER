@@ -1,28 +1,25 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use Illuminate\Support\Facades\DB;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
-    public function logged(Request $request)
+   public function logged(Request $request)
 {
-    // Verificar que el usuario es admin
     if (!Auth::check() || strtolower(Auth::user()->role->name ?? '') !== 'admin') {
         abort(403, 'No tienes acceso a esta funcionalidad.');
     }
 
-    // Construir la consulta con el Builder (sin ejecutar aún)
-    $query = User::with('role')
-        ->whereHas('role', function ($q) {
-            $q->whereIn('name', ['user', 'inspector', 'admin']);
-        })
-        ->where('id', '!=', auth()->id());
+    $query = User::with(['role' => fn($q) => $q->select('id', 'name')])
+        ->whereHas('role', fn($q) => $q->whereIn(DB::raw('LOWER(name)'), ['user', 'inspector', 'admin']))
+        ->where('id', '!=', auth()->id())
+        ->select('id', 'name', 'surname', 'dni', 'email', 'role_id');
 
-    // Aplicar filtro de búsqueda si existe
     if ($request->filled('search')) {
         $search = $request->search;
         $query->where(function ($q) use ($search) {
@@ -30,28 +27,24 @@ class UserController extends Controller
               ->orWhere('surname', 'like', "%{$search}%")
               ->orWhere('dni', 'like', "%{$search}%")
               ->orWhere('email', 'like', "%{$search}%")
-              ->orWhereHas('role', function ($r) use ($search) {
-                  $r->where('name', 'like', "%{$search}%");
-              });
+              ->orWhereHas('role', fn($r) => $r->where(DB::raw('LOWER(name)'), 'like', "%" . strtolower($search) . "%"));
         });
     }
 
-    // Ejecutar la consulta con paginación (recomendado)
-    $loggedUsers = $query->select('id', 'name', 'email', 'role_id')
-        ->paginate(25); // o get() si no quieres paginación
+    \Log::debug('SQL Query:', ['sql' => $query->toSql(), 'bindings' => $query->getBindings()]);
 
-    // Añadir el nombre del rol (solo si usas get(), no paginate)
-    // Si usas paginate(), el map se aplica así:
+    $loggedUsers = $query->paginate(25);
+
     $loggedUsers->getCollection()->transform(function ($user) {
         $user->role_name = $user->role?->name ?? 'Sin rol';
         return $user;
     });
 
-    \Log::info('Usuarios con rol user, inspector o admin:', [
-        'users' => $loggedUsers->toArray()
-    ]);
+    \Log::info('Usuarios encontrados por rol:', ['roles' => $loggedUsers->pluck('role_name')->countBy()]);
 
-    return view('user.logged', compact('loggedUsers'));
+    $roles = Role::pluck('name', 'id');
+
+    return view('user.logged', compact('loggedUsers', 'roles'));
 }
 
     public function index()

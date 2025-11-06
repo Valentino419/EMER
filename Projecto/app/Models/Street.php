@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Street extends Model
 {
-    protected $fillable = ['name', 'start_number', 'end_number', 'zone_id'];
+    protected $fillable = ['name', 'start_street', 'end_street', 'zone_id'];
 
     public function zone()
     {

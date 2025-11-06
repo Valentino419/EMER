@@ -36,9 +36,12 @@
 
         <div class="mb-3">
             <label for="name" class="form-label">Nombre</label>
-            <input  type="text" name="name" id="name" class="form-select" required>
+            <input  type="text" name="name" id="name" required>
         </div>
-        
+          <div class="mb-3">
+            <label for="rate" class="form-label">Monto por hora</label>
+            <input  type="number" name="rate" id="rate" required>
+        </div>
         
 
         <button type="submit" class="btn btn-primary">Guardar</button>

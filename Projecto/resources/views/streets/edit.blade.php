@@ -46,12 +46,12 @@
                 <input type="text" name="name" id="name" class="form-control" value="{{ old('name', $street->name) }}" required>
             </div>
             <div class="form-group">
-                <label for="start_number">Número Inicial:</label>
-                <input type="number" name="start_number" id="start_number" class="form-control" value="{{ old('start_number', $street->start_number) }}" required>
+                <label for="start_street">Número Inicial:</label>
+                <input type="text" name="start_street" id="start_street" class="form-control" value="{{ old('start_street', $street->start_street) }}" required>
             </div>
             <div class="form-group">
-                <label for="end_number">Número Final:</label>
-                <input type="number" name="end_number" id="end_number" class="form-control" value="{{ old('end_number', $street->end_number) }}" required>
+                <label for="end_street">Número Final:</label>
+                <input type="text" name="end_street" id="end_street" class="form-control" value="{{ old('end_street', $street->end_street) }}" required>
             </div>
             <div class="form-group">
                 <label for="zone_id">Zona:</label>
