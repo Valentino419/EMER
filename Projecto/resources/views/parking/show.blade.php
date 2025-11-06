@@ -244,7 +244,7 @@
                         <th>Duración</th>
                         <th>Monto</th>
                         <th>Estado</th>
-                        <th>Acciones</th>
+                        
                     </tr>
                 </thead>
                 <tbody>
@@ -258,7 +258,7 @@
                             <td>{{ $session->start_time->format('d/m/Y H:i') }}</td>
                             <td>{{ number_format($session->duration / 60, 1) }} horas</td>
                             <td>${{ number_format($session->amount, 2) }}</td>
-                        
+                            <td>
                                 @if ($session->status === 'active')
                                     <span class="badge bg-warning">Activo</span>
                                 @elseif ($session->payment_status === 'completed')
@@ -269,7 +269,6 @@
                             </td>
                           
                             
-                        </tr>
                     @endforeach
                 </tbody>
             </table>
