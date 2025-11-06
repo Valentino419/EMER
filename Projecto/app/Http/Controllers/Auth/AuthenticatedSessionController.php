@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
@@ -10,20 +11,19 @@ use Illuminate\Support\Facades\Route;
 
 class AuthenticatedSessionController extends Controller
 {
-    
-    
     public function create(Request $request)
     {
-        
-    if (Auth::check()) {
-       
-        return redirect()->route('dashboard');
-    }
-     return view('auth.login', [
+
+        if (Auth::check()) {
+
+            return redirect()->route('dashboard');
+        }
+
+        return view('auth.login', [
             'canResetPassword' => Route::has('password.request'),
             'status' => $request->session()->get('status'),
         ]);
-    
+
     }
 
     public function store(LoginRequest $request): RedirectResponse
@@ -31,21 +31,19 @@ class AuthenticatedSessionController extends Controller
         $request->authenticate();
         $request->session()->regenerate();
 
-    
         if (! $request->user()->hasVerifiedEmail()) {
-            return redirect()->route('verification.notice'); //si no se verifico-> pantalla azul
+            return redirect()->route('verification.notice');
+        }
 
-        return redirect()->intended('/dashboard'); //si ya se verifico -> dashboard
-        };
+        return redirect()->intended('/dashboard');
     }
-    
-    
 
     public function destroy(Request $request): RedirectResponse
     {
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+
         return redirect()->route('login')->with('status', 'You have been logged out.');
     }
 }

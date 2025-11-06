@@ -244,7 +244,7 @@
                         <th>Duración</th>
                         <th>Monto</th>
                         <th>Estado</th>
-                        <th>Acciones</th>
+                        
                     </tr>
                 </thead>
                 <tbody>
@@ -268,9 +268,7 @@
                                 @endif
                             </td>
                           
-                            <td><a href="{{ route('parking.show', $session->id) }}"
-                                    class="btn btn-primary btn-sm">Detalles</a></td>
-                        </tr>
+                            
                     @endforeach
                 </tbody>
             </table>
