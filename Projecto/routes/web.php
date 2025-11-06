@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Mail;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\CarController;
@@ -20,10 +21,8 @@ use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\StreetController;
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-Route::get('/dashboard', [DashboardController::class, 'user'])->name('dashboard');
 
-
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.user');
 });
 Route::resource('payment', PaymentController::class);
@@ -102,9 +101,9 @@ Route::post('/admin/notifications', [NotificationController::class, 'store'])->n
 Route::post('/admin/notifications/{infraccionId}/send', [NotificationController::class, 'sendInfraccion'])->name('notifications.send')->middleware('auth');
 Route::post('/admin/notifications/user/{userId}/send', [NotificationController::class, 'sendUserInfracciones'])->name('notifications.sendUser')->middleware('auth');
 
-Route::fallback(function () {
-    return redirect()->route('login');
-});
+Route::get('/email/verify', function () {
+    return view('auth.verify-email');
+})->middleware('auth')->name('verification.notice');
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';

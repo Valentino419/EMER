@@ -16,18 +16,7 @@ class AuthenticatedSessionController extends Controller
     {
         
     if (Auth::check()) {
-        // $user = Auth::user();
-        // $role = $user->role ? $user->role->name : 'user';
-        // $redirectRoute = match ($role) {
-        //     'admin' => 'dashboard.admin',
-        //     'inspector' => 'dashboard.inspector',
-        //     default => 'dashboard',
-        // };
        
-        // if (!Route::has($redirectRoute)) {
-          
-        //     return redirect()->route('dashboard');
-        // }
         return redirect()->route('dashboard');
     }
      return view('auth.login', [
@@ -40,12 +29,21 @@ class AuthenticatedSessionController extends Controller
     public function store(LoginRequest $request): RedirectResponse
     {
         $request->authenticate();
-        $request->session()->regenerate();
-        $user = Auth::user();
-        $role = $user->role ? $user->role->name : 'user';
-       
 
-        return redirect()->route('dashboard');
+    $request->session()->regenerate();
+
+    
+    if (auth()->user()->hasVerifiedEmail()) {
+        return redirect()->intended('/dashboard');
+    }
+
+    // Si no verificó → lo sacamos y lo mandamos a verificar
+    auth()->logout();
+    $request->session()->invalidate();
+    $request->session()->regenerateToken();
+
+    return redirect()->route('verification.notice')
+        ->with('status', 'Por favor verifica tu correo antes de entrar.');
     }
 
     public function destroy(Request $request): RedirectResponse
