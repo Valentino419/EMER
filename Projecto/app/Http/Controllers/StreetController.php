@@ -42,8 +42,8 @@ class StreetController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'start_number' => 'required|integer',
-            'end_number' => 'required|integer',
+            'start_street' => 'required|string|max:255',
+            'end_street' => 'required|string|max:255',
             'zone_id' => 'required|exists:zones,id',
             'start_lat' => 'nullable|numeric|between:-90,90',
             'start_lng' => 'nullable|numeric|between:-180,180',
@@ -80,13 +80,10 @@ class StreetController extends Controller
     {
         $validated = $request->validate([
             'name' => 'string|max:255',
-            'start_number' => 'integer',
-            'end_number' => 'integer',
+            'start_street' => 'string|max:255',
+            'end_street' => 'string|max:255',
             'zone_id' => 'exists:zones,id',
-            'start_lat' => 'nullable|numeric|between:-90,90',
-            'start_lng' => 'nullable|numeric|between:-180,180',
-            'end_lat' => 'nullable|numeric|between:-90,90',
-            'end_lng' => 'nullable|numeric|between:-180,180',
+            
         ]);
         $street->update($validated);
         return redirect()->route('zones.show', ['zone' => $validated['zone_id'] ?? $street->zone_id])->with('success', 'Calle actualizada exitosamente.');

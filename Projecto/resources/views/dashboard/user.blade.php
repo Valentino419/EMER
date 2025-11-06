@@ -320,6 +320,7 @@
         @endif
     </div>
 
+
     <script>
         // Temporizadores para sesiones activas
         const timers = {};

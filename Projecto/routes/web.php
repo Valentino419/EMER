@@ -1,23 +1,28 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\{
-    CarController, DashboardController, InfractionController,
-    InspectorController, NotificationController, ParkingSessionController,
-    PaymentController, ScheduleController, StreetController,
-    UserController, ZoneController
-};
+use App\Http\Controllers\CarController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\InfractionController;
+use App\Http\Controllers\InspectorController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\ParkingSessionController;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\ScheduleController;
+use App\Http\Controllers\StreetController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\ZoneController;
 use App\Models\Zone;
+use Illuminate\Support\Facades\Route;
 
 // ──────────────────────────────────────────────────────────────
 //  PUBLIC / DEBUG
 // ──────────────────────────────────────────────────────────────
 Route::get('/test-mp', fn () => response()->json([
     'MERCADOPAGO_ACCESS_TOKEN' => env('MERCADOPAGO_ACCESS_TOKEN') ? 'OK' : 'FALTA',
-    'MERCADOPAGO_PUBLIC_KEY'    => env('MERCADOPAGO_PUBLIC_KEY') ? 'OK' : 'FALTA',
-    'APP_KEY'                   => app('config')->get('app.key') ? 'OK' : 'FALTA',
-    'APP_ENV'                   => app()->environment(),
-    'TIME'                      => now()->format('H:i:s'),
+    'MERCADOPAGO_PUBLIC_KEY' => env('MERCADOPAGO_PUBLIC_KEY') ? 'OK' : 'FALTA',
+    'APP_KEY' => app('config')->get('app.key') ? 'OK' : 'FALTA',
+    'APP_ENV' => app()->environment(),
+    'TIME' => now()->format('H:i:s'),
 ]));
 
 // ──────────────────────────────────────────────────────────────
@@ -41,11 +46,13 @@ Route::post('/mercadopago/webhook', [PaymentController::class, 'webhook'])
 // ──────────────────────────────────────────────────────────────
 //  AUTHENTICATED + ROLE-BASED GROUPS
 // ──────────────────────────────────────────────────────────────
-Route::middleware('auth')->group(function () {
+Route::middleware('auth', 'verified')->group(function () {
 
     // ────── COMMON (all logged-in users) ──────
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.user');
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-
+    
+    
     // Parking
     Route::get('/parking/create', [ParkingSessionController::class, 'create'])->name('parking.create');
     Route::post('/parking', [ParkingSessionController::class, 'store'])->name('parking.store');
@@ -138,7 +145,7 @@ Route::middleware('auth')->group(function () {
             ->name('payment.confirm');
 
         // Zone helpers
-        Route::match(['get','post'], '/check-zone', [ZoneController::class, 'checkZone']);
+        Route::match(['get', 'post'], '/check-zone', [ZoneController::class, 'checkZone']);
         Route::get('/zones/{zone}/rate', fn (Zone $zone) => $zone->only('rate'));
 
         // Cars – **only index / show / create / store** (no edit / delete)
@@ -146,6 +153,12 @@ Route::middleware('auth')->group(function () {
             ->only(['index', 'show', 'create', 'store'])
             ->names([
                 'create' => 'cars.create',
+            ]);
+        // user infractions
+        Route::resource('infractions', InfractionController::class)
+            ->only(['index'])
+            ->names([
+                'index' => 'infractions.index',
             ]);
 
         // User notifications
@@ -164,9 +177,9 @@ Route::middleware('auth')->group(function () {
         Route::resource('infractions', InfractionController::class)
             ->only(['index', 'create', 'store', 'show'])
             ->names([
-                'index'  => 'infractions.index',
+                'index' => 'infractions.index',
                 'create' => 'infractions.create',
-                'store'  => 'infractions.store',
+                'store' => 'infractions.store',
             ]);
     });
 
@@ -178,28 +191,28 @@ Route::middleware('auth')->group(function () {
         Route::resource('street', StreetController::class);
         Route::resource('zones', ZoneController::class);
         Route::resource('zone', ZoneController::class)->names([
-            'index'  => 'zone.index',
+            'index' => 'zone.index',
             'create' => 'zone.create',
-            'edit'   => 'zone.edit',
+            'edit' => 'zone.edit',
         ]);
 
         // Users
         Route::resource('users', UserController::class)->names([
-            'index'   => 'user.index',
-            'create'  => 'user.create',
-            'store'   => 'user.store',
-            'edit'    => 'user.edit',
-            'update'  => 'user.update',
+            'index' => 'user.index',
+            'create' => 'user.create',
+            'store' => 'user.store',
+            'edit' => 'user.edit',
+            'update' => 'user.update',
             'destroy' => 'user.destroy',
         ]);
 
         // Inspectors
         Route::resource('inspectors', InspectorController::class)->names([
-            'index'   => 'inspectors.index',
-            'create'  => 'inspectors.create',
-            'store'   => 'inspectors.store',
-            'edit'    => 'inspectors.edit',
-            'update'  => 'inspectors.update',
+            'index' => 'inspectors.index',
+            'create' => 'inspectors.create',
+            'store' => 'inspectors.store',
+            'edit' => 'inspectors.edit',
+            'update' => 'inspectors.update',
             'destroy' => 'inspectors.destroy',
         ]);
 
@@ -207,8 +220,8 @@ Route::middleware('auth')->group(function () {
         Route::resource('infractions', InfractionController::class)
             ->except(['show']) // show already defined for inspectors
             ->names([
-                'edit'    => 'infractions.edit',
-                'update'  => 'infractions.update',
+                'edit' => 'infractions.edit',
+                'update' => 'infractions.update',
                 'destroy' => 'infractions.destroy',
             ]);
 
@@ -216,7 +229,7 @@ Route::middleware('auth')->group(function () {
         Route::resource('cars', CarController::class)
             ->only(['edit', 'update', 'destroy'])
             ->names([
-                'edit'   => 'cars.edit',
+                'edit' => 'cars.edit',
                 'update' => 'cars.update',
             ]);
 
@@ -229,13 +242,17 @@ Route::middleware('auth')->group(function () {
             ->name('notifications.send');
         Route::post('/admin/notifications/user/{userId}/send', [NotificationController::class, 'sendUserInfracciones'])
             ->name('notifications.sendUser');
+
     });
 });
 
-//Route::fallback(function () {
+// Route::fallback(function () {
 //  return redirect()->route('login');
-//});
+// });
 
+ Route::get('/email/verify', function (){
+    return view('auth.verify-email');
+})->middleware('auth')->name('verification.notice');
 
 require __DIR__ . '/settings.php';
 Route::get('/zones/{zone}/rate', function (Zone $zone) {

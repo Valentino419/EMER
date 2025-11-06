@@ -41,6 +41,7 @@ class ParkingSessionController extends Controller
         if (!auth()->check()) {
             return back()->withErrors(['error' => 'Debes iniciar sesión.']);
         }
+        //dd($request->all());
 
         $validated = $request->validate([
             'car_id' => 'required|exists:cars,id',
@@ -49,6 +50,7 @@ class ParkingSessionController extends Controller
             'start_time' => 'required|date_format:H:i',
             'duration' => 'required|integer|in:60,120,180,240,360,480',
             'timezone_offset' => 'required|integer',
+            'mercadopago_enabled' => 'nullable|boolean', // Agregamos el switch como booleano opcional
         ]);
 
         $car = Car::findOrFail($validated['car_id']);
@@ -80,41 +82,70 @@ class ParkingSessionController extends Controller
         $endDateTime = $startDateTime->copy()->addMinutes($durationInMinutes);
         $amount = ($durationInMinutes / 60) * $rate;
 
-        // CREAR LA SESIÓN PENDIENTE EN LA BASE DE DATOS
-        $parkingSession = ParkingSession::create([
-            'car_id' => $validated['car_id'],
-            'zone_id' => $validated['zone_id'],
-            'street_id' => $validated['street_id'],
-            'user_id' => auth()->id(),
-            'start_time' => $startDateTime,
-            'end_time' => $endDateTime,
-            'duration' => $durationInMinutes,
-            'rate' => $rate,
-            'amount' => $amount,
-            'status' => 'pending',
-            'payment_status' => 'pending',
-            'metodo_pago' => 'tarjeta',
-            'license_plate' => $car->license_plate ?? strtoupper($car->car_plate ?? 'N/A'),
-        ]);
+        // Verificamos el switch de Mercado Pago
+        $mercadopagoEnabled = $validated['mercadopago_enabled'] ?? false; // Por defecto true si no se envía
+        //DD($mercadopagoEnabled);
+        if (!$mercadopagoEnabled) {
+            //DD('sin');
+            // Modo sin pago: Crear sesión directamente como activa
+            $parkingSession = ParkingSession::create([
+                'car_id' => $validated['car_id'],
+                'zone_id' => $validated['zone_id'],
+                'street_id' => $validated['street_id'],
+                'user_id' => auth()->id(),
+                'start_time' => $startDateTime,
+                'end_time' => $endDateTime,
+                'duration' => $durationInMinutes,
+                'rate' => $rate,
+                'amount' => $amount,
+                'status' => 'active', // Directamente activa
+                'payment_status' => 'completed', // O 'paid' si prefieres simular pago, pero 'skipped' para diferenciar
+                'metodo_pago' => 'none', // O lo que prefieras
+                'license_plate' => $car->license_plate ?? strtoupper($car->car_plate ?? 'N/A'),
+            ]);
 
-        Log::info('Sesión pendiente creada', ['session_id' => $parkingSession->id]);
+            Log::info('Sesión activada sin pago (modo skip)', ['session_id' => $parkingSession->id]);
 
-        // GUARDAR EN SESIÓN PARA EL PAGO
-        session([
-            'parking_session_id' => $parkingSession->id,
-            'parking_amount' => $amount,
-        ]);
+            return redirect()->route('parking.create')
+                ->with('success', '¡Estacionamiento activado sin pago! Contador iniciado.');
+        } else { 
+            //DD('else');
+            // Modo normal con pago
+            $parkingSession = ParkingSession::create([
+                'car_id' => $validated['car_id'],
+                'zone_id' => $validated['zone_id'],
+                'street_id' => $validated['street_id'],
+                'user_id' => auth()->id(),
+                'start_time' => $startDateTime,
+                'end_time' => $endDateTime,
+                'duration' => $durationInMinutes,
+                'rate' => $rate,
+                'amount' => $amount,
+                'status' => 'pending',
+                'payment_status' => 'pending',
+                'metodo_pago' => 'tarjeta',
+                'license_plate' => $car->license_plate ?? strtoupper($car->car_plate ?? 'N/A'),
+            ]);
 
-        // LOG ANTES DEL REDIRECT
-        Log::info('REDIRIGIENDO A PAGO', [
-            'session_id' => $parkingSession->id,
-            'amount' => $amount,
-            'route' => route('payment.initiate'),
-            'url' => url(route('payment.initiate'))
-        ]);
+            Log::info('Sesión pendiente creada', ['session_id' => $parkingSession->id]);
 
-        // REDIRECT FINAL A PAGOS
-        return redirect()->route('payment.initiate');
+            // GUARDAR EN SESIÓN PARA EL PAGO
+            session([
+                'parking_session_id' => $parkingSession->id,
+                'parking_amount' => $amount,
+            ]);
+
+            // LOG ANTES DEL REDIRECT
+            Log::info('REDIRIGIENDO A PAGO', [
+                'session_id' => $parkingSession->id,
+                'amount' => $amount,
+                'route' => route('payment.initiate'),
+                'url' => url(route('payment.initiate'))
+            ]);
+
+            // REDIRECT FINAL A PAGOS
+            return redirect()->route('payment.initiate');
+        }
     }
 
     public function completePayment(Request $request)

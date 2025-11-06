@@ -30,12 +30,8 @@ class InfractionController extends Controller
         $infractions = $query->latest()->paginate(10);
 
    
-        $user = Auth::user();
-        $user->unreadNotifications()
-         ->where('type', InfraccionNotification::class)
-         ->update(['read_at' => now()]);
-
-        return view('infractions.index', compact('infractions', 'user'));
+        $deudaPending = Auth::check() ? Auth::user()->infractions()->with('car')->where('status', 'pending')->first() : null;
+        return view('infractions.index', compact('infractions','deudaPending'));
     }
 
     public function store(Request $request)
