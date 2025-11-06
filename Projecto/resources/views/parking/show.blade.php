@@ -258,7 +258,7 @@
                             <td>{{ $session->start_time->format('d/m/Y H:i') }}</td>
                             <td>{{ number_format($session->duration / 60, 1) }} horas</td>
                             <td>${{ number_format($session->amount, 2) }}</td>
-                            <td>
+                        
                                 @if ($session->status === 'active')
                                     <span class="badge bg-warning">Activo</span>
                                 @elseif ($session->payment_status === 'completed')
@@ -268,8 +268,7 @@
                                 @endif
                             </td>
                           
-                            <td><a href="{{ route('parking.show', $session->id) }}"
-                                    class="btn btn-primary btn-sm">Detalles</a></td>
+                            
                         </tr>
                     @endforeach
                 </tbody>
