@@ -1,5 +1,5 @@
 <?php
-
+use Illuminate\Support\ServiceProvider;
 return [
 
     /*
@@ -39,7 +39,7 @@ return [
     |
     */
 
-    'debug' => (bool) env('APP_DEBUG', false),
+    ' debug ' => true,
 
     /*
     |--------------------------------------------------------------------------
@@ -122,5 +122,13 @@ return [
         'driver' => env('APP_MAINTENANCE_DRIVER', 'file'),
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
+    'providers' => ServiceProvider::defaultProviders()->merge([
+    // ... other providers
+    App\Providers\AppServiceProvider::class,
+])->toArray(),
+'stripe' => [
+    'secret' => env('STRIPE_SECRET'),
+    'publishable_key' => env('STRIPE_PUBLISHABLE_KEY'),
+],
 
 ];

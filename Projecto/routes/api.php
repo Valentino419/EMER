@@ -7,12 +7,16 @@ use App\Models\Street;
 use App\Models\Schedule;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\PaymentController;
+
+Route::post('/webhook/mercadopago', [PaymentController::class, 'webhook']);
 
 Route::get('/zones/{zone}/streets', function (Zone $zone) {
-    return Street::where('zone_id', $zone->id)->get(['id', 'name', 'zone_id']);
+    return Street::where('zone_id', $zone->id)->get(['id', 'name', 'zone_id','rate']);
 });
 
-Route::get('/zones/{zone}/rate', function (Zone $zone, Request $request) {
+
+/*Route::get('/zones/{zone}/rate', function (Zone $zone, Request $request) {
     // Get current day and time in the app's timezone
     $currentDay = Carbon::now()->format('l'); // e.g., "Monday"
     $currentTime = Carbon::now()->format('H:i:s'); // e.g., "19:47:00"
@@ -50,4 +54,6 @@ Route::get('/zones/{zone}/rate', function (Zone $zone, Request $request) {
 
     // Return rate or fallback
     return response()->json(['rate' => $schedule ? $schedule->rate : 12]);
-});
+});*/
+
+

@@ -15,17 +15,17 @@ class ZoneSeeder extends Seeder
     public function run(): void
     {
         DB::table('zones')->insert([
-            "name"=> "25 de Mayo",
-            "numeration" => "1285",
+            "name"=> "Zona centro",
+            "rate" => "1000",
         ]);
         
         DB::table('zones')->insert([
-            'name'=> "Luis N palma",
-            'numeration'=> "1125",
+            'name'=> "Zona Norte",
+            'rate'=> "1125",
         ]);
         DB::table('zones')->insert([
-            "name"=> "Zona costanera",
-            "numeration"=> "900",
+            "name"=> "Zona Sur",
+            "rate"=> "900",
         ]);
     }
 }

@@ -20,7 +20,7 @@ class UserSeeder extends Seeder
             [
                 'name' => 'Admin',
                 'surname' => 'User',
-                'dni' => 12345678,
+                'dni' => 00000001,
                 'email' => 'admin@example.com',
                 'email_verified_at' => now(),
                 'password' => Hash::make('password'),
@@ -32,7 +32,7 @@ class UserSeeder extends Seeder
             [
                 'name' => 'Inspector',
                 'surname' => 'User',
-                'dni' => 87654321,
+                'dni' => 00000002,
                 'email' => 'inspector@example.com',
                 'email_verified_at' => now(),
                 'password' => Hash::make('password'),
@@ -44,15 +44,15 @@ class UserSeeder extends Seeder
             [
                 'name' => 'Regular',
                 'surname' => 'User',
-                'dni' => 11223344,
+                'dni' =>00000003,
                 'email' => 'user@example.com',
                 'email_verified_at' => now(),
-                'password' => Hash::make('password123'),
+                'password' => Hash::make('password'),
                 'role_id' => 3,
                 'remember_token' => Str::random(10),
                 'created_at' => now(),
                 'updated_at' => now(),
-            ],
+            ], 
         ]);
     }
 }

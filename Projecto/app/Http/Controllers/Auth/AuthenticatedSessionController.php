@@ -29,22 +29,17 @@ class AuthenticatedSessionController extends Controller
     public function store(LoginRequest $request): RedirectResponse
     {
         $request->authenticate();
-
-    $request->session()->regenerate();
+        $request->session()->regenerate();
 
     
-    if (auth()->user()->hasVerifiedEmail()) {
-        return redirect()->intended('/dashboard');
-    }
+        if (! $request->user()->hasVerifiedEmail()) {
+            return redirect()->route('verification.notice'); //si no se verifico-> pantalla azul
 
-    // Si no verificó → lo sacamos y lo mandamos a verificar
-    auth()->logout();
-    $request->session()->invalidate();
-    $request->session()->regenerateToken();
-
-    return redirect()->route('verification.notice')
-        ->with('status', 'Por favor verifica tu correo antes de entrar.');
+        return redirect()->intended('/dashboard'); //si ya se verifico -> dashboard
+        };
     }
+    
+    
 
     public function destroy(Request $request): RedirectResponse
     {

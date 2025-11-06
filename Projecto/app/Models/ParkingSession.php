@@ -12,7 +12,7 @@ class ParkingSession extends Model
 
     protected $fillable = [
         'user_id',
-        'car_id', 
+        'car_id',
         'zone_id',
         'street_id',
         'license_plate',
@@ -34,7 +34,6 @@ class ParkingSession extends Model
         'amount' => 'decimal:2',
     ];
 
-    // Relationships
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -57,10 +56,10 @@ class ParkingSession extends Model
 
     public function payment()
     {
-        return $this->hasOne(Payment::class, 'parking_session_id');
+        return $this->hasOne(Payment::class, 'license_plate', 'license_plate')
+            ->where('id_user', $this->user_id);
     }
 
-    // Accessors for convenience
     public function getDurationInHoursAttribute()
     {
         return $this->duration / 60;
@@ -71,22 +70,21 @@ class ParkingSession extends Model
         if (!$this->start_time || !$this->end_time) {
             return false;
         }
-        
-        return $this->status === 'active' && 
-               now()->between($this->start_time, $this->end_time);
+
+        return $this->status === 'active' &&
+            now()->between($this->start_time, $this->end_time);
     }
 
     public function getIsExpiredAttribute()
     {
-        return $this->status === 'expired' || 
-               ($this->status === 'active' && now()->gt($this->end_time));
+        return $this->status === 'expired' ||
+            ($this->status === 'active' && now()->gt($this->end_time));
     }
 
-    // Scopes
     public function scopeActive($query)
     {
         return $query->where('status', 'active')
-                     ->where('payment_status', 'completed');
+            ->where('payment_status', 'completed');
     }
 
     public function scopePending($query)
@@ -99,14 +97,12 @@ class ParkingSession extends Model
         return $query->where('user_id', $userId);
     }
 
-    // Helper to check if session can be started
     public function canStart()
     {
-        return $this->payment_status === 'completed' && 
-               $this->status === 'pending';
+        return $this->payment_status === 'completed' &&
+            $this->status === 'pending';
     }
 
-    // Helper to expire session
     public function expire()
     {
         if ($this->isActive) {

@@ -86,9 +86,7 @@
             </button>
         </form>
         &nbsp;&nbsp;
-        <a href="{{ route('login') }}">Volver al login</a>
     </div>
 </div>
-
 </body>
 </html>
