@@ -288,6 +288,7 @@
                                         data-bs-target="#modalEditarUsuario{{ $user->id }}">
                                         Editar
                                     </button>
+                                    <a href="{{ route('user.show', $user) }}" class="btn btn-primary btn-sm">Ver</a>
                                     <form action="{{ route('user.destroy', $user) }}" method="POST" class="d-inline"
                                         onsubmit="return confirm('¿Estás seguro de eliminar este usuario?');">
                                         @csrf
