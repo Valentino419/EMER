@@ -147,6 +147,7 @@
                 
                     
                         <td>
+                            <a href="{{ route('user.show', $user->id) }}" class="btn btn-primary btn-sm">Ver</a>
                             <a href="{{ route('user.edit' , $user->id)}}" class="btn btn-primary btn-sm">Editar</a>
                             <form action="{{ route('user.destroy', $user->id) }}" method="POST" onsubmit="return confirm('¿Estás seguro de eliminar este usuario?');">
                                 @csrf

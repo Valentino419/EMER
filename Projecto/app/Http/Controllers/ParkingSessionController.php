@@ -316,4 +316,9 @@ class ParkingSessionController extends Controller
         $zone = Zone::findOrFail($zoneId);
         return response()->json(['rate' => $zone->rate ?? 5.0]);
     }
+    public function destroy( ParkingSession $session)
+    {
+        $session->delete();
+        return redirect()->back()->with('success', 'Horario eliminado con éxito');
+    }
 }

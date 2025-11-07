@@ -55,9 +55,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/parking/create', [ParkingSessionController::class, 'create'])->name('parking.create');
     Route::post('/parking', [ParkingSessionController::class, 'store'])->name('parking.store');
     Route::post('/parking/{id}/end', [ParkingSessionController::class, 'end'])->name('parking.end');
-    Route::get('/parking/{parkingSession?}', [ParkingSessionController::class, 'show'])->name('parking.show');
+    //Route::get('/parking/{parkingSession?}', [ParkingSessionController::class, 'show'])->name('parking.show');
     Route::post('/parking/{session}/extend', [ParkingSessionController::class, 'extend'])->name('parking.extend');
-
+    
     // API para verificar estacionamiento activo
     Route::get('/api/parking/check-active/{carId}', [ParkingSessionController::class, 'checkActive'])
         ->name('parking.check-active');
@@ -68,12 +68,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/payment/failure', [PaymentController::class, 'failure'])->name('payment.failure');
     Route::get('/payment/pending', [PaymentController::class, 'pending'])->name('payment.pending');
     Route::post('/payment/confirm', [PaymentController::class, 'confirm'])->name('payment.confirm');
-
+    
     // ────── Zonas y Calles ──────
     Route::match(['get', 'post'], '/check-zone', [ZoneController::class, 'checkZone']);
     Route::get('/zones/{zone}/rate', fn (Zone $zone) => $zone->only('rate'));
 
     // ────── Recursos Completos (disponibles para todos los autenticados) ──────
+    Route::resource('parking',ParkingSessionController::class);
     Route::resource('schedule', ScheduleController::class);
     Route::resource('street', StreetController::class);
     Route::resource('zones', ZoneController::class);
@@ -81,6 +82,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         'create' => 'cars.create',
         'edit'   => 'cars.edit',
         'update' => 'cars.update',
+        
     ]);
 
     Route::resource('infractions', InfractionController::class)->names([
@@ -108,6 +110,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         'edit'    => 'user.edit',
         'update'  => 'user.update',
         'destroy' => 'user.destroy',
+        'show'=>'user.show',
     ]);
 
     Route::get('/user/logged', [UserController::class, 'logged'])->name('user.logged');
