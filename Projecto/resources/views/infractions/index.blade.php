@@ -212,9 +212,29 @@
                         </td>
                     </tr>
                 @empty
-                    <tr>
-                        <td colspan="6" class="text-center">No hay infracciones para mostrar.</td>
-                    </tr>
+                    @if ($infractions->isEmpty())
+                        <div class="text-center py-5 my-4">
+                            <div class="bg-light rounded-3 p-5 shadow-sm border border-light"
+                                style="max-width: 600px; margin: 0 auto;">
+                                <div class="mb-4">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="#6c757d"
+                                        class="bi bi-exclamation-circle" viewBox="0 0 16 16">
+                                        <path
+                                            d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z" />
+                                        <path
+                                            d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995z" />
+                                    </svg>
+                                </div>
+                                <h5 class="text-muted fw-bold">
+                                    No se encontraron infracciones
+                                </h5>
+                                <p class="text-secondary mb-3">
+                                    para la patente <strong
+                                        class="text-primary">{{ strtoupper($car_plate ?? 'desconocida') }}</strong>
+                                </p>
+                            </div>
+                        </div>
+                    @endif
                 @endforelse
             </tbody>
         </table>
@@ -253,10 +273,13 @@
                         <div class="mb-3">
                             <label for="status" class="form-label">Estado</label>
                             <select name="status" id="status" class="form-control">
-                                <option value="pending" {{ old('status', 'pending') === 'pending' ? 'selected' : '' }}>
+                                <option value="pending"
+                                    {{ old('status', 'pending') === 'pending' ? 'selected' : '' }}>
                                     Pendiente</option>
-                                <option value="paid" {{ old('status') === 'paid' ? 'selected' : '' }}>Pagada</option>
-                                <option value="canceled" {{ old('status') === 'canceled' ? 'selected' : '' }}>Cancelada
+                                <option value="paid" {{ old('status') === 'paid' ? 'selected' : '' }}>Pagada
+                                </option>
+                                <option value="canceled" {{ old('status') === 'canceled' ? 'selected' : '' }}>
+                                    Cancelada
                                 </option>
                             </select>
                         </div>
@@ -272,23 +295,26 @@
         </div>
     </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script> 
-    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
     @if ($deudaPending)
-       <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        const deuda = {
-            fine: '{{ $deudaPending->fine }}',
-            carPlate: '{{ $deudaPending->car->car_plate }}',
-            date: '{{ $deudaPending->date }}'
-        };
-        Swal.fire({
-            icon: 'warning',
-            title: 'Deuda Pendiente',
-            text: '¡Tienes una deuda pendiente de $' + deuda.fine + ' (Patente: ' + deuda.carPlate + ', Fecha: ' + deuda.date + ')!',
-            confirmButtonText: 'OK'
-        });
-    </script>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script>
+            const deuda = {
+                fine: '{{ $deudaPending->fine }}',
+                carPlate: '{{ $deudaPending->car->car_plate }}',
+                date: '{{ $deudaPending->date }}'
+            };
+            Swal.fire({
+                icon: 'warning',
+                title: 'Deuda Pendiente',
+                text: '¡Tienes una deuda pendiente de $' + deuda.fine + ' (Patente: ' + deuda.carPlate + ', Fecha: ' +
+                    deuda.date + ')!',
+                confirmButtonText: 'OK'
+            });
+        </script>
     @endif
+
 </body>
+
 </html>

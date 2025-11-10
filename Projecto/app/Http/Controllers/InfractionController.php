@@ -81,7 +81,7 @@ class InfractionController extends Controller
             \Log::warning('El auto no tiene un user_id válido: ' . $car->id);
         }
 
-        return redirect()->route('infractions.index')->with('success', 'Infracción registrada');
+        return redirect()->route('infractions.index')->with('success', '¡Multa registrada exitosamente por $5000!');
     }
 
     public function edit(Infraction $infraction)
