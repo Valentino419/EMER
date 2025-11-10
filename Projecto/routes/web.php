@@ -1,55 +1,36 @@
 <?php
 
+use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\CarController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InfractionController;
 use App\Http\Controllers\InspectorController;
-use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ParkingSessionController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\StreetController;
-use App\Http\Controllers\UserController;
+
+use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\Auth\NewPasswordController;
+
 use App\Http\Controllers\ZoneController;
 use App\Models\Zone;
-use Illuminate\Support\Facades\Route;
 
-// ──────────────────────────────────────────────────────────────
-//  PUBLIC / DEBUG
-// ──────────────────────────────────────────────────────────────
-Route::get('/test-mp', fn () => response()->json([
-    'MERCADOPAGO_ACCESS_TOKEN' => env('MERCADOPAGO_ACCESS_TOKEN') ? 'OK' : 'FALTA',
-    'MERCADOPAGO_PUBLIC_KEY' => env('MERCADOPAGO_PUBLIC_KEY') ? 'OK' : 'FALTA',
-    'APP_KEY' => app('config')->get('app.key') ? 'OK' : 'FALTA',
-    'APP_ENV' => app()->environment(),
-    'TIME' => now()->format('H:i:s'),
-]));
 
-// ──────────────────────────────────────────────────────────────
-//  AUTH (login / register / password)
-// ──────────────────────────────────────────────────────────────
-require __DIR__.'/auth.php';
+Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+Route::get('/dashboard', [DashboardController::class, 'user'])->name('dashboard');
 
-// Home → login
-Route::get('/', fn () => redirect()->route('login'));
 
-// ──────────────────────────────────────────────────────────────
-//  WEBHOOKS (no CSRF)
-// ──────────────────────────────────────────────────────────────
-Route::post('/webhook/mercadopago', [PaymentController::class, 'webhook'])
-    ->name('webhook.mercadopago');
+Route::middleware(['auth'])->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.user');
+});
 
-Route::post('/mercadopago/webhook', [PaymentController::class, 'webhook'])
-    ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class])
-    ->name('mercadopago.webhook');
+Route::resource('schedule', ScheduleController::class);
 
-// ──────────────────────────────────────────────────────────────
-//  AUTHENTICATED ROUTES (solo auth + verified, SIN ROLES)
-// ──────────────────────────────────────────────────────────────
-Route::middleware(['auth', 'verified'])->group(function () {
-
-    // Dashboard
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+Route::resource('street', StreetController::class);
 
     // ────── Parking ──────
     Route::get('/parking/create', [ParkingSessionController::class, 'create'])->name('parking.create');
@@ -128,15 +109,96 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/admin/notifications/user/{userId}/send', [NotificationController::class, 'sendUserInfracciones'])
         ->name('notifications.sendUser');
 });
+Route::resource('zones', ZoneController::class);
 
-// ──────────────────────────────────────────────────────────────
-//  VERIFICACIÓN DE EMAIL
-// ──────────────────────────────────────────────────────────────
-Route::get('/email/verify', function () {
-    return view('auth.verify-email');
-})->middleware('auth')->name('verification.notice');
+Route::resource('users', UserController::class);
 
-// ──────────────────────────────────────────────────────────────
-//  SETTINGS & EXTRAS
-// ──────────────────────────────────────────────────────────────
+
+Route::resource('zone', ZoneController::class)->names([
+    'index' => 'zone.index',
+    'create' => 'zone.create',
+    'edit' => 'zone.edit',
+]);
+
+Route::resource('cars', CarController::class)->names([
+    'create' => 'cars.create',
+    'edit' => 'cars.edit',
+    'update' => 'cars.update',
+]);
+Route::resource('infractions', InfractionController::class)->names([
+    'index' => 'infractions.index',
+    'create' => 'infractions.create',
+    'store' => 'infractions.store',
+    'edit' => 'infractions.edit',
+    'update' => 'infractions.update',
+    'destroy' => 'infractions.destroy',
+]);
+
+Route::resource('inspectors', InspectorController::class)->names([
+    'index' => 'inspectors.index',
+    'create' => 'inspectors.create',
+    'store' => 'inspectors.store',
+    'edit' => 'inspectors.edit',
+    'update' => 'inspectors.update',
+    'destroy' => 'inspectors.destroy',
+]);
+
+Route::resource('users', UserController::class)->names([
+    'index' => 'user.index',
+    'create' => 'user.create',
+    'store' => 'user.store',
+    'edit' => 'user.edit',
+    'update' => 'user.update',
+    'destroy' => 'user.destroy',
+    'show'=>'user.show',
+]);
+
+Route::get('/user/logged', [UserController::class, 'logged'])->middleware('auth')->name('user.logged');
+
+
+Route::get('/check-zone', [ZoneController::class, 'checkZone']);
+Route::post('/check-zone', [ZoneController::class, 'checkZone']);
+
+// Rutas para parking sessions 
+Route::get('/parking/create', [ParkingSessionController::class, 'create'])->name('parking.create');
+Route::post('/parking/{id}/end', [ParkingSessionController::class, 'end'])->name('parking.end');
+Route::post('/parking', [ParkingSessionController::class, 'store'])->name('parking.store'); // Crea sesión pending
+Route::get('/parking/{parkingSession?}', [ParkingSessionController::class, 'show'])->name('parking.show');
+
+
+
+Route::get('/api/parking/check-active/{carId}', [ParkingSessionController::class, 'checkActive'])
+    ->middleware('auth')
+    ->name('parking.check-active');
+    
+// rutas de pago
+Route::post('/payment/initiate', [PaymentController::class, 'initiate'])
+    ->name('payment.initiate');
+Route::get('/payment/success', [PaymentController::class, 'success'])
+    ->name('payment.success');
+Route::get('/payment/failure', [PaymentController::class, 'failure'])
+    ->name('payment.failure');
+Route::get('/payment/pending', [PaymentController::class, 'pending'])
+    ->name('payment.pending');
+
+
+// Rutas para notificaciones
+Route::get('/notifications', [NotificationController::class, 'userNotifications'])->name('notifications.user')->middleware('auth');
+Route::get('/admin/notifications', [NotificationController::class, 'index'])->name('notifications.index')->middleware('auth');
+Route::post('/admin/notifications', [NotificationController::class, 'store'])->name('notifications.store')->middleware('auth');
+Route::post('/admin/notifications/{infraccionId}/send', [NotificationController::class, 'sendInfraccion'])->name('notifications.send')->middleware('auth');
+Route::post('/admin/notifications/user/{userId}/send', [NotificationController::class, 'sendUserInfracciones'])->name('notifications.sendUser')->middleware('auth');
+
+Route::fallback(function () {
+    return redirect()->route('login');
+});
+Route::get('/zones/{zone}/rate', function (Zone $zone) {
+    return Zone::where('id', $zone->id)->get(['rate']);
+});
+Route::post('/payment/confirm', [PaymentController::class, 'confirm'])->name('payment.confirm');
+// In routes/web.php
+Route::post('/mercadopago/webhook', [PaymentController::class, 'webhook'])
+    ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class])
+    ->name('mercadopago.webhook');
 require __DIR__.'/settings.php';
+require __DIR__.'/auth.php';
