@@ -308,7 +308,7 @@
                         <p><strong>Duración:</strong> {{ $session->duration }} minutos</p>
                         <p><strong>Monto:</strong> ${{ number_format($session->amount, 2) }}</p>
                         <p id="dashboard-timer-{{ $session->id }}">Cargando...</p>
-                        <button class="btn btn-light btn-sm mt-2" onclick="window.location.href='{{ route('parking.show') }}'">Ver Detalles</button>
+                        
                         <form id="end-parking-form-{{ $session->id }}" action="{{ route('parking.end', $session->id) }}" method="POST">
                             @csrf
                             @method('POST')

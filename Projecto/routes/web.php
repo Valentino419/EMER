@@ -55,7 +55,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/parking/create', [ParkingSessionController::class, 'create'])->name('parking.create');
     Route::post('/parking', [ParkingSessionController::class, 'store'])->name('parking.store');
     Route::post('/parking/{id}/end', [ParkingSessionController::class, 'end'])->name('parking.end');
-    //Route::get('/parking/{parkingSession?}', [ParkingSessionController::class, 'show'])->name('parking.show');
+    Route::get('/parking/{parkingSession?}', [ParkingSessionController::class, 'show'])->name('parking.show');
     Route::post('/parking/{session}/extend', [ParkingSessionController::class, 'extend'])->name('parking.extend');
     
     // API para verificar estacionamiento activo
