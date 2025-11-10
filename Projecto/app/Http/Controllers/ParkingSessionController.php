@@ -63,7 +63,7 @@ class ParkingSessionController extends Controller
             ->where('status', 'active')
             ->exists()
         ) {
-            return back()->withErrors(['car_id' => 'Ya tienes un estacionamiento activo.']);
+            return back()->withErrors(['car_id' => 'Ya tienes un estacionamiento activo para esta patente.']);
         }
 
         $street = Street::findOrFail($validated['street_id']);
@@ -83,10 +83,8 @@ class ParkingSessionController extends Controller
         $amount = ($durationInMinutes / 60) * $rate;
 
         // Verificamos el switch de Mercado Pago
-        $mercadopagoEnabled = $validated['mercadopago_enabled'] ?? false; // Por defecto true si no se envía
-        //DD($mercadopagoEnabled);
+        $mercadopagoEnabled = $validated['mercadopago_enabled'] ?? false; // Por defecto false si no se envía
         if (!$mercadopagoEnabled) {
-            //DD('sin');
             // Modo sin pago: Crear sesión directamente como activa
             $parkingSession = ParkingSession::create([
                 'car_id' => $validated['car_id'],
@@ -108,8 +106,7 @@ class ParkingSessionController extends Controller
 
             return redirect()->route('parking.create')
                 ->with('success', '¡Estacionamiento activado sin pago! Contador iniciado.');
-        } else { 
-            //DD('else');
+        } else {
             // Modo normal con pago
             $parkingSession = ParkingSession::create([
                 'car_id' => $validated['car_id'],

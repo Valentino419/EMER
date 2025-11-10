@@ -14,10 +14,10 @@ class ZoneController extends Controller
      */
     public function index()
     {
-        if (Auth::check() && Auth::user()->role === 'user') {
-            $zones = Auth::user()->zones()->with('streets')->get(); // Solo zonas asignadas al usuario
+        if (Auth::check() && Auth::user()->role?->name === 'user') {
+            $zones = Auth::user()->zones()->with('streets')->get();
         } else {
-            $zones = Zone::with('streets')->get(); // Todas las zonas para admin/inspector
+            $zones = Zone::with('streets')->get();
         }
         return view('zones.index', compact('zones'));
     }
@@ -27,8 +27,7 @@ class ZoneController extends Controller
      */
     public function show(Zone $zone)
     {
-        if (Auth::check() && Auth::user()->role === 'user') {
-            // Verificar que la zona pertenece al usuario
+        if (Auth::check() && Auth::user()->role?->name === 'user') {
             if (!Auth::user()->zones()->where('id', $zone->id)->exists()) {
                 abort(403, 'No tienes acceso a esta zona.');
             }
@@ -53,10 +52,11 @@ class ZoneController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'rate'=> 'required|integer|max:255'
+            'rate' => 'required|numeric|min:0', // Cambiado a numeric
         ]);
 
         Zone::create($validated);
+
         return redirect()->route('zones.index')->with('success', 'Zona creada exitosamente.');
     }
 
@@ -65,7 +65,23 @@ class ZoneController extends Controller
      */
     public function edit(Zone $zone)
     {
-        return view('zones.edit', compact('zone'));
+        return view('zone.edit', compact('zone'));
+    }
+
+    /**
+     * Update the specified zone in storage.
+     * ¡¡¡AQUÍ ESTABA EL PROBLEMA!!!
+     */
+    public function update(Request $request, Zone $zone)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'rate' => 'required|numeric|min:0', // Acepta decimales (ej: 150.50)
+        ]);
+
+        $zone->update($validated);
+
+        return redirect()->route('zones.index')->with('success', 'Zona actualizada correctamente.');
     }
 
     /**
