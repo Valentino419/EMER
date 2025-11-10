@@ -1,51 +1,53 @@
 <?php
 
 namespace App\Http\Controllers;
-use Illuminate\Support\Facades\DB;
+
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class UserController extends Controller
 {
-   public function logged(Request $request)
-{
-    if (!Auth::check() || strtolower(Auth::user()->role->name ?? '') !== 'admin') {
-        abort(403, 'No tienes acceso a esta funcionalidad.');
-    }
+    public function logged(Request $request)
+    {
+        if (! Auth::check() || strtolower(Auth::user()->role->name ?? '') !== 'admin') {
+            abort(403, 'No tienes acceso a esta funcionalidad.');
+        }
 
-    $query = User::with(['role' => fn($q) => $q->select('id', 'name')])
-        ->whereHas('role', fn($q) => $q->whereIn(DB::raw('LOWER(name)'), ['user', 'inspector', 'admin']))
-        ->where('id', '!=', auth()->id())
-        ->select('id', 'name', 'surname', 'dni', 'email', 'role_id');
+        $query = User::with(['role' => fn ($q) => $q->select('id', 'name')])
+            ->whereHas('role', fn ($q) => $q->whereIn(DB::raw('LOWER(name)'), ['user', 'inspector', 'admin']))
+            ->where('id', '!=', auth()->id())
+            ->select('id', 'name', 'surname', 'dni', 'email', 'role_id');
 
-    if ($request->filled('search')) {
-        $search = $request->search;
-        $query->where(function ($q) use ($search) {
-            $q->where('name', 'like', "%{$search}%")
-              ->orWhere('surname', 'like', "%{$search}%")
-              ->orWhere('dni', 'like', "%{$search}%")
-              ->orWhere('email', 'like', "%{$search}%")
-              ->orWhereHas('role', fn($r) => $r->where(DB::raw('LOWER(name)'), 'like', "%" . strtolower($search) . "%"));
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('surname', 'like', "%{$search}%")
+                    ->orWhere('dni', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhereHas('role', fn ($r) => $r->where(DB::raw('LOWER(name)'), 'like', '%'.strtolower($search).'%'));
+            });
+        }
+
+        \Log::debug('SQL Query:', ['sql' => $query->toSql(), 'bindings' => $query->getBindings()]);
+
+        $loggedUsers = $query->paginate(25);
+
+        $loggedUsers->getCollection()->transform(function ($user) {
+            $user->role_name = $user->role?->name ?? 'Sin rol';
+
+            return $user;
         });
+
+        \Log::info('Usuarios encontrados por rol:', ['roles' => $loggedUsers->pluck('role_name')->countBy()]);
+
+        $roles = Role::pluck('name', 'id');
+
+        return view('user.logged', compact('loggedUsers', 'roles'));
     }
-
-    \Log::debug('SQL Query:', ['sql' => $query->toSql(), 'bindings' => $query->getBindings()]);
-
-    $loggedUsers = $query->paginate(25);
-
-    $loggedUsers->getCollection()->transform(function ($user) {
-        $user->role_name = $user->role?->name ?? 'Sin rol';
-        return $user;
-    });
-
-    \Log::info('Usuarios encontrados por rol:', ['roles' => $loggedUsers->pluck('role_name')->countBy()]);
-
-    $roles = Role::pluck('name', 'id');
-
-    return view('user.logged', compact('loggedUsers', 'roles'));
-}
 
     public function index()
     {
@@ -54,11 +56,18 @@ class UserController extends Controller
         return view('user.index', compact('users'));
     }
 
-    public function show(string $id)
+    public function show(User $user)
     {
-        $user = User::findOrFail($id);
+        $roles = Role::pluck('name', 'id');
 
-        return view('user.show', compact('user'));
+        $user->load([
+            'role',
+            'cars.infractions',
+            'cars.parkingSessions.zone',
+            'cars.parkingSessions.street',
+        ]);
+
+        return view('user.show', compact('user', 'roles'));
     }
 
     public function store(Request $request)

@@ -71,7 +71,7 @@ class DashboardController extends Controller
                         ['name' => 'Mis Autos', 'link' => route('cars.index')],
                         ['name' => 'Iniciar Estacionamiento', 'link' => route('parking.create')],
                         ['name' => 'Multas', 'link' => route('infractions.index')],
-                        ['name' => 'Zonas', 'link' => route('zone.index')],
+                        ['name' => 'Zonas', 'link' => route('zones.index')],
                         ['name' => 'Historial de Estacionamientos', 'link' => route('parking.show')],
                     ],
                     'cars' => $cars,
