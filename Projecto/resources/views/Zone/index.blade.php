@@ -68,6 +68,7 @@
             border-radius: 5px;
             margin-bottom: 20px;
         }
+
         .back-arrow {
             display: inline-block;
             font-size: 32px;
@@ -87,31 +88,30 @@
             color: #fff;
             transform: scale(1.1);
         }
-        
     </style>
 </head>
 
 <body>
     <div class="container">
         <h1 class="text-center mb-4">
-            @if(Auth::check() && (Auth::user()->role?->name === 'admin' || Auth::user()->role?->name === 'inspector'))
+            @if (Auth::check() && (Auth::user()->role?->name === 'admin' || Auth::user()->role?->name === 'inspector'))
                 Gestión de Zonas
             @else
                 Mis Zonas
             @endif
         </h1>
 
-         <a href="{{ route('dashboard') }}" class="back-arrow" title="Volver al inicio" aria-label="Volver al inicio">
+        <a href="{{ route('dashboard') }}" class="back-arrow" title="Volver al inicio" aria-label="Volver al inicio">
             &#8592;
-        </a>      
+        </a>
 
         @if (session('success'))
             <div class="alert alert-success">{{ session('success') }}</div>
         @endif
 
         <!-- Botón de crear solo para admin/inspector -->
-        @if(Auth::check() && (Auth::user()->role?->name === 'admin' || Auth::user()->role?->name === 'inspector'))
-            <a href="{{ route('zone.create') }}" class="btn btn-primary mb-3">Nueva Zona</a>
+        @if (Auth::check() && (Auth::user()->role?->name === 'admin' || Auth::user()->role?->name === 'inspector'))
+            <a href="{{ route('zones.create') }}" class="btn btn-primary mb-3">Nueva Zona</a>
         @endif
 
         <table class="table table-striped">
@@ -120,10 +120,9 @@
                     <th>ID</th>
                     <th>Nombre</th>
                     <th>Cantidad de Calles</th>
-                    @if(Auth::check() && (Auth::user()->role?->name === 'admin' || Auth::user()->role?->name === 'inspector'))
-                        <th>Acciones</th>
-                    @endif
+                    <th>Acciones</th>
                 </tr>
+
             </thead>
             <tbody>
                 @forelse ($zones as $zone)
@@ -131,29 +130,33 @@
                         <td>{{ $zone->id }}</td>
                         <td>{{ $zone->name }}</td>
                         <td>{{ $zone->streets->count() }}</td>
-                        @if(Auth::check() && (Auth::user()->role?->name === 'admin' || Auth::user()->role?->name === 'inspector'))
+                        @if (Auth::check() && (Auth::user()->role?->name === 'admin' || Auth::user()->role?->name === 'inspector'))
                             <td>
-                                <a href="{{ route('zone.show', $zone) }}" class="btn btn-primary btn-sm">Ver Calles</a>
-                                <a href="{{ route('zone.edit', $zone) }}" class="btn btn-primary btn-sm">Editar</a>
-                                <form action="{{ route('zone.destroy', $zone) }}" method="POST" style="display:inline;">
+                                <a href="{{ route('zones.show', $zone) }}" class="btn btn-primary btn-sm">Ver Calles</a>
+                                <a href="{{ route('zones.edit', $zone) }}" class="btn btn-primary btn-sm">Editar</a>
+                                <form action="{{ route('zones.destroy', $zone) }}" method="POST"
+                                    style="display:inline;">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro?');">Eliminar</button>
+                                    <button type="submit" class="btn btn-danger btn-sm"
+                                        onclick="return confirm('¿Estás seguro?');">Eliminar</button>
                                 </form>
                             </td>
                         @else
                             <td>
-                                <a href="{{ route('zone.show', $zone) }}" class="btn btn-primary btn-sm">Ver Calles</a>
+                                <a href="{{ route('zones.show', $zone) }}" class="btn btn-primary btn-sm">Ver Calles</a>
                             </td>
                         @endif
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="@if(Auth::check() && (Auth::user()->role?->name === 'admin' || Auth::user()->role?->name === 'inspector')) 4 @else 3 @endif" class="text-center">No hay zonas registradas.</td>
+                        <td colspan="@if (Auth::check() && (Auth::user()->role?->name === 'admin' || Auth::user()->role?->name === 'inspector')) 4 @else 3 @endif" class="text-center">No hay
+                            zonas registradas.</td>
                     </tr>
                 @endforelse
             </tbody>
         </table>
     </div>
 </body>
+
 </html>

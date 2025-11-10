@@ -35,12 +35,13 @@ class User extends Authenticatable implements MustVerifyEmail
  
     public function role()
     {
-        return $this->belongsTo(Role::class);
+        return $this->belongsTo(Role::class)->withDefault(['name' => 'Sin rol']);
     }
     public function infractions()
     {
         return $this->hasManyThrough(Infraction::class, Car::class, 'user_id','car_id', 'id', 'id');
     }
+    
     /**
      * The attributes that should be hidden for serialization.
      *

@@ -31,7 +31,7 @@
     
         <h5 class="modal-title">Editar Zona</h5>
       
-        <form action="{{ route('zone.update', $zone) }}" method="POST">
+        <form action="{{ route('zones.update', $zone) }}" method="POST">
         @csrf
         @method('PUT')
         <div class="modal-body">
@@ -49,7 +49,7 @@
 
         <div class="modal-footer">
             <button type="submit" class="btn btn-primary">Actualizar</button>
-            <a href="{{ route('zone.index') }}" class="btn btn-secondary">Cancelar</a>
+            <a href="{{ route('zones.index') }}" class="btn btn-secondary">Cancelar</a>
     </div>
     </form>
 </body>
