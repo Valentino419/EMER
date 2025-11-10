@@ -2,10 +2,10 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Editar Inspector</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-    <style>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Nueva Zona</title>
+   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <style>
         body {
             background-color: #f0f4f8;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -26,30 +26,32 @@
             margin-bottom: 25px;
         }
     </style>
-
+</head>
 <body>
-    
+
+<div class="modal-card">
+    <div class="modal-header">
         <h5 class="modal-title">Editar Zona</h5>
-      
-        <form action="{{ route('zones.update', $zone) }}" method="POST">
+    </div>
+
+    <form action="{{ route('zones.store') }}" method="POST">
         @csrf
-        @method('PUT')
-        <div class="modal-body">
+
+        <div class="mb-3">
+                <label for="name" class="form-label">Nombre</label>
+                <input type="text" name="name" id="name" class="form-control" placeholder="Ej: Centro" required autofocus>
+            </div>
+
+          <div class="mb-3">
+                <label for="rate" class="form-label">Monto por hora</label>
+                <input type="number" step="0.01" name="rate" id="rate" class="form-control" placeholder="0.00" required>
+            </div>
+        </div>
 
        
-        <div class="mb-3">
-            <label for="name" class="form-label">Nombre</label>
-            <input type="text" name="name" id="name" class="form-control" value="{{ $zone->name}}" required>
-        </div>
-
-        <div class="mb-3">
-            <label for="rate" class="form-label">Monto por Hora</label>
-            <input type="integer" name="rate" id="rate" class="form-control" value="{{ $zone->rate }}" required>
-        </div>
-
-        <div class="modal-footer">
-            <button type="submit" class="btn btn-primary">Actualizar</button>
-            <a href="{{ route('zones.index') }}" class="btn btn-secondary">Cancelar</a>
-    </div>
+        <button type="submit" class="btn btn-primary">Actualizar</button>   
+        <a href="{{ route('zones.index') }}" class="btn btn-secondary">Cancelar</a>
     </form>
+</div>
 </body>
+</html>

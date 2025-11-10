@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Zonas</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <style>
         body {
             background-color: #f8f9fa;
@@ -120,6 +121,7 @@
                     <th>ID</th>
                     <th>Nombre</th>
                     <th>Cantidad de Calles</th>
+                    <th>Montos</th>
                     <th>Acciones</th>
                 </tr>
 
@@ -130,10 +132,14 @@
                         <td>{{ $zone->id }}</td>
                         <td>{{ $zone->name }}</td>
                         <td>{{ $zone->streets->count() }}</td>
+                        <td>{{ $zone->rate }}</td>
+
                         @if (Auth::check() && (Auth::user()->role?->name === 'admin' || Auth::user()->role?->name === 'inspector'))
                             <td>
                                 <a href="{{ route('zones.show', $zone) }}" class="btn btn-primary btn-sm">Ver Calles</a>
-                                <a href="{{ route('zones.edit', $zone) }}" class="btn btn-primary btn-sm">Editar</a>
+                                <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#editZone{{ $zone->id }}">
+                                    Editar
+                                </button>
                                 <form action="{{ route('zones.destroy', $zone) }}" method="POST"
                                     style="display:inline;">
                                     @csrf
@@ -157,6 +163,55 @@
             </tbody>
         </table>
     </div>
+
+
+@foreach($zones as $zone)
+<div class="modal fade" id="editZone{{ $zone->id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow-lg" style="border-radius: 16px; border: none;">
+            
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold text-dark" style="font-size: 1.5rem;">Editar Zona</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body pt-3">
+                <form action="{{ route('zones.update', $zone) }}" method="POST">
+                    @csrf
+                    @method('PUT')
+
+                    <div class="mb-4">
+                        <label class="form-label fw-500 text-secondary">Nombre</label>
+                        <input type="text" name="name" class="form-control form-control-lg" 
+                               value="{{ old('name', $zone->name) }}" 
+                               style="height: 50px; border-radius: 10px;" required>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-500 text-secondary">Monto por hora</label>
+                        <input type="number" step="0.01" name="rate" class="form-control form-control-lg"
+                               value="{{ old('rate', $zone->rate) }}" 
+                               style="height: 50px; border-radius: 10px;" required>
+                    </div>
+
+                    <div class="d-flex gap-3 mt-4">
+                        <button type="submit" class="btn btn-primary px-4 py-2 fw-500" 
+                                style="border-radius: 10px; font-size: 1rem; background: #0d6efd;">
+                            Guardar
+                        </button>
+                        <button type="button" class="btn btn-secondary px-4 py-2 fw-500" 
+                                data-bs-dismiss="modal"
+                                style="border-radius: 10px; background: #6c757d; border: none;">
+                            Cancelar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+@endforeach
+
 </body>
 
 </html>

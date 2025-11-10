@@ -70,7 +70,7 @@
                     <button class="btn btn-outline-secondary" type="submit">Buscar</button>
                 </div>
             </form>
-            @if(Auth::user()->role->name === 'admin' || Auth::user()->role->name === 'inspector')
+            @if (Auth::user()->role->name === 'admin' || Auth::user()->role->name === 'inspector')
                 {{-- Botón que abre el modal --}}
                 <button class="btn btn-primary btn-new" data-bs-toggle="modal" data-bs-target="#infraccionModal">
                     Nueva Infracción
@@ -100,6 +100,33 @@
                     <h5 class="modal-title" id="infraccionModalLabel">Registrar Nueva Infracción</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
+
+                <!-- Toast de éxito -->
+                @if (session('success'))
+                    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+                        <div id="successToast" class="toast align-items-center text-white bg-success border-0"
+                            role="alert" aria-live="assertive" aria-atomic="true">
+                            <div class="d-flex">
+                                <div class="toast-body">
+                                    {{ session('success') }}
+                                </div>
+                                <button type="button" class="btn-close btn-close-white me-2 m-auto"
+                                    data-bs-dismiss="toast" aria-label="Close"></button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            var toastEl = document.getElementById('successToast');
+                            var toast = new bootstrap.Toast(toastEl, {
+                                delay: 5000
+                            });
+                            toast.show();
+                        });
+                    </script>
+                @endif
+
                 <div class="modal-body">
                     <form action="{{ route('infractions.store') }}" method="POST" id="infraccionForm">
                         @csrf
@@ -112,7 +139,8 @@
 
                         <div class="mb-3">
                             <label for="fine" class="form-label">Monto de la Multa</label>
-                            <input type="number" class="form-control" id="fine" name="fine" value="5000" readonly>
+                            <input type="number" class="form-control" id="fine" name="fine" value="5000"
+                                readonly>
                         </div>
                     </form>
                 </div>
