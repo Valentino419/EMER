@@ -39,7 +39,7 @@ class ZoneController extends Controller
     }
 
     /**
-     * Show the form for creating a new zone.
+     * Show the form for creating a new zones.
      */
     public function create()
     {

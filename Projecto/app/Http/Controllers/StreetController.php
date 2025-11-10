@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Auth;
 class StreetController extends Controller
 {
     /**
-     * Display a listing of streets based on user role and zone.
+     * Display a listing of streets based on user role and zones.
      */
     public function index($zone_id = null)
     {
