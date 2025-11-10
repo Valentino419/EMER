@@ -202,6 +202,8 @@ Route::post('/parking', [ParkingSessionController::class, 'store'])
 Route::get('/parking/{parkingSession?}', [ParkingSessionController::class, 'show'])
     ->middleware(['auth' ])
     ->name('parking.show');
+Route::post('/parking/{session}/extend', [ParkingSessionController::class, 'extend'])
+    ->name('parking.extend');
 
 // API parking check
 Route::get('/api/parking/check-active/{carId}', [ParkingSessionController::class, 'checkActive'])
