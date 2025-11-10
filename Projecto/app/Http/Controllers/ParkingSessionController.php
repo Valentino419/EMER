@@ -331,4 +331,5 @@ class ParkingSessionController extends Controller
         $session->delete();
         return redirect()->back()->with('success', 'Horario eliminado con éxito');
     }
+    
 }
