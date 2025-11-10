@@ -218,10 +218,23 @@ class ParkingSessionController extends Controller
         ]);
     }
 
-    public function show()
+    public function show(Request $request)
     {
+        $search = $request->query('search');
+
         $sessions = ParkingSession::where('user_id', auth()->id())
             ->with(['car', 'zone', 'street'])
+            ->when($search, function ($query) use ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('license_plate', 'like', "%{$search}%")
+                        ->orWhereHas('zone', function ($z) use ($search) {
+                            $z->where('name', 'like', "%{$search}%");
+                        })
+                        ->orWhereHas('street', function ($s) use ($search) {
+                            $s->where('name', 'like', "%{$search}%");
+                        });
+                });
+            })
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
