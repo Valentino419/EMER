@@ -14,10 +14,10 @@ class ZoneController extends Controller
      */
     public function index()
     {
-        if (Auth::check() && Auth::user()->role?->name === 'user') {
-            $zones = Auth::user()->zones()->with('streets')->get();
+        if (Auth::check() && Auth::user()->role === 'user') {
+            $zones = Auth::user()->zones()->with('streets')->get(); // Solo zonas asignadas al usuario
         } else {
-            $zones = Zone::with('streets')->get();
+            $zones = Zone::with('streets')->get(); // Todas las zonas para admin/inspector
         }
         return view('zone.index', compact('zones'));
     }
@@ -27,13 +27,14 @@ class ZoneController extends Controller
      */
     public function show(Zone $zone)
     {
-        if (Auth::check() && Auth::user()->role?->name === 'user') {
+        if (Auth::check() && Auth::user()->role === 'user') {
+            // Verificar que la zona pertenece al usuario
             if (!Auth::user()->zones()->where('id', $zone->id)->exists()) {
                 abort(403, 'No tienes acceso a esta zona.');
             }
         }
 
-        $zone->load('streets');
+        $zone->load('streets'); // Carga las calles para la zona seleccionada
         return view('zone.show', compact('zone'));
     }
 
@@ -52,26 +53,13 @@ class ZoneController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'rate' => 'required|numeric|min:0', // Cambiado a numeric
+            'rate'=> 'required|integer|max:255'
         ]);
 
         Zone::create($validated);
-
         return redirect()->route('zones.index')->with('success', 'Zona creada exitosamente.');
     }
 
-    /**
-     * Show the form for editing the specified zone.
-     */
-    public function edit(Zone $zone)
-    {
-        return view('zone.edit', compact('zone'));
-    }
-
-    /**
-     * Update the specified zone in storage.
-     * ¡¡¡AQUÍ ESTABA EL PROBLEMA!!!
-     */
     public function update(Request $request, Zone $zone)
     {
         $validated = $request->validate([
@@ -82,6 +70,13 @@ class ZoneController extends Controller
         $zone->update($validated);
 
         return redirect()->route('zones.index')->with('success', 'Zona actualizada correctamente.');
+    }
+    /**
+     * Show the form for editing the specified zone.
+     */
+    public function edit(Zone $zone)
+    {
+        return view('zone.edit', compact('zone'));
     }
 
     /**
