@@ -122,7 +122,7 @@
 
         <!-- Actions -->
         <div class="d-flex flex-wrap gap-2 mb-4">
-            <a href="{{ route('user.index') }}" class="btn btn-back text-white">Volver</a>
+            <a href="{{ route('user.logged') }}" class="btn btn-back text-white">Volver</a>
             <button type="button" class="btn btn-edit text-white" data-bs-toggle="modal"
                 data-bs-target="#editUserModal">Editar</button>
             <form action="{{ route('user.destroy', $user->id) }}" method="POST"
