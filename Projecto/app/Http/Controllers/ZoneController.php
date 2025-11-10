@@ -19,7 +19,7 @@ class ZoneController extends Controller
         } else {
             $zones = Zone::with('streets')->get(); // Todas las zonas para admin/inspector
         }
-        return view('zone.index', compact('zones'));
+        return view('zones.index', compact('zones'));
     }
 
     /**
@@ -35,15 +35,15 @@ class ZoneController extends Controller
         }
 
         $zone->load('streets'); // Carga las calles para la zona seleccionada
-        return view('zone.show', compact('zone'));
+        return view('zones.show', compact('zone'));
     }
 
     /**
-     * Show the form for creating a new zone.
+     * Show the form for creating a new zones.
      */
     public function create()
     {
-        return view('zone.create');
+        return view('zones.create');
     }
 
     /**
@@ -61,11 +61,11 @@ class ZoneController extends Controller
     }
 
     /**
-     * Show the form for editing the specified zone.
+     * Show the form for editing the specified zones.
      */
     public function edit(Zone $zone)
     {
-        return view('zone.edit', compact('zone'));
+        return view('zones.edit', compact('zone'));
     }
 
     /**
