@@ -108,7 +108,7 @@ Route::resource('street', StreetController::class);
         ->name('notifications.send');
     Route::post('/admin/notifications/user/{userId}/send', [NotificationController::class, 'sendUserInfracciones'])
         ->name('notifications.sendUser');
-});
+
 Route::resource('zones', ZoneController::class);
 
 Route::resource('users', UserController::class);
