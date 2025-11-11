@@ -5,10 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\Car;
 use App\Models\Infraction;
 use App\Models\User;
+use App\Models\ParkingSession;
 use App\Notifications\InfraccionNotification;
 use App\Traits\LicensePlateValidator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+
 
 class InfractionController extends Controller
 {
@@ -16,71 +18,124 @@ class InfractionController extends Controller
 
     public function index(Request $request)
     {
-        $query = Infraction::with('car');
+        $user = Auth::user();
+        $search = $request->get('search');
+        $infractions = collect();
+        $car = null;
+        $activeParkingSession = null;
+        $carStatus = null;
 
-        if (Auth::user()->role->name !== 'admin' && Auth::user()->role->name !== 'inspector') {
-            $query->whereHas('car', fn ($q) => $q->where('user_id', Auth::id()));
+        // === 1. Si hay búsqueda ===
+        if ($search) {
+            $plate = $this->validateAndCleanLicensePlate($search);
+
+            if ($plate['valid']) {
+                $cleanPlate = $plate['cleaned'];
+                $car = Car::where('car_plate', $cleanPlate)->first();
+
+                if ($car) {
+                    $carStatus = 'encontrado';
+
+                    // === BUSCAR SESIÓN ACTIVA ===
+                    $activeParkingSession = ParkingSession::where('car_id', $car->id)
+                        ->where('status', 'active')
+                        ->where('end_time', '>', now())
+                        ->first();
+
+                    // === BUSCAR INFRACCIONES ===
+                    $infractions = Infraction::where('car_id', $car->id)
+                        ->with('car')
+                        ->latest()
+                        ->paginate(10);
+                } else {
+                    $carStatus = 'no_encontrado';
+                }
+            } else {
+                $carStatus = 'formato_invalido';
+            }
+        } else {
+            // === SIN BÚSQUEDA: Listar infracciones del usuario (si es usuario) ===
+            $query = Infraction::with('car');
+            if ($user->role->name !== 'admin' && $user->role->name !== 'inspector') {
+                $query->whereHas('car', fn($q) => $q->where('user_id', Auth::id()));
+            }
+            $infractions = $query->latest()->paginate(10);
         }
 
-        if ($request->filled('search')) {
-            $query->whereHas('car', fn ($q) => $q->where('car_plate', 'like', '%'.$request->search.'%'));
+        // === Deuda pendiente (solo para usuarios) ===
+        $deudaPending = null;
+        if ($user->role->name === 'user') {
+            $deudaPending = $user->infractions()->with('car')->where('status', 'pending')->first();
         }
 
-        $infractions = $query->latest()->paginate(10);
-
-        $deudaPending = Auth::check() ? Auth::user()->infractions()->with('car')->where('status', 'pending')->first() : null;
-
-        return view('infractions.index', compact('infractions', 'deudaPending'));
+        return view('infractions.index', compact(
+            'infractions',
+            'deudaPending',
+            'search',
+            'car',
+            'activeParkingSession',
+            'carStatus'
+        ));
     }
 
     public function store(Request $request)
     {
-        if (Auth::user()->role->name !== 'admin' && Auth::user()->role->name !== 'inspector') {
+        if (! in_array(Auth::user()->role->name, ['admin', 'inspector'])) {
             abort(403);
         }
+
         $request->validate([
             'car_plate' => 'required|string|max:10',
             'fine' => 'nullable|integer|min:0',
-            'date' => 'nullable|date',
-            'status' => 'nullable|in:pending,paid,canceled',
         ]);
+
         $plate = $this->validateAndCleanLicensePlate($request->car_plate);
         if (! $plate['valid']) {
-            return back()->withErrors(['car_plate' => 'Patente inválida'])->withInput();
+            return back()->withErrors(['car_plate' => 'Patente inválida (formato incorrecto)'])->withInput();
         }
+
         $car = Car::firstOrCreate(
             ['car_plate' => $plate['cleaned']],
-            ['user_id' => Auth::id()]
+            ['user_id' => null] // Inspector no asigna dueño aún
         );
 
+        // === EVITAR DUPLICADOS POR DÍA ===
+        $today = now()->toDateString();
+        $existing = Infraction::where('car_id', $car->id)
+            ->whereDate('date', $today)
+            ->where('status', 'pending')
+            ->first();
+
+        if ($existing) {
+            return back()
+                ->with('error', "Ya existe una infracción pendiente HOY para la patente {$car->car_plate}.")
+                ->withInput();
+        }
+
         $infraction = Infraction::create([
-            'user_id' => auth()->id(), // Inspector como user_id
+            'user_id' => auth()->id(),
             'car_id' => $car->id,
             'fine' => 5000,
-            'date' => now()->format('Y-m-d'),
+            'date' => $today,
             'status' => 'pending',
         ]);
 
-        // Notificar al propietario del auto si existe
+        // === NOTIFICACIÓN ===
         if ($car->user_id && $car->user_id != 0) {
-            $user = User::find($car->user_id);
-            if ($user && $user->email) {
-                $user->notify(new InfraccionNotification([
+            $owner = User::find($car->user_id);
+            if ($owner && $owner->email) {
+                $owner->notify(new InfraccionNotification([
                     'car_plate' => $car->car_plate,
                     'date' => $infraction->date,
                     'hour' => now()->format('H:i'),
                     'ubication' => 'No especificado',
                     'infraccion_id' => $infraction->id,
                 ]));
-                \Log::info('Notificación enviada a usuario ID: '.$user->id); // Depuración
-            } else {
-                \Log::warning('No se encontró usuario para car_id: '.$car->id);
             }
-        } else {
-            \Log::warning('El auto no tiene un user_id válido: '.$car->id);
         }
 
-        return redirect()->route('infractions.index')->with('success', '¡Multa registrada exitosamente por $5000!');
+        return redirect()->route('infractions.index')
+            ->with('success', "¡Multa registrada por $5000 a la patente {$car->car_plate}!");
     }
 
     public function edit(Infraction $infraction)
