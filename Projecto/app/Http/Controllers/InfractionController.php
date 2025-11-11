@@ -3,13 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Car;
-use App\Models\User;
 use App\Models\Infraction;
+use App\Models\User;
 use App\Notifications\InfraccionNotification;
 use App\Traits\LicensePlateValidator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-
 
 class InfractionController extends Controller
 {
@@ -17,21 +16,21 @@ class InfractionController extends Controller
 
     public function index(Request $request)
     {
-         $query = Infraction::with('car');
+        $query = Infraction::with('car');
 
-            if (Auth::user()->role->name !== 'admin' && Auth::user()->role->name !== 'inspector') {
-             $query->whereHas('car', fn($q) => $q->where('user_id', Auth::id()));
-            }
+        if (Auth::user()->role->name !== 'admin' && Auth::user()->role->name !== 'inspector') {
+            $query->whereHas('car', fn ($q) => $q->where('user_id', Auth::id()));
+        }
 
-            if ($request->filled('search')) {
-              $query->whereHas('car', fn($q) => $q->where('car_plate', 'like', '%' . $request->search . '%'));
-            }
+        if ($request->filled('search')) {
+            $query->whereHas('car', fn ($q) => $q->where('car_plate', 'like', '%'.$request->search.'%'));
+        }
 
         $infractions = $query->latest()->paginate(10);
 
-   
         $deudaPending = Auth::check() ? Auth::user()->infractions()->with('car')->where('status', 'pending')->first() : null;
-        return view('infractions.index', compact('infractions','deudaPending'));
+
+        return view('infractions.index', compact('infractions', 'deudaPending'));
     }
 
     public function store(Request $request)
@@ -46,7 +45,7 @@ class InfractionController extends Controller
             'status' => 'nullable|in:pending,paid,canceled',
         ]);
         $plate = $this->validateAndCleanLicensePlate($request->car_plate);
-        if (!$plate['valid']) {
+        if (! $plate['valid']) {
             return back()->withErrors(['car_plate' => 'Patente inválida'])->withInput();
         }
         $car = Car::firstOrCreate(
@@ -73,12 +72,12 @@ class InfractionController extends Controller
                     'ubication' => 'No especificado',
                     'infraccion_id' => $infraction->id,
                 ]));
-                \Log::info('Notificación enviada a usuario ID: ' . $user->id); // Depuración
+                \Log::info('Notificación enviada a usuario ID: '.$user->id); // Depuración
             } else {
-                \Log::warning('No se encontró usuario para car_id: ' . $car->id);
+                \Log::warning('No se encontró usuario para car_id: '.$car->id);
             }
         } else {
-            \Log::warning('El auto no tiene un user_id válido: ' . $car->id);
+            \Log::warning('El auto no tiene un user_id válido: '.$car->id);
         }
 
         return redirect()->route('infractions.index')->with('success', '¡Multa registrada exitosamente por $5000!');
@@ -89,37 +88,31 @@ class InfractionController extends Controller
         if (Auth::user()->role->name !== 'admin' && $infraction->user_id !== Auth::id()) {
             abort(403);
         }
-        $cars= Car::with('user')->get();
+        $cars = Car::with('user')->get();
 
         return view('infractions.edit', compact('infraction', 'cars'));
     }
 
     public function update(Request $request, Infraction $infraction)
     {
-        if (Auth::user()->role->name !== 'admin' && $infraction->user_id !== Auth::id()) {
-            abort(403);
+        // Solo admin puede editar cualquier multa
+        if (! auth()->user()->isAdmin()) {
+            abort(403, 'Acceso denegado.');
         }
-        $request->validate([
-            'car_plate' => 'required|string|max:10',
+
+        $validated = $request->validate([
             'fine' => 'required|integer|min:0',
             'date' => 'required|date',
-            'status' => 'required|in:pending,paid,canceled',
+            'status' => 'required|in:pendiente,pagada,cancelada',
         ]);
-        $plate = $this->validateAndCleanLicensePlate($request->car_plate);
-        if (!$plate['valid']) {
-            return back()->withErrors(['car_plate' => 'Patente inválida'])->withInput();
-        }
-        $car = Car::firstOrCreate(
-            ['car_plate' => $plate['cleaned']],
-            ['user_id' => Auth::id()]
-        );
+
         $infraction->update([
-            'car_id' => $car->id,
-            'fine' => $request->fine,
-            'date' => $request->date,
-            'status' => $request->status,
+            'fine' => $validated['fine'],
+            'date' => $validated['date'],
+            'status' => $validated['status'],
         ]);
-        return redirect()->route('infractions.index')->with('success', 'Infracción actualizada');
+
+        return back()->with('success', 'Multa actualizada correctamente.');
     }
 
     public function destroy(Infraction $infraction)
@@ -128,6 +121,7 @@ class InfractionController extends Controller
             abort(403);
         }
         $infraction->delete();
+
         return redirect()->route('infractions.index')->with('success', 'Infracción eliminada');
     }
 }

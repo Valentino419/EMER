@@ -140,7 +140,7 @@
                 </ul>
             </div>
         @endif
-         @if(session('success'))
+        @if (session('success'))
             <div class="alert alert-success">
                 {{ session('success') }}
             </div>
@@ -451,38 +451,74 @@
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header bg-primary text-white">
-                        <h5 class="modal-title">Editar Multa</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"
-                            aria-label="Close"></button>
+                        <h5 class="modal-title">Editar Multa #{{ $infraction->id }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
+
                     <form action="{{ route('infractions.update', $infraction) }}" method="POST">
                         @csrf @method('PUT')
+
                         <div class="modal-body">
+                            <!-- Patente (solo lectura) -->
                             <div class="mb-3">
-                                <label class="form-label">Monto</label>
-                                <input type="number" name="fine" class="form-control"
-                                    value="{{ $infraction->fine }}" required>
+                                <label class="form-label">Patente</label>
+                                <input type="text" class="form-control" value="{{ $infraction->car->car_plate }}"
+                                    readonly>
                             </div>
+
+                            <!-- Monto -->
                             <div class="mb-3">
-                                <label class="form-label">Fecha</label>
+                                <label class="form-label">Monto (ARS)</label>
+                                <input type="number" name="fine" class="form-control"
+                                    value="{{ $infraction->fine }}" min="0" step="1" required>
+                            </div>
+
+                            <!-- Fecha -->
+                            <div class="mbajalabel class="form-label">Fecha</label>
                                 <input type="date" name="date" class="form-control"
                                     value="{{ $infraction->date }}" required>
                             </div>
+
+                            <!-- Estado -->
                             <div class="mb-3">
                                 <label class="form-label">Estado</label>
-                                <select name="status" class="form-select">
+                                <select name="status" class="form-select" required>
                                     <option value="pendiente"
-                                        {{ $infraction->status == 'pendiente' ? 'selected' : '' }}>Pendiente
+                                        {{ $infraction->status == 'pendiente' ? 'selected' : '' }}>
+                                        Pendiente
                                     </option>
                                     <option value="pagada" {{ $infraction->status == 'pagada' ? 'selected' : '' }}>
-                                        Pagada</option>
+                                        Pagada
+                                    </option>
+                                    <option value="cancelada"
+                                        {{ $infraction->status == 'cancelada' ? 'selected' : '' }}>
+                                        Cancelada
+                                    </option>
                                 </select>
                             </div>
+
+                            <!-- Errores -->
+                            @if ($errors->hasAny(['fine', 'date', 'status']))
+                                <div class="alert alert-danger">
+                                    <ul class="mb-0">
+                                        @error('fine')
+                                            <li>{{ $message }}</li>
+                                        @enderror
+                                        @error('date')
+                                            <li>{{ $message }}</li>
+                                        @enderror
+                                        @error('status')
+                                            <li>{{ $message }}</li>
+                                        @enderror
+                                    </ul>
+                                </div>
+                            @endif
                         </div>
+
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary"
                                 data-bs-dismiss="modal">Cancelar</button>
-                            <button type="submit" class="btn btn-primary">Guardar</button>
+                            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
                         </div>
                     </form>
                 </div>
