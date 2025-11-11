@@ -39,7 +39,7 @@ class ZoneController extends Controller
     }
 
     /**
-     * Show the form for creating a new zone.
+     * Show the form for creating a new zones.
      */
     public function create()
     {
@@ -60,6 +60,17 @@ class ZoneController extends Controller
         return redirect()->route('zones.index')->with('success', 'Zona creada exitosamente.');
     }
 
+    public function update(Request $request, Zone $zone)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'rate' => 'required|numeric|min:0', // Acepta decimales (ej: 150.50)
+        ]);
+
+        $zone->update($validated);
+
+        return redirect()->route('zones.index')->with('success', 'Zona actualizada correctamente.');
+    }
     /**
      * Show the form for editing the specified zone.
      */

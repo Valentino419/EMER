@@ -300,7 +300,7 @@
     
   @if ($deudaPending && Auth::user()->role->name === 'user')
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
+        <script>
             const deuda = {
                 fine: '{{ $deudaPending->fine }}',
                 carPlate: '{{ $deudaPending->car->car_plate }}',
@@ -315,6 +315,5 @@
             });
         </script>
     @endif
-
 </body>
 </html>

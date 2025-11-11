@@ -239,6 +239,62 @@
                 margin-right: auto;
             }
         }
+        /* MODAL FIJO Y OCULTO */
+        .extend-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            padding: 1rem;
+            display: none;
+            /* Oculto por defecto */
+        }
+
+        .extend-modal.show {
+            display: flex;
+        }
+
+        .extend-modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            max-width: 320px;
+            width: 100%;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, .3);
+        }
+
+        .extend-btn {
+            background: linear-gradient(135deg, #28a745, #1e7e34);
+            color: white;
+            font-weight: 600;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            font-size: .9em;
+            margin-top: 8px;
+            transition: all .3s;
+            width: 100%;
+        }
+
+        .extend-btn:hover {
+            background: linear-gradient(135deg, #218838, #1c6c2e);
+            transform: translateY(-1px);
+        }
+
+        #start_time {
+            background-color: #f0f0f0;
+            cursor: not-allowed;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
     </style>
 </head>
 
@@ -278,16 +334,23 @@
                     <div class="card card-menu">
                         <div class="card-body">
                             <span class="emoji">
-                                @if ($widget['name'] == 'Mis Autos') 🚗
-                                @elseif ($widget['name'] == 'Iniciar Estacionamiento') 🅿️
-                                @elseif ($widget['name'] == 'Multas') ⚠️
-                                @elseif ($widget['name'] == 'Zonas') 🌍
-                                @elseif ($widget['name'] == 'Historial de Estacionamientos') 📋
-                                @else 🛠️
+                                @if ($widget['name'] == 'Mis Autos')
+                                    🚗
+                                @elseif ($widget['name'] == 'Iniciar Estacionamiento')
+                                    🅿️
+                                @elseif ($widget['name'] == 'Multas')
+                                    ⚠️
+                                @elseif ($widget['name'] == 'Zonas')
+                                    🌍
+                                @elseif ($widget['name'] == 'Historial de Estacionamientos')
+                                    📋
+                                @else
+                                    🛠️
                                 @endif
                             </span>
                             <h5 class="card-title">{{ $widget['name'] }}</h5>
-                            <a href="{{ $widget['link'] }}" class="btn {{ $widget['name'] == 'Iniciar Estacionamiento' ? 'btn-success' : 'btn-primary' }}">Ir</a>
+                            <a href="{{ $widget['link'] }}"
+                                class="btn {{ $widget['name'] == 'Iniciar Estacionamiento' ? 'btn-success' : 'btn-primary' }}">Ir</a>
                         </div>
                     </div>
                 </div>
@@ -295,21 +358,26 @@
         </div>
 
         <!-- Sesiones activas -->
-        @if(isset($data['activeSessions']) && $data['activeSessions']->isNotEmpty())
+        @if (isset($data['activeSessions']) && $data['activeSessions']->isNotEmpty())
             <div class="active-sessions-section">
                 <h3>Sesiones de Estacionamiento Activas</h3>
                 @foreach ($data['activeSessions'] as $session)
                     <div id="active-parking-widget-{{ $session->id }}" class="active-parking-widget">
                         <h5><span class="emoji">🚗</span> Estacionamiento Activo</h5>
-                        <p><strong>Vehículo:</strong> {{ $session->car->license_plate ?? $session->car->car_plate }}</p>
+                        <p><strong>Vehículo:</strong> {{ $session->car->license_plate ?? $session->car->car_plate }}
+                        </p>
                         <p><strong>Zona:</strong> {{ $session->street->zone->name }}</p>
                         <p><strong>Calle:</strong> {{ $session->street->name }}</p>
                         <p><strong>Hora de inicio:</strong> {{ $session->start_time->format('d/m/Y H:i') }}</p>
                         <p><strong>Duración:</strong> {{ $session->duration }} minutos</p>
                         <p><strong>Monto:</strong> ${{ number_format($session->amount, 2) }}</p>
                         <p id="dashboard-timer-{{ $session->id }}">Cargando...</p>
-                        <button class="btn btn-light btn-sm mt-2" onclick="window.location.href='{{ route('parking.create') }}'">Ver Detalles</button>
-                        <form id="end-parking-form-{{ $session->id }}" action="{{ route('parking.end', $session->id) }}" method="POST">
+                        <button id="extend-btn-{{ $session->id }}" class="extend-btn hidden"
+                            onclick="openModal({{ $session->id }})">
+                            Agregar Tiempo
+                        </button>
+                        <form id="end-parking-form-{{ $session->id }}"
+                            action="{{ route('parking.end', $session->id) }}" method="POST">
                             @csrf
                             @method('POST')
                             <button type="submit" class="btn btn-danger btn-sm mt-2">Finalizar</button>
@@ -319,100 +387,181 @@
             </div>
         @endif
     </div>
+    <!-- MODAL ÚNICO (FUERA DEL FOREACH) -->
+    <div id="extend-modal" class="extend-modal">
+        <div class="extend-modal-content">
+            <h3 class="text-lg font-bold text-[#1a3c6d] mb-2">Extender Tiempo</h3>
+            <p class="text-sm text-gray-600 mb-3">Vehículo: <strong id="modal-car"></strong></p>
 
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Tiempo adicional</label>
+                <select id="extra-duration" class="w-full border border-gray-300 rounded-lg p-2 text-sm">
+                    <!-- Opciones se llenan con JS -->
+                </select>
+            </div>
 
-    <script>
-        // Temporizadores para sesiones activas
-        const timers = {};
-        @if(isset($data['activeSessions']) && $data['activeSessions']->isNotEmpty())
-            @foreach ($data['activeSessions'] as $session)
-                timers[{{ $session->id }}] = {
-                    startTime: new Date('{{ $session->start_time->toIso8601String() }}').getTime(),
-                    duration: {{ $session->duration }},
-                    interval: null
-                };
-                (function(sessionId) {
-                    const widget = document.getElementById('active-parking-widget-' + sessionId);
-                    const timerElement = document.getElementById('dashboard-timer-' + sessionId);
-                    const now = new Date().getTime();
-                    const endTime = timers[sessionId].startTime + timers[sessionId].duration * 60 * 1000;
-                    let timeLeft = Math.floor((endTime - now) / 1000);
-                    if (timeLeft > 0) {
-                        widget.style.display = 'block';
-                        timers[sessionId].timeLeft = timeLeft;
-                        timers[sessionId].interval = setInterval(() => updateTimer(sessionId, timerElement, widget), 1000);
-                    } else {
-                        widget.style.display = 'none';
-                        expireSession(sessionId);
-                    }
-                })({{ $session->id }});
-            @endforeach
-        @endif
+            <p class="text-right text-sm font-bold mb-3">
+                Costo: <span id="extend-cost" class="text-green-600">$0</span>
+            </p>
 
-        function updateTimer(sessionId, timerElement, widget) {
-            if (timers[sessionId].timeLeft > 0) {
-                timers[sessionId].timeLeft--;
-                const hours = Math.floor(timers[sessionId].timeLeft / 3600);
-                const minutes = Math.floor((timers[sessionId].timeLeft % 3600) / 60);
-                const seconds = timers[sessionId].timeLeft % 60;
-                timerElement.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')} restantes`;
-            } else {
-                clearInterval(timers[sessionId].interval);
-                timerElement.textContent = 'Tiempo terminado';
-                widget.style.display = 'none';
-                expireSession(sessionId);
-            }
-        }
+            <div class="flex gap-2">
+                <button onclick="closeModal()"
+                    class="flex-1 bg-gray-200 text-gray-700 py-2 rounded-lg text-sm font-medium">Cancelar</button>
+                <button id="confirm-extend"
+                    class="flex-1 bg-gradient-to-r from-[#28a745] to-[#1e7e34] text-black py-2 rounded-lg text-sm font-medium">
+                    Pagar y Extender
+                </button>
+            </div>
+        </div>
+    </div>
 
-        function expireSession(sessionId) {
-            fetch(`/parking/expire/${sessionId}`, {
+<script>
+    // === DATOS DE SESIONES (100% SEGURO) ===
+    @php
+        $sessionsData = $data['activeSessions']->map(function ($s) {
+            return [
+                'id' => $s->id,
+                'start' => $s->start_time->timestamp * 1000,
+                'duration' => $s->duration,
+                'amount' => $s->amount,
+                'car' => $s->car->license_plate ?? $s->car->car_plate,
+                'rate' => $s->street->zone->rate ?? 100,
+            ];
+        })->toArray();
+    @endphp
+
+    const sessions = @json($sessionsData);
+
+    let currentSessionId = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+        sessions.forEach(s => {
+            let endTime = s.start + (s.duration * 60 * 1000);
+            let warned = false;
+
+            const timerEl = document.getElementById(`dashboard-timer-${s.id}`);
+            const btn = document.getElementById(`extend-btn-${s.id}`);
+            const widget = document.getElementById(`active-parking-widget-${s.id}`);
+
+            const update = () => {
+                const left = Math.max(0, Math.floor((endTime - Date.now()) / 1000));
+                if (left === 0) {
+                    timerEl.textContent = 'Finalizado';
+                    timerEl.classList.add('text-red-600');
+                    btn.classList.add('hidden');
+                    widget.style.opacity = '0.6';
+                    setTimeout(() => location.reload(), 3000);
+                    return;
+                }
+                const h = String(Math.floor(left / 3600)).padStart(2, '0');
+                const m = String(Math.floor((left % 3600) / 60)).padStart(2, '0');
+                const s = String(left % 60).padStart(2, '0');
+                timerEl.textContent = `${h}:${m}:${s} restantes`;
+
+                if (left <= 300 && !warned) {
+                    btn.classList.remove('hidden');
+                    warned = true;
+                }
+            };
+            update();
+            setInterval(update, 1000);
+        });
+    });
+
+    function number_format(n) {
+        return Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '');
+    }
+
+    function openModal(id) {
+        const s = sessions.find(x => x.id == id);
+        currentSessionId = id;
+        document.getElementById('modal-car').textContent = s.car;
+
+        const select = document.getElementById('extra-duration');
+        select.innerHTML = '';
+        const rate = s.rate;
+        const opts = [
+            [60, rate, `1 hora - $${number_format(rate)}`],
+            [120, rate * 2, `2 horas - $${number_format(rate * 2)}`],
+            [180, rate * 3, `3 horas - $${number_format(rate * 3)}`]
+        ];
+        opts.forEach(o => {
+            const opt = new Option(o[2], o[0]);
+            opt.dataset.cost = o[1];
+            select.add(opt);
+        });
+
+        document.getElementById('extend-cost').textContent = `$${number_format(opts[0][1])}`;
+        document.getElementById('extend-modal').classList.add('show');
+    }
+
+    function closeModal() {
+        document.getElementById('extend-modal').classList.remove('show');
+    }
+
+    document.getElementById('extra-duration').addEventListener('change', () => {
+        const cost = document.getElementById('extra-duration').selectedOptions[0].dataset.cost;
+        document.getElementById('extend-cost').textContent = `$${number_format(cost)}`;
+    });
+
+    document.getElementById('confirm-extend').onclick = async () => {
+        const extra = parseInt(document.getElementById('extra-duration').value);
+        const btn = document.getElementById('confirm-extend');
+        const txt = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = 'Procesando...';
+
+        try {
+            const res = await fetch(`/parking/${currentSessionId}/extend`, {
                 method: 'POST',
                 headers: {
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
                 },
-            }).then(response => response.json())
-              .then(data => {
-                  if (data.success) {
-                      alert('El tiempo de estacionamiento ha terminado.');
-                  } else {
-                      console.error('Error al expirar sesión:', data.message);
-                  }
-              }).catch(error => {
-                  console.error('Error de red al expirar sesión:', error);
-              });
-        }
+                body: JSON.stringify({ extra_minutes: extra })
+            });
+            const data = await res.json();
 
-        // Manejar finalización de estacionamientos
-        @if(isset($data['activeSessions']) && $data['activeSessions']->isNotEmpty())
-            @foreach ($data['activeSessions'] as $session)
-                document.getElementById('end-parking-form-{{ $session->id }}').addEventListener('submit', async function(e) {
-                    e.preventDefault();
-                    try {
-                        const response = await fetch(this.action, {
-                            method: 'POST',
-                            headers: {
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                                'Accept': 'application/json',
-                            },
-                        });
-                        const data = await response.json();
-                        if (response.ok && data.success) {
-                            alert(data.message);
-                            clearInterval(timers[{{ $session->id }}].interval);
-                            document.getElementById('active-parking-widget-{{ $session->id }}').style.display = 'none';
-                            window.location.reload();
-                        } else {
-                            alert(data.message || `Error desconocido al finalizar el estacionamiento. Código: ${response.status}`);
-                            console.error('Respuesta del servidor:', data, 'Estado:', response.status);
-                        }
-                    } catch (error) {
-                        console.error('Error al finalizar estacionamiento:', error);
-                        alert(`Error al finalizar el estacionamiento: ${error.message}`);
-                    }
-                });
-            @endforeach
-        @endif
-    </script>
+            if (data.success) {
+                alert('¡Tiempo extendido con éxito!');
+                closeModal();
+                location.reload();
+            } else {
+                alert(data.message || 'Error al extender');
+            }
+        } catch (e) {
+            alert('Error de conexión');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = txt;
+        }
+    };
+
+    // Finalizar estacionamiento
+    document.querySelectorAll('[id^="end-parking-form-"]').forEach(form => {
+        form.addEventListener('submit', async function (e) {
+            e.preventDefault();
+            if (!confirm('¿Finalizar este estacionamiento?')) return;
+
+            const res = await fetch(this.action, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: new FormData(this)
+            });
+            const data = await res.json();
+            if (res.ok && data.success) {
+                alert(data.message);
+                document.getElementById('active-parking-widget-' + this.id.split('-')[3]).remove();
+            } else {
+                alert(data.message || 'Error');
+            }
+        });
+    });
+    
+</script>
 </body>
+
 </html>

@@ -319,6 +319,58 @@
         .slider.round:before {
             border-radius: 50%;
         }
+
+        .alert-error {
+            background-color: #dc3545;
+            color: white;
+            padding: 1.25rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1.5rem;
+            font-weight: bold;
+            font-size: 1.1rem;
+            border: 2px solid #c82333;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .alert-error ul {
+            list-style-type: disc;
+            padding-left: 1.5rem;
+            margin-bottom: 0;
+        }
+
+        .alert-error li {
+            margin-bottom: 0.5rem;
+        }
+
+        .alert-success {
+            background-color: #28a745;
+            color: white;
+            padding: 1.25rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1.5rem;
+            font-weight: bold;
+            font-size: 1.1rem;
+            border: 2px solid #218838;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            animation: pulse 1s infinite;
+        }
     </style>
 
     <div class="custom-card">
@@ -327,12 +379,16 @@
         </div>
 
         @if (session('success'))
-            <div class="bg-green-100 text-green-800 p-4 rounded mb-4">{{ session('success') }}</div>
+            <div class="alert-success">
+                <h4 class="text-lg mb-2">¡Éxito!</h4>
+                {{ session('success') }}
+            </div>
         @endif
 
         @if ($errors->any())
-            <div class="bg-red-100 text-red-800 p-4 rounded mb-4">
-                <ul class="mb-0">
+            <div class="alert-error">
+                <h4 class="text-lg mb-2">¡Atención! Error al registrar:</h4>
+                <ul>
                     @foreach ($errors->all() as $error)
                         <li>{{ $error }}</li>
                     @endforeach
@@ -401,10 +457,10 @@
                         <label>Monto Estimado</label>
                         <p id="amount-preview" class="font-bold text-lg">$0</p>
                     </div>
-                    <div class="mb-4">
+                    <div class="mb-4" hidden>
                         <label>Habilitar Mercado Pago</label>
                         <label class="switch">
-                            <input type="checkbox" name="mercadopago_enabled" id="mercadopago_enabled"   value="1">
+                            <input type="checkbox" name="mercadopago_enabled" id="mercadopago_enabled" value="1">
                             <span class="slider round"></span>
                         </label>
                     </div>
@@ -468,7 +524,7 @@
                 <button onclick="closeModal()"
                     class="flex-1 bg-gray-200 text-gray-700 py-2 rounded-lg text-sm font-medium">Cancelar</button>
                 <button id="confirm-extend"
-                    class="flex-1 bg-gradient-to-r from-[#00b4db] to-[#0083b0] text-white py-2 rounded-lg text-sm font-medium">
+                    class="flex-1 bg-gradient-to-r from-[#28a745] to-[#1e7e34] text-black py-2 rounded-lg text-sm font-medium">
                     Pagar y Extender
                 </button>
             </div>
@@ -566,7 +622,19 @@
 
                     if (left <= 300 && !warned) {
                         btn.classList.remove('hidden');
+                        btn.classList.add('show'); // Animación del botón
                         warned = true;
+
+                        // MOSTRAR LA NOTIFICACIÓN PRO
+                        mostrarNotificacionTiempoAgotandose({
+                            id: s.id,
+                            car: s.car,
+                            zone: s.zone || s.street?.zone?.name || 'Desconocida'
+                        });
+
+                        // Opcional: cambiar color del widget a rojo
+                        widget.style.border = '3px solid #dc3545';
+                        widget.style.boxShadow = '0 0 20px rgba(220, 53, 69, 0.6)';
                     }
                 };
 
@@ -588,7 +656,6 @@
             select.innerHTML = '';
             const rate = s.rate;
             const opts = [
-                [30, rate / 2, `30 min - $${number_format(rate/2,0)}`],
                 [60, rate, `1 hora - $${number_format(rate,0)}`],
                 [120, rate * 2, `2 horas - $${number_format(rate*2,0)}`],
                 [180, rate * 3, `3 horas - $${number_format(rate*3,0)}`]

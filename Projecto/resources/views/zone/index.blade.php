@@ -110,7 +110,7 @@
             <div class="alert alert-success">{{ session('success') }}</div>
         @endif
 
-        <!-- Botón de crear solo para admin/inspector -->
+        <!-- Botón de crear solo para admin -->
         @if (Auth::check() && (Auth::user()->role?->name === 'admin' || Auth::user()->role?->name === 'inspector'))
             <a href="{{ route('zones.create') }}" class="btn btn-primary mb-3">Nueva Zona</a>
         @endif
