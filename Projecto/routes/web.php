@@ -205,12 +205,10 @@ Route::post('/parking', [ParkingSessionController::class, 'store'])
 Route::get('/parking/{parkingSession?}', [ParkingSessionController::class, 'show'])
     ->middleware(['auth' ])
     ->name('parking.show');
-Route::delete('/parking/{parkingSession?}', [ParkingSessionController::class, 'destroy']) ->middleware(['auth'])
-    ->name('parking.destroy');
-Route::put('/parking/{parkingSession?}', [ParkingSessionController::class, 'update'])
-    ->middleware(['auth'])
-    ->name('parking.update');
+Route::post('/parking/{session}/extend', [ParkingSessionController::class, 'extend'])
+    ->name('parking.extend');
 Route::get('/parking/zones/{zoneId}/rate', [ParkingSessionController::class, 'getZoneRate']);
+
 // API parking check
 Route::get('/api/parking/check-active/{carId}', [ParkingSessionController::class, 'checkActive'])
     ->middleware(['auth'])
