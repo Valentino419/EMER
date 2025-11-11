@@ -190,6 +190,9 @@ Route::match(['get', 'post'], '/check-zone', [ZoneController::class, 'checkZone'
     ->middleware(['auth']);
 
 // Parking sessions
+Route::get('/parking', [ParkingSessionController::class, 'index'])
+    ->middleware(['auth'])
+    ->name('parking.index'); 
 Route::get('/parking/create', [ParkingSessionController::class, 'create'])
     ->middleware(['auth'])
     ->name('parking.create');
@@ -204,11 +207,20 @@ Route::get('/parking/{parkingSession?}', [ParkingSessionController::class, 'show
     ->name('parking.show');
 Route::post('/parking/{session}/extend', [ParkingSessionController::class, 'extend'])
     ->name('parking.extend');
+Route::get('/parking/zones/{zoneId}/rate', [ParkingSessionController::class, 'getZoneRate']);
+Route::delete('/parking/{parkingSession}', [ParkingSessionController::class, 'destroy'])
+    ->middleware(['auth'])
+    ->name('parking.destroy');
 
+
+    Route::put('/parking/{parkingSession}', [ParkingSessionController::class, 'update'])
+    ->middleware(['auth'])
+    ->name('parking.update');
 // API parking check
 Route::get('/api/parking/check-active/{carId}', [ParkingSessionController::class, 'checkActive'])
     ->middleware(['auth'])
     ->name('parking.check-active');
+Route::get('/parking/streets/{zoneId}', [ParkingSessionController::class, 'getStreetsByZone']);
 
 // Payments
 Route::post('/payment/initiate', [PaymentController::class, 'initiate'])

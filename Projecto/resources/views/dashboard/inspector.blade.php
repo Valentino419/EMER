@@ -65,8 +65,8 @@
         <div class="d-flex justify-content-center align-items-center mb-4 search-new-container gap-2">
             <form method="GET" action="{{ route('infractions.index') }}" class="flex-grow-1">
                 <div class="input-group">
-                    <input type="text" name="search" class="form-control" placeholder="Buscar por patente..."
-                        value="{{ request('search') }}">
+                    <input type="text" name="search" class="form-control" placeholder="Buscar patente (ej: AA123BB)"
+                        value="{{ request('search') }}" maxlength="7" style="text-transform: uppercase;">
                     <button class="btn btn-outline-secondary" type="submit">Buscar</button>
                 </div>
             </form>
@@ -77,7 +77,40 @@
                 </button>
             @endif
         </div>
-
+        @if (request('search'))
+            <div class="row justify-content-center mb-4">
+                <div class="col-md-8">
+                    @if ($carStatus === 'activo')
+                        <div class="alert alert-success d-flex align-items-center gap-2">
+                            <i class="bi bi-check-circle-fill"></i>
+                            <div>
+                                <strong>Patente {{ $car->car_plate }}</strong> está <strong>ACTIVA</strong>.
+                                @if ($hasTodayInfraction)
+                                    <br><span class="text-danger">Ya tiene una multa PENDIENTE HOY.</span>
+                                @else
+                                    <br><span class="text-success">Listo para registrar infracción.</span>
+                                @endif
+                            </div>
+                        </div>
+                    @elseif ($carStatus === 'no_encontrado')
+                        <div class="alert alert-warning d-flex align-items-center gap-2">
+                            <i class="bi bi-exclamation-triangle-fill"></i>
+                            <div>
+                                <strong>Patente {{ request('search') }}</strong> no está registrada.
+                                <br><small>Se creará automáticamente al registrar la infracción.</small>
+                            </div>
+                        </div>
+                    @elseif ($carStatus === 'formato_invalido')
+                        <div class="alert alert-danger d-flex align-items-center gap-2">
+                            <i class="bi bi-x-circle-fill"></i>
+                            <div>
+                                Formato de patente inválido. Use: <strong>AA123BB</strong> o <strong>ABC123</strong>.
+                            </div>
+                        </div>
+                    @endif
+                </div>
+            </div>
+        @endif
         {{-- Botones grandes --}}
         <div class="row g-4 justify-content-center">
             <div class="col-md-4">
@@ -148,11 +181,15 @@
                     <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                     <button type="submit" form="infraccionForm" class="btn btn-primary">Registrar</button>
                 </div>
+
+                @if (session('success'))
+   |            <!-- Toast de éxito -->
+                @endif
+
             </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-
 </html>
