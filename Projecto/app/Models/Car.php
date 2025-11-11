@@ -26,8 +26,8 @@ class Car extends Model
         return $this->hasMany(Infraction::class, 'car_id');
     }
 
-    public function parking_sessions()
+    public function parkingSessions()
     {
-        return $this->hasMany(ParkingSession::class, 'id_car');
+        return $this->hasMany(ParkingSession::class, 'car_id');
     }
 }
