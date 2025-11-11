@@ -202,7 +202,7 @@ Route::post('/parking/{id}/end', [ParkingSessionController::class, 'end'])
 Route::post('/parking', [ParkingSessionController::class, 'store'])
     ->middleware(['auth'])
     ->name('parking.store');
-Route::get('/parking/{parkingSession?}', [ParkingSessionController::class, 'show'])
+Route::get('/parking', [ParkingSessionController::class, 'show'])
     ->middleware(['auth'])
     ->name('parking.show');
 Route::post('/parking/{session}/extend', [ParkingSessionController::class, 'extend'])
