@@ -59,7 +59,7 @@ class ParkingSessionController extends Controller
             ->with(['car', 'zone', 'street'])
             ->get();
 
-        return back()->with([
+        return view('parking.create')->with([
             'cars' => $cars,
             'zones' => $zones,
             'streets' => $streets,
