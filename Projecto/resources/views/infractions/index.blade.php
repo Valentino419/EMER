@@ -180,7 +180,10 @@
                     <th>Multa</th>
                     <th>Fecha</th>
                     <th>Estado</th>
-                    <th>Acciones</th>
+
+                    @if (Auth::user()->role->name === 'admin' || Auth::user()->role->name === 'user')
+                        <th>Acciones</th>
+                    @endif
                 </tr>
             </thead>
             <tbody>
@@ -191,49 +194,66 @@
                         <td>${{ $infraction->fine }}</td>
                         <td>{{ $infraction->date }}</td>
                         <td>{{ $infraction->status }}</td>
-                        <td>
-                            @if (Auth::user()->role->name === 'admin' || Auth::user()->role->name === 'inspector')
-                                <a href="{{ route('infractions.edit', $infraction) }}"
-                                    class="btn btn-sm btn-primary">Editar</a>
+
+                        @if (Auth::user()->role->name === 'admin')
+                            <td>
+                                <a href="{{ route('infractions.edit', $infraction) }}" class="btn btn-sm btn-primary">
+                                    Editar
+                                </a>
+
                                 <form action="{{ route('infractions.destroy', $infraction) }}" method="POST"
                                     class="d-inline">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-sm btn-danger"
-                                        onclick="return confirm('¿Estás seguro de eliminar esta infracción?')">Eliminar</button>
+                                        onclick="return confirm('¿Estás seguro de eliminar esta infracción?')">
+                                        Eliminar
+                                    </button>
                                 </form>
-                            @else
-                                <form action="{{ route('infractions.index', $infraction) }}" method="POST"
-                                    class="d-inline">
-                                    @csrf
-                                    <button type="submit" class="btn btn-sm btn-success">Pagar</button>
-                                </form>
-                            @endif
-                        </td>
+                            </td>
+                        @elseif (Auth::user()->role->name === 'user')
+                            <td>
+                                @if ($infraction->status === 'pending')
+                                    <form action="{{ route('payments.create', $infraction) }}" method="GET"
+                                        class="d-inline">
+                                        @csrf
+                                        <button type="submit" class="btn btn-sm btn-success">
+                                            Pagar
+                                        </button>
+                                    </form>
+                                @else
+                                    <span class="text-muted">{{ ucfirst($infraction->status) }}</span>
+                                @endif
+                            </td>
+                        @else
+                            <!-- Inspector: no tiene columna de acciones -->
+                            <!-- No se muestra nada -->
+                        @endif
                     </tr>
                 @empty
                     @if ($infractions->isEmpty())
-                        <div class="text-center py-5 my-4">
-                            <div class="bg-light rounded-3 p-5 shadow-sm border border-light"
-                                style="max-width: 600px; margin: 0 auto;">
-                                <div class="mb-4">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="#6c757d"
-                                        class="bi bi-exclamation-circle" viewBox="0 0 16 16">
-                                        <path
-                                            d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z" />
-                                        <path
-                                            d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995z" />
-                                    </svg>
+                        <tr>
+                            <td colspan="{{ Auth::user()->role->name === 'inspector' ? 5 : 6 }}"
+                                class="text-center py-5">
+                                <div class="bg-light rounded-3 p-5 shadow-sm border border-light"
+                                    style="max-width: 600px; margin: 0 auto;">
+                                    <div class="mb-4">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"
+                                            fill="#6c757d" class="bi bi-exclamation-circle" viewBox="0 0 16 16">
+                                            <path
+                                                d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z" />
+                                            <path
+                                                d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995z" />
+                                        </svg>
+                                    </div>
+                                    <h5 class="text-muted fw-bold">No se encontraron infracciones</h5>
+                                    <p class="text-secondary mb-3">
+                                        para la patente <strong
+                                            class="text-primary">{{ strtoupper(request('search') ?? 'desconocida') }}</strong>
+                                    </p>
                                 </div>
-                                <h5 class="text-muted fw-bold">
-                                    No se encontraron infracciones
-                                </h5>
-                                <p class="text-secondary mb-3">
-                                    para la patente <strong
-                                        class="text-primary">{{ strtoupper($car_plate ?? 'desconocida') }}</strong>
-                                </p>
-                            </div>
-                        </div>
+                            </td>
+                        </tr>
                     @endif
                 @endforelse
             </tbody>
@@ -268,21 +288,9 @@
                         <div class="mb-3">
                             <label for="date" class="form-label">Fecha</label>
                             <input type="date" name="date" id="date" class="form-control"
-                                value="{{ old('date', now()->format('Y-m-d')) }}">
+                                value="{{ old('date', now()->format('Y-m-d')) }}" readonly>
                         </div>
-                        <div class="mb-3">
-                            <label for="status" class="form-label">Estado</label>
-                            <select name="status" id="status" class="form-control">
-                                <option value="pending"
-                                    {{ old('status', 'pending') === 'pending' ? 'selected' : '' }}>
-                                    Pendiente</option>
-                                <option value="paid" {{ old('status') === 'paid' ? 'selected' : '' }}>Pagada
-                                </option>
-                                <option value="canceled" {{ old('status') === 'canceled' ? 'selected' : '' }}>
-                                    Cancelada
-                                </option>
-                            </select>
-                        </div>
+
                     </form>
                 </div>
 
