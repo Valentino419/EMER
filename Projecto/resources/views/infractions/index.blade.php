@@ -180,63 +180,148 @@
                     <th>Multa</th>
                     <th>Fecha</th>
                     <th>Estado</th>
-                    <th>Acciones</th>
+
+                    @if (Auth::user()->role->name === 'admin' || Auth::user()->role->name === 'user')
+                        <th>Acciones</th>
+                    @endif
                 </tr>
             </thead>
-            <tbody>
-                @forelse ($infractions as $infraction)
+           <tbody>
+    @forelse ($infractions as $infraction)
+        <tr>
+            <td>{{ $infraction->id }}</td>
+            <td>{{ $infraction->car?->car_plate ?? 'N/A' }}</td>
+            <td>${{ $infraction->fine }}</td>
+            <td>{{ $infraction->date }}</td>
+            <td>{{ $infraction->status }}</td>
+
+            @if (Auth::user()->role->name === 'admin')
+                <td>
+                    <a href="{{ route('infractions.edit', $infraction) }}" class="btn btn-sm btn-primary">
+                        Editar
+                    </a>
+                    <form action="{{ route('infractions.destroy', $infraction) }}" method="POST" class="d-inline">
+                        @csrf @method('DELETE')
+                        <button type="submit" class="btn btn-sm btn-danger"
+                            onclick="return confirm('¿Eliminar esta infracción?')">
+                            Eliminar
+                        </button>
+                    </form>
+                </td>
+            @elseif (Auth::user()->role->name === 'user')
+                <td>
+                    @if ($infraction->status === 'pending')
+                        <form action="{{ route('payments.create', $infraction) }}" method="GET" class="d-inline">
+                            @csrf
+                            <button type="submit" class="btn btn-sm btn-success">Pagar</button>
+                        </form>
+                    @else
+                        <span class="text-muted">{{ ucfirst($infraction->status) }}</span>
+                    @endif
+                </td>
+            @endif
+        </tr>
+    @empty
+        @if (request('search'))
+            <!-- ====== AQUÍ VA LA LÓGICA DE BÚSQUEDA ====== -->
+            @if ($carStatus === 'formato_invalido')
+                <tr>
+                    <td colspan="6" class="text-center py-5">
+                        <div class="bg-light rounded-3 p-5 shadow-sm border border-danger">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="#dc3545"
+                                class="bi bi-x-circle" viewBox="0 0 16 16">
+                                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                                <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+                            </svg>
+                            <h5 class="text-danger fw-bold mt-3">Formato de patente inválido</h5>
+                            <p class="text-muted">Use: <code>AA123BB</code> o <code>ABC123</code></p>
+                        </div>
+                    </td>
+                </tr>
+
+            @elseif ($carStatus === 'no_encontrado')
+                <tr>
+                    <td colspan="6" class="text-center py-5">
+                        <div class="bg-light rounded-3 p-5 shadow-sm border border-warning">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="#ffc107"
+                                class="bi bi-car-front" viewBox="0 0 16 16">
+                                <path d="M4 9a1 1 0 1 1-2 0 1 1 0 0 1 2 0Zm10 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM6 8a1 1 0 0 0 0 2h4a1 1 0 1 0 0-2H6ZM4.5 2.5a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 .5.5v3h-2V3H7v2.5H5v-3Z"/>
+                                <path d="M2 13.5a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-1Z"/>
+                            </svg>
+                            <h5 class="text-warning fw-bold mt-3">Patente no registrada</h5>
+                            <p class="text-muted">
+                                <strong>{{ strtoupper(request('search')) }}</strong> no está en el sistema.<br>
+                                <small>Se creará al registrar la infracción.</small>
+                            </p>
+                            <button class="btn btn-danger mt-3" data-bs-toggle="modal" data-bs-target="#infraccionModal"
+                                onclick="document.getElementById('car_plate').value = '{{ strtoupper(request('search')) }}'">
+                                Registrar Infracción
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+
+            @elseif ($carStatus === 'encontrado')
+                @if ($activeParkingSession)
+                    <!-- ESTACIONAMIENTO ACTIVO -->
                     <tr>
-                        <td>{{ $infraction->id }}</td>
-                        <td>{{ $infraction->car?->car_plate ?? 'N/A' }}</td>
-                        <td>${{ $infraction->fine }}</td>
-                        <td>{{ $infraction->date }}</td>
-                        <td>{{ $infraction->status }}</td>
-                        <td>
-                            @if (Auth::user()->role->name === 'admin' || Auth::user()->role->name === 'inspector')
-                                <a href="{{ route('infractions.edit', $infraction) }}"
-                                    class="btn btn-sm btn-primary">Editar</a>
-                                <form action="{{ route('infractions.destroy', $infraction) }}" method="POST"
-                                    class="d-inline">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-danger"
-                                        onclick="return confirm('¿Estás seguro de eliminar esta infracción?')">Eliminar</button>
-                                </form>
-                            @else
-                                <form action="{{ route('infractions.index', $infraction) }}" method="POST"
-                                    class="d-inline">
-                                    @csrf
-                                    <button type="submit" class="btn btn-sm btn-success">Pagar</button>
-                                </form>
-                            @endif
+                        <td colspan="6" class="text-center py-5">
+                            <div class="bg-light rounded-3 p-5 shadow-sm border border-success">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="#28a745"
+                                    class="bi bi-check-circle-fill" viewBox="0 0 16 16">
+                                    <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+                                </svg>
+                                <h5 class="text-success fw-bold mt-3">Vehículo con estacionamiento ACTIVO</h5>
+                                <div class="text-start mt-3">
+                                    <p><strong>Patente:</strong> {{ $car->car_plate }}</p>
+                                    <p><strong>Zona:</strong> {{ $activeParkingSession->zone->name ?? 'N/A' }}</p>
+                                    <p><strong>Calle:</strong> {{ $activeParkingSession->street->name ?? 'N/A' }}</p>
+                                    <p><strong>Finaliza:</strong> {{ $activeParkingSession->end_time->format('d/m/Y H:i') }}</p>
+                                </div>
+                                <div class="alert alert-info mt-3">
+                                    <strong>No se puede multar:</strong> El vehículo está estacionado correctamente.
+                                </div>
+                            </div>
                         </td>
                     </tr>
-                @empty
-                    @if ($infractions->isEmpty())
-                        <div class="text-center py-5 my-4">
-                            <div class="bg-light rounded-3 p-5 shadow-sm border border-light"
-                                style="max-width: 600px; margin: 0 auto;">
-                                <div class="mb-4">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="#6c757d"
-                                        class="bi bi-exclamation-circle" viewBox="0 0 16 16">
-                                        <path
-                                            d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z" />
-                                        <path
-                                            d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995z" />
-                                    </svg>
-                                </div>
-                                <h5 class="text-muted fw-bold">
-                                    No se encontraron infracciones
-                                </h5>
-                                <p class="text-secondary mb-3">
-                                    para la patente <strong
-                                        class="text-primary">{{ strtoupper($car_plate ?? 'desconocida') }}</strong>
+                @else
+                    <!-- SIN ESTACIONAMIENTO ACTIVO -->
+                    <tr>
+                        <td colspan="6" class="text-center py-5">
+                            <div class="bg-light rounded-3 p-5 shadow-sm border border-danger">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="#dc3545"
+                                    class="bi bi-exclamation-triangle-fill" viewBox="0 0 16 16">
+                                    <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+                                </svg>
+                                <h5 class="text-danger fw-bold mt-3">SIN estacionamiento activo</h5>
+                                <p class="text-muted">
+                                    <strong>{{ $car->car_plate }}</strong> puede ser multado.
                                 </p>
+                                <button class="btn btn-danger mt-3" data-bs-toggle="modal" data-bs-target="#infraccionModal"
+                                    onclick="document.getElementById('car_plate').value = '{{ $car->car_plate }}'">
+                                    Registrar Infracción
+                                </button>
                             </div>
-                        </div>
-                    @endif
-                @endforelse
-            </tbody>
+                        </td>
+                    </tr>
+                @endif
+            @endif
+        @else
+            <!-- SIN BÚSQUEDA: LISTA NORMAL -->
+            <tr>
+                <td colspan="{{ Auth::user()->role->name === 'inspector' ? 5 : 6 }}" class="text-center py-5">
+                    <div class="bg-light rounded-3 p-5 shadow-sm border border-light">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="#6c757d"
+                            class="bi bi-inbox" viewBox="0 0 16 16">
+                            <path d="M4.98 4a.5.5 0 0 0-.39.188L1.54 8H6a.5.5 0 0 1 .5.5v1A1.5 1.5 0 0 1 5 11H1a1.5 1.5 0 0 1-1.5-1.5v-7A1.5 1.5 0 0 1 1 1h5.5a.5.5 0 0 1 0 1H1a.5.5 0 0 0-.5.5v7a.5.5 0 0 0 .5.5h4a.5.5 0 0 0 .5-.5v-1A.5.5 0 0 1 6 8h4.54l-3.05-3.812A.5.5 0 0 0 11.98 4H4.98z"/>
+                        </svg>
+                        <h5 class="text-muted fw-bold mt-3">No hay infracciones registradas</h5>
+                    </div>
+                </td>
+            </tr>
+        @endif
+    @endforelse
+</tbody>
         </table>
 
         <div class="mt-4">
@@ -270,19 +355,7 @@
                             <input type="date" name="date" id="date" class="form-control"
                                 value="{{ old('date', now()->format('Y-m-d')) }}">
                         </div>
-                        <div class="mb-3">
-                            <label for="status" class="form-label">Estado</label>
-                            <select name="status" id="status" class="form-control">
-                                <option value="pending"
-                                    {{ old('status', 'pending') === 'pending' ? 'selected' : '' }}>
-                                    Pendiente</option>
-                                <option value="paid" {{ old('status') === 'paid' ? 'selected' : '' }}>Pagada
-                                </option>
-                                <option value="canceled" {{ old('status') === 'canceled' ? 'selected' : '' }}>
-                                    Cancelada
-                                </option>
-                            </select>
-                        </div>
+
                     </form>
                 </div>
 
