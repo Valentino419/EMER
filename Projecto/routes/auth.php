@@ -55,10 +55,10 @@ Route::middleware('auth')->group(function () {
     // Route::get('/dashboard/inspector', [DashboardController::class, 'index'])->middleware('role:inspector')->name('dashboard.inspector');
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    Route::get('/admin/users', fn() => view('admin.users'))->middleware('role:admin')->name('admin.users');
-    Route::get('/admin/reports', fn() => view('admin.reports'))->middleware('role:admin')->name('admin.reports');
-    Route::get('/inspector/inspections', fn() => view('inspector.inspections'))->middleware('role:inspector')->name('inspector.inspections');
-    Route::get('/inspector/schedule', fn() => view('inspector.schedule'))->middleware('role:inspector')->name('inspector.schedule');
-    Route::get('/user/profile', fn() => view('user.profile'))->middleware('role:user')->name('user.profile');
-    Route::get('/user/orders', fn() => view('user.orders'))->middleware('role:user')->name('user.orders');
+    Route::get('/admin/users', fn() => view('admin.users'))->name('admin.users');
+    Route::get('/admin/reports', fn() => view('admin.reports'))->name('admin.reports');
+    Route::get('/inspector/inspections', fn() => view('inspector.inspections'))->name('inspector.inspections');
+    Route::get('/inspector/schedule', fn() => view('inspector.schedule'))->name('inspector.schedule');
+    Route::get('/user/profile', fn() => view('user.profile'))->name('user.profile');
+    Route::get('/user/orders', fn() => view('user.orders'))->name('user.orders');
 });

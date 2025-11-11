@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Role;
 use App\Models\User;
+use App\Models\Zone;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -66,8 +67,9 @@ class UserController extends Controller
             'cars.parkingSessions.zone',
             'cars.parkingSessions.street',
         ]);
+        $zones =Zone::pluck('name','id');
 
-        return view('user.show', compact('user', 'roles'));
+        return view('user.show', compact('user', 'roles','zones'));
     }
 
     public function store(Request $request)
