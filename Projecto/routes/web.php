@@ -208,7 +208,9 @@ Route::get('/parking/{parkingSession?}', [ParkingSessionController::class, 'show
 Route::post('/parking/{session}/extend', [ParkingSessionController::class, 'extend'])
     ->name('parking.extend');
 Route::get('/parking/zones/{zoneId}/rate', [ParkingSessionController::class, 'getZoneRate']);
-
+Route::delete('/parking/{parkingSession}', [ParkingSessionController::class, 'destroy'])
+    ->middleware(['auth'])
+    ->name('parking.destroy');
 // API parking check
 Route::get('/api/parking/check-active/{carId}', [ParkingSessionController::class, 'checkActive'])
     ->middleware(['auth'])
