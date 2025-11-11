@@ -305,32 +305,97 @@ class ParkingSessionController extends Controller
     { /* ... */
     }
 
-    public function end(Request $request, $id)
-    { /* ... */
+    public function expire($id)
+    {
+        $session = ParkingSession::where('id', $id)
+            ->where('user_id', auth()->id())
+            ->where('status', 'active')
+            ->first();
+
+        if (! $session) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Sesión no encontrada o ya finalizada.',
+            ], 404);
+        }
+
+        $session->update(['status' => 'expired']);
+        Log::info('Sesión expirada automáticamente', ['session_id' => $id]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Sesión expirada correctamente.',
+        ]);
     }
 
-    public function expire($id)
-    { /* ... */
+    public function end(Request $request, $id)
+    {
+        $session = ParkingSession::where('id', $id)
+            ->where('user_id', auth()->id())
+            ->where('status', 'active')
+            ->first();
+
+        if (! $session) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Sesión no encontrada o ya finalizada.',
+            ], 404);
+        }
+
+        try {
+            $session->update([
+                'status' => 'cancelled',
+                'end_time' => now(), // Actualiza el fin real
+            ]);
+
+            Log::info('Estacionamiento finalizado manualmente', ['session_id' => $id]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Estacionamiento finalizado correctamente.',
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error al finalizar estacionamiento', [
+                'session_id' => $id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al finalizar: '.$e->getMessage(),
+            ], 500);
+        }
     }
+
+    // app/Http/Controllers/ParkingSessionController.php
 
     public function checkActive($carId)
-    { /* ... */
+    {
+        try {
+            $active = ParkingSession::where('car_id', $carId)
+                ->where('user_id', auth()->id())
+                ->where('status', 'active')
+                ->exists();
+
+            return response()->json(['active' => $active]);
+        } catch (\Exception $e) {
+            \Log::error('Error en checkActive', ['error' => $e->getMessage()]);
+
+            return response()->json(['error' => 'Error interno'], 500);
+        }
     }
 
-    // ParkingSessionController
     public function getStreetsByZone($zoneId)
     {
-        return response()->json(
-            Street::where('zone_id', $zoneId)->get(['id', 'name'])
-        );
+        $streets = Street::where('zone_id', $zoneId)->get();
+
+        return response()->json($streets);
     }
 
     public function getZoneRate($zoneId)
     {
-        $zone = Zone::find($zoneId);
+        $zone = Zone::findOrFail($zoneId);
 
         return response()->json(['rate' => $zone->rate ?? 5.0]);
     }
-    // ParkingSessionController
-
 }
