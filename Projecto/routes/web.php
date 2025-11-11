@@ -156,7 +156,7 @@ Route::put('/infractions/{infraction}', [InfractionController::class, 'update'])
 Route::delete('/infractions/{infraction}', [InfractionController::class, 'destroy'])
     ->middleware(['auth'])
     ->name('infractions.destroy');
-git 
+
 // Inspectors (admin only)
 Route::get('/inspectors', [InspectorController::class, 'index'])
     ->middleware(['auth'])
