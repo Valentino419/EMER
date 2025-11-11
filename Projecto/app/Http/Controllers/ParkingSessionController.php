@@ -165,7 +165,6 @@ class ParkingSessionController extends Controller
         return redirect()->route('payment.initiate');
     }
 
-    // SHOW
     public function show(Request $request)
     {
         $search = $request->query('search');
@@ -188,6 +187,8 @@ class ParkingSessionController extends Controller
 
         return view('parking.show', compact('sessions'));
     }
+
+   
 
     // EDIT - Formulario para editar
     public function edit(ParkingSession $parkingSession)
@@ -297,11 +298,11 @@ class ParkingSessionController extends Controller
     // Métodos adicionales (extend, end, expire, etc.)
     // ... (los que ya tenías, están perfectos)
 
-     public function completePayment(Request $request)
+    public function completePayment(Request $request)
     {
         try {
             $sessionId = session('parking_session_id');
-            if (!$sessionId) {
+            if (! $sessionId) {
                 throw new \Exception('No se encontró sesión de estacionamiento pendiente.');
             }
 
@@ -322,7 +323,7 @@ class ParkingSessionController extends Controller
 
                 Log::info('Estacionamiento activado después del pago', [
                     'session_id' => $parkingSession->id,
-                    'user_id' => auth()->id()
+                    'user_id' => auth()->id(),
                 ]);
             });
 
@@ -334,23 +335,20 @@ class ParkingSessionController extends Controller
         } catch (\Exception $e) {
             Log::error('Error al activar estacionamiento después del pago', [
                 'error' => $e->getMessage(),
-                'user_id' => auth()->id()
+                'user_id' => auth()->id(),
             ]);
 
             return redirect()->route('parking.create')
-                ->withErrors(['error' => 'Error al activar el estacionamiento: ' . $e->getMessage()]);
+                ->withErrors(['error' => 'Error al activar el estacionamiento: '.$e->getMessage()]);
         }
     }
 
-
-
-     public function extend(Request $request, ParkingSession $session)
+    public function extend(Request $request, ParkingSession $session)
     {
         if ($session->user_id !== auth()->id() || $session->start_time->addMinutes($session->duration) <= now()) {
             return response()->json(['success' => false, 'message' => 'No permitido'], 400);
         }
-
-
+    }
 
     public function expire($id)
     {
@@ -432,22 +430,17 @@ class ParkingSessionController extends Controller
         }
     }
 
-
-   
-
-   
-
-   
-
     public function getStreetsByZone($zoneId)
     {
         $streets = Street::where('zone_id', $zoneId)->get();
+
         return response()->json($streets);
     }
 
     public function getZoneRate($zoneId)
     {
         $zone = Zone::findOrFail($zoneId);
+
         return response()->json(['rate' => $zone->rate ?? 5.0]);
     }
 }
