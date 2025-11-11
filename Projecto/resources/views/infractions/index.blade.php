@@ -211,7 +211,7 @@
             @elseif (Auth::user()->role->name === 'user')
                 <td>
                     @if ($infraction->status === 'pending')
-                        <form action="{{ route('payments.create', $infraction) }}" method="GET" class="d-inline">
+                        <form action="{{ route('infractions.index', $infraction) }}" method="GET" class="d-inline">
                             @csrf
                             <button type="submit" class="btn btn-sm btn-success">Pagar</button>
                         </form>
