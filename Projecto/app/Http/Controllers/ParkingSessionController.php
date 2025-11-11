@@ -115,7 +115,7 @@ class ParkingSessionController extends Controller
         $endDateTime = $startDateTime->copy()->addMinutes($durationInMinutes); // Fixed: was `eingMinutes`
         $amount = ($durationInMinutes / 60) * $rate;
 
-        $mercadopagoEnabled = $validated['mercadopago_enabled'] ?? false;
+        $mercadopagoEnabled = false;
 
         if (! $mercadopagoEnabled) {
             $parkingSession = ParkingSession::create([
@@ -129,7 +129,7 @@ class ParkingSessionController extends Controller
                 'rate' => $rate,
                 'amount' => $amount,
                 'status' => 'active',
-                'payment_status' => 'skipped',
+                'payment_status' => 'completed',
                 'metodo_pago' => 'none',
                 'license_plate' => $car->license_plate ?? strtoupper($car->car_plate ?? 'N/A'),
             ]);
@@ -165,6 +165,30 @@ class ParkingSessionController extends Controller
         return redirect()->route('payment.initiate');
     }
 
+    // SHOW
+    public function show(Request $request)
+    {
+        $search = $request->query('search');
+
+        $sessions = ParkingSession::where('user_id', auth()->id())
+            ->with(['car', 'zone', 'street'])
+            ->when($search, function ($query) use ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('license_plate', 'like', "%{$search}%")
+                        ->orWhereHas('zone', function ($z) use ($search) {
+                            $z->where('name', 'like', "%{$search}%");
+                        })
+                        ->orWhereHas('street', function ($s) use ($search) {
+                            $s->where('name', 'like', "%{$search}%");
+                        });
+                });
+            })
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
+
+        return view('parking.show', compact('sessions'));
+    }
+
     // EDIT - Formulario para editar
     public function edit(ParkingSession $parkingSession)
     {
@@ -190,72 +214,72 @@ class ParkingSessionController extends Controller
     }
 
     // UPDATE - Actualizar sesión
-public function update(Request $request, ParkingSession $parkingSession)
-{
-    // Validación (solo estructura)
-    $validated = $request->validate([
-        'car_id'          => 'sometimes|required|exists:cars,id',
-        'zone_id'         => 'required|exists:zones,id',
-        'street_id'       => 'required|exists:streets,id',
-        'start_date'      => 'required|date',
-        'start_time'      => 'required|date_format:H:i',
-        'duration'        => 'required|integer|in:60,120,180,240,360,480',
-        'status'          => 'required|in:pending,active,expired,cancelled',
-        'timezone_offset' => 'sometimes|required_with:start_time|integer',
-    ]);
+    public function update(Request $request, ParkingSession $parkingSession)
+    {
+        // Validación (solo estructura)
+        $validated = $request->validate([
+            'car_id' => 'sometimes|required|exists:cars,id',
+            'zone_id' => 'required|exists:zones,id',
+            'street_id' => 'required|exists:streets,id',
+            'start_date' => 'required|date',
+            'start_time' => 'required|date_format:H:i',
+            'duration' => 'required|integer|in:60,120,180,240,360,480',
+            'status' => 'required|in:pending,active,expired,cancelled',
+            'timezone_offset' => 'sometimes|required_with:start_time|integer',
+        ]);
 
-    // Validar zona/calle
-    $street = Street::findOrFail($validated['street_id']);
-    if ($street->zone_id !== (int) $validated['zone_id']) {
-        return back()->withErrors(['street_id' => 'La calle no pertenece a la zona seleccionada.']);
-    }
-
-    $zone = Zone::findOrFail($validated['zone_id']);
-    $rate = $zone->rate ?? 5.0;
-
-    // Construir start_time con fecha + hora + timezone
-    $offsetMinutes = $request->input('timezone_offset', 0);
-    $tzString = sprintf('%+03d:00', -$offsetMinutes / 60);
-
-    $startDateTime = Carbon::createFromFormat(
-        'Y-m-d H:i',
-        $validated['start_date'] . ' ' . $validated['start_time'],
-        $tzString
-    );
-
-    // Calcular end_time y monto
-    $durationMinutes = (int) $validated['duration'];
-    $endDateTime = $startDateTime->copy()->addMinutes($durationMinutes);
-    $amount = ($durationMinutes / 60) * $rate;
-
-    // Actualización completa (admin)
-    DB::transaction(function () use (
-        $parkingSession, $validated, $startDateTime, $endDateTime,
-        $durationMinutes, $amount, $rate
-    ) {
-        $data = [
-            'zone_id'    => $validated['zone_id'],
-            'street_id'  => $validated['street_id'],
-            'start_time' => $startDateTime,
-            'end_time'   => $endDateTime,
-            'duration'   => $durationMinutes,
-            'amount'     => $amount,
-            'rate'       => $rate,
-            'status'     => $validated['status'],
-        ];
-
-        if (isset($validated['car_id'])) {
-            $car = Car::findOrFail($validated['car_id']);
-            $data['car_id'] = $validated['car_id'];
-            $data['license_plate'] = $car->license_plate
-                ?? strtoupper($car->car_plate ?? 'N/A');
+        // Validar zona/calle
+        $street = Street::findOrFail($validated['street_id']);
+        if ($street->zone_id !== (int) $validated['zone_id']) {
+            return back()->withErrors(['street_id' => 'La calle no pertenece a la zona seleccionada.']);
         }
 
-        $parkingSession->update($data);
-    });
+        $zone = Zone::findOrFail($validated['zone_id']);
+        $rate = $zone->rate ?? 5.0;
 
-    return back()->with('success', 'Sesión actualizada correctamente por el administrador.');
-}
+        // Construir start_time con fecha + hora + timezone
+        $offsetMinutes = $request->input('timezone_offset', 0);
+        $tzString = sprintf('%+03d:00', -$offsetMinutes / 60);
+
+        $startDateTime = Carbon::createFromFormat(
+            'Y-m-d H:i',
+            $validated['start_date'].' '.$validated['start_time'],
+            $tzString
+        );
+
+        // Calcular end_time y monto
+        $durationMinutes = (int) $validated['duration'];
+        $endDateTime = $startDateTime->copy()->addMinutes($durationMinutes);
+        $amount = ($durationMinutes / 60) * $rate;
+
+        // Actualización completa (admin)
+        DB::transaction(function () use (
+            $parkingSession, $validated, $startDateTime, $endDateTime,
+            $durationMinutes, $amount, $rate
+        ) {
+            $data = [
+                'zone_id' => $validated['zone_id'],
+                'street_id' => $validated['street_id'],
+                'start_time' => $startDateTime,
+                'end_time' => $endDateTime,
+                'duration' => $durationMinutes,
+                'amount' => $amount,
+                'rate' => $rate,
+                'status' => $validated['status'],
+            ];
+
+            if (isset($validated['car_id'])) {
+                $car = Car::findOrFail($validated['car_id']);
+                $data['car_id'] = $validated['car_id'];
+                $data['license_plate'] = $car->license_plate
+                    ?? strtoupper($car->car_plate ?? 'N/A');
+            }
+
+            $parkingSession->update($data);
+        });
+
+        return back()->with('success', 'Sesión actualizada correctamente por el administrador.');
+    }
 
     // DELETE - Eliminar sesión
     public function destroy(ParkingSession $parkingSession)
