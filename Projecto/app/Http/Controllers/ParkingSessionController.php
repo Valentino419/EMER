@@ -345,9 +345,23 @@ class ParkingSessionController extends Controller
 
     public function extend(Request $request, ParkingSession $session)
     {
-        if ($session->user_id !== auth()->id() || $session->start_time->addMinutes($session->duration) <= now()) {
-            return response()->json(['success' => false, 'message' => 'No permitido'], 400);
-        }
+        $request->validate([
+            'extra_minutes' => 'required|integer|in:60,120,180'
+        ]);
+
+        $extra = $request->extra_minutes;
+        $rate = $session->rate;
+
+        $session->duration += $extra;
+        $session->end_time = $session->end_time->addMinutes($extra);
+        $session->amount += ($extra / 60) * $rate;
+        $session->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Tiempo extendido correctamente',
+            'redirect' => route('payment.initiate') // o null si no pagas
+        ]);
     }
 
     public function expire($id)

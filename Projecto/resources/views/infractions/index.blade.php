@@ -211,7 +211,7 @@
             @elseif (Auth::user()->role->name === 'user')
                 <td>
                     @if ($infraction->status === 'pending')
-                        <form action="{{ route('payments.create', $infraction) }}" method="GET" class="d-inline">
+                        <form action="{{ route('infractions.index', $infraction) }}" method="GET" class="d-inline">
                             @csrf
                             <button type="submit" class="btn btn-sm btn-success">Pagar</button>
                         </form>
@@ -353,7 +353,7 @@
                         <div class="mb-3">
                             <label for="date" class="form-label">Fecha</label>
                             <input type="date" name="date" id="date" class="form-control"
-                                value="{{ old('date', now()->format('Y-m-d')) }}">
+                                value="{{ old('date', now()->format('Y-m-d')) }}" readonly>
                         </div>
 
                     </form>
