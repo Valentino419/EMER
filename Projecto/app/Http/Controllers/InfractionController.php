@@ -5,10 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\Car;
 use App\Models\Infraction;
 use App\Models\User;
+use App\Models\ParkingSession;
 use App\Notifications\InfraccionNotification;
 use App\Traits\LicensePlateValidator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+
 
 class InfractionController extends Controller
 {
@@ -16,21 +18,64 @@ class InfractionController extends Controller
 
     public function index(Request $request)
     {
-        $query = Infraction::with('car');
+        $user = Auth::user();
+        $search = $request->get('search');
+        $infractions = collect();
+        $car = null;
+        $activeParkingSession = null;
+        $carStatus = null;
 
-        if (Auth::user()->role->name !== 'admin' && Auth::user()->role->name !== 'inspector') {
-            $query->whereHas('car', fn($q) => $q->where('user_id', Auth::id()));
+        // === 1. Si hay búsqueda ===
+        if ($search) {
+            $plate = $this->validateAndCleanLicensePlate($search);
+
+            if ($plate['valid']) {
+                $cleanPlate = $plate['cleaned'];
+                $car = Car::where('car_plate', $cleanPlate)->first();
+
+                if ($car) {
+                    $carStatus = 'encontrado';
+
+                    // === BUSCAR SESIÓN ACTIVA ===
+                    $activeParkingSession = ParkingSession::where('car_id', $car->id)
+                        ->where('status', 'active')
+                        ->where('end_time', '>', now())
+                        ->first();
+
+                    // === BUSCAR INFRACCIONES ===
+                    $infractions = Infraction::where('car_id', $car->id)
+                        ->with('car')
+                        ->latest()
+                        ->paginate(10);
+                } else {
+                    $carStatus = 'no_encontrado';
+                }
+            } else {
+                $carStatus = 'formato_invalido';
+            }
+        } else {
+            // === SIN BÚSQUEDA: Listar infracciones del usuario (si es usuario) ===
+            $query = Infraction::with('car');
+            if ($user->role->name !== 'admin' && $user->role->name !== 'inspector') {
+                $query->whereHas('car', fn($q) => $q->where('user_id', Auth::id()));
+            }
+            $infractions = $query->latest()->paginate(10);
         }
 
-        if ($request->filled('search')) {
-            $query->whereHas('car', fn($q) => $q->where('car_plate', 'like', '%' . $request->search . '%'));
+        // === Deuda pendiente (solo para usuarios) ===
+        $deudaPending = null;
+        if ($user->role->name === 'user') {
+            $deudaPending = $user->infractions()->with('car')->where('status', 'pending')->first();
         }
 
-        $infractions = $query->latest()->paginate(10);
-
-        $deudaPending = Auth::check() ? Auth::user()->infractions()->with('car')->where('status', 'pending')->first() : null;
-
-        return view('infractions.index', compact('infractions', 'deudaPending'));
+        return view('infractions.index', compact(
+            'infractions',
+            'deudaPending',
+            'search',
+            'car',
+            'activeParkingSession',
+            'carStatus'
+        ));
     }
 
     public function store(Request $request)
