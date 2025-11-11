@@ -335,9 +335,17 @@
         }
 
         @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+
+            100% {
+                transform: scale(1);
+            }
         }
 
         .alert-error ul {
@@ -449,10 +457,10 @@
                         <label>Monto Estimado</label>
                         <p id="amount-preview" class="font-bold text-lg">$0</p>
                     </div>
-                    <div class="mb-4">
+                    <div class="mb-4" hidden>
                         <label>Habilitar Mercado Pago</label>
                         <label class="switch">
-                            <input type="checkbox" name="mercadopago_enabled" id="mercadopago_enabled"   value="1">
+                            <input type="checkbox" name="mercadopago_enabled" id="mercadopago_enabled" value="1">
                             <span class="slider round"></span>
                         </label>
                     </div>
@@ -614,7 +622,19 @@
 
                     if (left <= 300 && !warned) {
                         btn.classList.remove('hidden');
+                        btn.classList.add('show'); // Animación del botón
                         warned = true;
+
+                        // MOSTRAR LA NOTIFICACIÓN PRO
+                        mostrarNotificacionTiempoAgotandose({
+                            id: s.id,
+                            car: s.car,
+                            zone: s.zone || s.street?.zone?.name || 'Desconocida'
+                        });
+
+                        // Opcional: cambiar color del widget a rojo
+                        widget.style.border = '3px solid #dc3545';
+                        widget.style.boxShadow = '0 0 20px rgba(220, 53, 69, 0.6)';
                     }
                 };
 
