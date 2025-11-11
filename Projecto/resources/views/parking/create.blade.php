@@ -458,11 +458,7 @@
                         <p id="amount-preview" class="font-bold text-lg">$0</p>
                     </div>
                     <div class="mb-4" hidden>
-                        <label>Habilitar Mercado Pago</label>
-                        <label class="switch">
-                            <input type="checkbox" name="mercadopago_enabled" id="mercadopago_enabled" value="1">
-                            <span class="slider round"></span>
-                        </label>
+                       
                     </div>
                     <input type="hidden" name="timezone_offset" id="timezone_offset">
                     <button type="submit" class="btn-blue">Iniciar Estacionamiento</button>
