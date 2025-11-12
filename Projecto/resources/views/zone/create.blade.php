@@ -65,7 +65,7 @@
         <div class="mb-3">
             <label for="rate" class="form-label">Monto de la Zona por hora </label>
             <input type="number" name="rate" id="rate" class="form-control" 
-                   step="100" min="0" 
+                   min="0" 
                    value="{{ old('rate') }}" 
                    placeholder="1500" required>
             @error('rate')
