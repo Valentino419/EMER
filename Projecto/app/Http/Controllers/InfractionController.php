@@ -16,33 +16,55 @@ class InfractionController extends Controller
 {
     use LicensePlateValidator;
 
+    // app/Http/Controllers/InfractionController.php
+
     public function index(Request $request)
     {
         $user = Auth::user();
         $search = $request->get('search');
+        $carPlateFilter = $request->get('car_plate'); // ← NUEVO: filtro desde autos
+
         $infractions = collect();
         $car = null;
         $activeParkingSession = null;
         $carStatus = null;
 
-        // === 1. Si hay búsqueda ===
+        // === 1. FILTRO POR PATENTE DESDE AUTOS ===
+        if ($carPlateFilter) {
+            $plate = $this->validateAndCleanLicensePlate($carPlateFilter);
+            if ($plate['valid']) {
+                $car = Car::where('car_plate', $plate['cleaned'])->first();
+                if ($car) {
+                    $infractions = Infraction::where('car_id', $car->id)
+                        ->with('car')
+                        ->latest()
+                        ->paginate(10);
+                    $infractions->appends(['car_plate' => $carPlateFilter]); // mantener filtro
+                }
+            }
+            // Mostrar solo infracciones de esta patente
+            $deudaPending = null;
+            return view('infractions.index', compact(
+                'infractions',
+                'car',
+                'deudaPending'
+            ));
+        }
+
+        // === 2. BÚSQUEDA NORMAL (inspector busca cualquier patente) ===
         if ($search) {
             $plate = $this->validateAndCleanLicensePlate($search);
-
             if ($plate['valid']) {
                 $cleanPlate = $plate['cleaned'];
                 $car = Car::where('car_plate', $cleanPlate)->first();
 
                 if ($car) {
                     $carStatus = 'encontrado';
-
-                    // === BUSCAR SESIÓN ACTIVA ===
                     $activeParkingSession = ParkingSession::where('car_id', $car->id)
                         ->where('status', 'active')
                         ->where('end_time', '>', now())
                         ->first();
 
-                    // === BUSCAR INFRACCIONES ===
                     $infractions = Infraction::where('car_id', $car->id)
                         ->with('car')
                         ->latest()
@@ -54,7 +76,7 @@ class InfractionController extends Controller
                 $carStatus = 'formato_invalido';
             }
         } else {
-            // === SIN BÚSQUEDA: Listar infracciones del usuario (si es usuario) ===
+            // === 3. LISTA NORMAL (según rol) ===
             $query = Infraction::with('car');
             if ($user->role->name !== 'admin' && $user->role->name !== 'inspector') {
                 $query->whereHas('car', fn($q) => $q->where('user_id', Auth::id()));
@@ -62,7 +84,7 @@ class InfractionController extends Controller
             $infractions = $query->latest()->paginate(10);
         }
 
-        // === Deuda pendiente (solo para usuarios) ===
+        // === DEUDA PENDIENTE (solo usuarios) ===
         $deudaPending = null;
         if ($user->role->name === 'user') {
             $deudaPending = $user->infractions()->with('car')->where('status', 'pending')->first();

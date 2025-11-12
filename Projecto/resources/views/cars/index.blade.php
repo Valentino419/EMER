@@ -5,7 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Autos</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        crossorigin="anonymous">
     <style>
         body {
             background-color: #f0f4f8;
@@ -148,38 +149,39 @@
         <h2>Mis Autos</h2>
         <hr>
 
-        @if(session('success'))
+        @if (session('success'))
             <div class="alert alert-success">
                 {{ session('success') }}
             </div>
         @endif
 
-        @if(session('warning'))
+        @if (session('warning'))
             <div class="alert alert-warning">
                 {{ session('warning') }}
                 <a href="{{ route('cars.store') }}" class="btn btn-primary btn-sm">Reclamar Patente</a>
             </div>
         @endif
 
-        @if($errors->any())
+        @if ($errors->any())
             <div class="alert alert-danger">
                 <ul>
-                    @foreach($errors->all() as $error)
+                    @foreach ($errors->all() as $error)
                         <li>{{ $error }}</li>
                     @endforeach
                 </ul>
             </div>
         @endif
 
-        @if($cars->isEmpty())
+        @if ($cars->isEmpty())
             <div class="alert alert-info text-center">
-                @if(Auth::user()->role->name === 'user')
+                @if (Auth::user()->role->name === 'user')
                     Aún no registraste ningún auto. 🚗
                     <div class="mt-3">
                         <form action="{{ route('cars.store') }}" method="POST">
                             @csrf
                             <div class="input-group">
-                                <input type="text" name="car_plate" class="form-control" placeholder="Ingresar patente" required>
+                                <input type="text" name="car_plate" class="form-control"
+                                    placeholder="Ingresar patente" required>
                                 <button type="submit" class="btn btn-primary">Registrar mi primer auto</button>
                             </div>
                         </form>
@@ -201,22 +203,26 @@
                     <tr>
                         <th>ID</th>
                         <th>Patente</th>
-                        @if(Auth::user()->role->name !== 'user')
+                        @if (Auth::user()->role->name !== 'user')
                             <th>Propietario</th>
                         @endif
                         <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($cars as $car)
+                    @foreach ($cars as $car)
                         <tr>
                             <td>{{ $car->id }}</td>
                             <td>{{ $car->car_plate }}</td>
-                            @if(Auth::user()->role->name !== 'user')
+                            @if (Auth::user()->role->name !== 'user')
                                 <td>{{ $car->user->name ?? 'N/A' }}</td>
                             @endif
+                            <!-- En tu vista de autos: resources/views/cars/index.blade.php -->
                             <td>
-                                <a href="{{ route('infractions.index') }}" class="btn btn-primary btn-sm">Ver Infracciones</a>
+                                <a href="{{ route('infractions.index', ['car_plate' => $car->car_plate]) }}"
+                                    class="btn btn-primary btn-sm">
+                                    Ver Infracciones
+                                </a>
                             </td>
                         </tr>
                     @endforeach
@@ -228,7 +234,8 @@
             </div>
         @endif
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous">
+    </script>
 </body>
 
 </html>

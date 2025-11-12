@@ -10,7 +10,7 @@ class Zone extends Model
     use HasFactory;
     
     protected $fillable = [
-        'name',
+        'name','rate',
     ];
     public function streets()
     {
