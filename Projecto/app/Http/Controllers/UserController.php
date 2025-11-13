@@ -35,7 +35,7 @@ class UserController extends Controller
 
         \Log::debug('SQL Query:', ['sql' => $query->toSql(), 'bindings' => $query->getBindings()]);
 
-        $loggedUsers = $query->paginate(25);
+        $loggedUsers = $query->paginate(10);
 
         $loggedUsers->getCollection()->transform(function ($user) {
             $user->role_name = $user->role?->name ?? 'Sin rol';
