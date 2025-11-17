@@ -1,5 +1,7 @@
 <?php
+
 use Illuminate\Support\ServiceProvider;
+
 return [
 
     /*
@@ -123,12 +125,13 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
     'providers' => ServiceProvider::defaultProviders()->merge([
-    // ... other providers
-    App\Providers\AppServiceProvider::class,
-])->toArray(),
-'stripe' => [
-    'secret' => env('STRIPE_SECRET'),
-    'publishable_key' => env('STRIPE_PUBLISHABLE_KEY'),
-],
+        // ... other providers
+        App\Providers\AppServiceProvider::class,
+    ])->toArray(),
+    'stripe' => [
+        'secret' => env('STRIPE_SECRET'),
+        'publishable_key' => env('STRIPE_PUBLISHABLE_KEY'),
+    ],
+    'timezone' => 'America/Argentina/Buenos_Aires',
 
 ];
