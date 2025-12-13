@@ -33,8 +33,7 @@ class UserController extends Controller
         $usersToCheckIds = User::whereHas('role', fn ($r) => $r->whereIn('name', $rolesPermitidos))
             ->where('id', '!=', Auth::id())
             ->pluck('id');
-        // >>> LOG DEPURACIÓN: ¿Quién debería ser revisado?
-        \Log::info('DEBUG: Usuarios a revisar (Todos los IDs)', ['ids' => $usersToCheckIds->toArray()]);
+
         $onlineUserIds = [];
 
         // B. Buscar en caché SOLO los IDs que están online
@@ -43,15 +42,14 @@ class UserController extends Controller
                 $onlineUserIds[] = $userId;
             }
         }
-        // >>> LOG DEPURACIÓN: ¿Quién fue encontrado online?
-        \Log::info('DEBUG: Usuarios encontrados ONLINE (IDs de Caché)', ['online_ids' => $onlineUserIds]);
+
         // C. Aplicar el filtro a la consulta principal con WHERE IN (mucho más eficiente)
         $query->whereIn('id', $onlineUserIds);
 
         // ----------------------------------------------------
 
         // 4. Filtro de Búsqueda (Search)
-       /* if ($request->filled('search')) {
+        if ($request->filled('search')) {
             $search = $request->input('search');
             $lowerSearch = strtolower($search);
 
@@ -62,7 +60,7 @@ class UserController extends Controller
                     ->orWhere('email', 'like', "%{$search}%")
                     ->orWhereHas('role', fn ($r) => $r->whereRaw('LOWER(name) LIKE ?', "%{$lowerSearch}%"));
             });
-        }*/
+        }
 
         // 5. Ejecución y Paginación
         $loggedUsers = $query->paginate(10);
@@ -75,23 +73,6 @@ class UserController extends Controller
 
             return $user;
         });
-
-       // 1. Loguear si la colección paginada tiene elementos
-\Log::info('DEBUG: Total de usuarios paginados', ['count' => $loggedUsers->count()]);
-
-// 2. Loguear los IDs y Roles de los resultados obtenidos
-\Log::info('DEBUG: IDs y Roles encontrados', [
-    'results' => $loggedUsers->getCollection()->map(fn($u) => [
-        'id' => $u->id, 
-        'role' => $u->role?->name, 
-        'role_id' => $u->role_id
-    ])->toArray()
-]);
-
-// 3. Su log original para comparar
-\Log::info('Usuarios online encontrados por rol:', [
-    'roles' => $loggedUsers->pluck('role_name')->countBy(), 
-]);
 
         $roles = Role::pluck('name', 'id');
 
