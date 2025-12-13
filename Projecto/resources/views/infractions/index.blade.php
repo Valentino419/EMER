@@ -354,9 +354,7 @@
         <div class="d-flex justify-content-center mt-4">
             {{ $infractions->links('pagination::bootstrap-5') }}
         </div>
-        <div class="mt-4">
-            {{ $infractions->links() }}
-        </div>
+       
     </div>
 
     <!-- Modal para nueva infracción -->

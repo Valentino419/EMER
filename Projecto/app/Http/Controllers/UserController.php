@@ -7,43 +7,91 @@ use App\Models\User;
 use App\Models\Zone;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 
 class UserController extends Controller
 {
     public function logged(Request $request)
     {
+        // 1. Autorización: Solo Admin puede acceder
         if (! Auth::check() || strtolower(Auth::user()->role->name ?? '') !== 'admin') {
             abort(403, 'No tienes acceso a esta funcionalidad.');
         }
 
-        $query = User::with(['role' => fn ($q) => $q->select('id', 'name')])
-            ->whereHas('role', fn ($q) => $q->whereIn(DB::raw('LOWER(name)'), ['user', 'inspector', 'admin']))
-            ->where('id', '!=', auth()->id())
-            ->select('id', 'name', 'surname', 'dni', 'email', 'role_id');
+        $rolesPermitidos = ['user', 'inspector', 'admin'];
 
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
+        // 2. Consulta Base (Excluye al usuario logueado)
+        $query = User::with(['role' => fn ($q) => $q->select('id', 'name')])
+            ->whereHas('role', fn ($q) => $q->whereIn('name', $rolesPermitidos))
+            ->where('id', '!=', Auth::id())
+            ->select('id', 'name', 'surname', 'dni', 'email', 'role_id')
+            ->orderBy('surname')
+            ->orderBy('name');
+
+        // --- 3. Filtro de Usuarios Online (Optimizado) ---
+        // A. Obtener IDs de TODOS los usuarios relevantes (sin paginación)
+        $usersToCheckIds = User::whereHas('role', fn ($r) => $r->whereIn('name', $rolesPermitidos))
+            ->where('id', '!=', Auth::id())
+            ->pluck('id');
+        // >>> LOG DEPURACIÓN: ¿Quién debería ser revisado?
+        \Log::info('DEBUG: Usuarios a revisar (Todos los IDs)', ['ids' => $usersToCheckIds->toArray()]);
+        $onlineUserIds = [];
+
+        // B. Buscar en caché SOLO los IDs que están online
+        foreach ($usersToCheckIds as $userId) {
+            if (Cache::has('user-online-'.$userId)) {
+                $onlineUserIds[] = $userId;
+            }
+        }
+        // >>> LOG DEPURACIÓN: ¿Quién fue encontrado online?
+        \Log::info('DEBUG: Usuarios encontrados ONLINE (IDs de Caché)', ['online_ids' => $onlineUserIds]);
+        // C. Aplicar el filtro a la consulta principal con WHERE IN (mucho más eficiente)
+        $query->whereIn('id', $onlineUserIds);
+
+        // ----------------------------------------------------
+
+        // 4. Filtro de Búsqueda (Search)
+       /* if ($request->filled('search')) {
+            $search = $request->input('search');
+            $lowerSearch = strtolower($search);
+
+            $query->where(function ($q) use ($search, $lowerSearch) {
                 $q->where('name', 'like', "%{$search}%")
                     ->orWhere('surname', 'like', "%{$search}%")
                     ->orWhere('dni', 'like', "%{$search}%")
                     ->orWhere('email', 'like', "%{$search}%")
-                    ->orWhereHas('role', fn ($r) => $r->where(DB::raw('LOWER(name)'), 'like', '%'.strtolower($search).'%'));
+                    ->orWhereHas('role', fn ($r) => $r->whereRaw('LOWER(name) LIKE ?', "%{$lowerSearch}%"));
             });
-        }
+        }*/
 
-        \Log::debug('SQL Query:', ['sql' => $query->toSql(), 'bindings' => $query->getBindings()]);
-
+        // 5. Ejecución y Paginación
         $loggedUsers = $query->paginate(10);
 
+        // 6. Post-procesamiento (Añadir nombre de rol e indicador online)
         $loggedUsers->getCollection()->transform(function ($user) {
             $user->role_name = $user->role?->name ?? 'Sin rol';
+            // El indicador is_online sigue siendo útil para la vista
+            $user->is_online = Cache::has('user-online-'.$user->id);
 
             return $user;
         });
 
-        \Log::info('Usuarios encontrados por rol:', ['roles' => $loggedUsers->pluck('role_name')->countBy()]);
+       // 1. Loguear si la colección paginada tiene elementos
+\Log::info('DEBUG: Total de usuarios paginados', ['count' => $loggedUsers->count()]);
+
+// 2. Loguear los IDs y Roles de los resultados obtenidos
+\Log::info('DEBUG: IDs y Roles encontrados', [
+    'results' => $loggedUsers->getCollection()->map(fn($u) => [
+        'id' => $u->id, 
+        'role' => $u->role?->name, 
+        'role_id' => $u->role_id
+    ])->toArray()
+]);
+
+// 3. Su log original para comparar
+\Log::info('Usuarios online encontrados por rol:', [
+    'roles' => $loggedUsers->pluck('role_name')->countBy(), 
+]);
 
         $roles = Role::pluck('name', 'id');
 
@@ -67,9 +115,9 @@ class UserController extends Controller
             'cars.parkingSessions.zone',
             'cars.parkingSessions.street',
         ]);
-        $zones =Zone::pluck('name','id');
+        $zones = Zone::pluck('name', 'id');
 
-        return view('user.show', compact('user', 'roles','zones'));
+        return view('user.show', compact('user', 'roles', 'zones'));
     }
 
     public function store(Request $request)

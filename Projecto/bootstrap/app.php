@@ -8,7 +8,7 @@ use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use App\Http\Middleware\RestrictToRole;
 use Illuminate\Console\Scheduling\Schedule;
-
+use App\Http\Middleware\UpdateUserActivity;
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
@@ -23,11 +23,13 @@ return Application::configure(basePath: dirname(__DIR__))
             HandleAppearance::class,
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
-            
+            UpdateUserActivity::class,
         ]);
+
          $middleware->alias([
             'role' => RestrictToRole::class,
         ]);
+        
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
