@@ -95,6 +95,7 @@
             background-color: #f8d7da;
             color: #721c24;
         }
+
         .back-arrow {
             display: inline-block;
             font-size: 32px;
@@ -248,7 +249,7 @@
                         <th>Zona</th>
                         <td>{{ $session->street->zone->name }}</td>
                     </tr>
-                   
+
                     <tr>
                         <th>Calle</th>
                         <td>{{ $session->street->name }}</td>
@@ -295,6 +296,7 @@
                     @endif
                 </tbody>
             </table>
+
             <div class="mt-3">
                 <a href="{{ route('parking.create') }}" class="btn btn-primary">Registrar otro</a>
                 <a href="{{ route('parking.show') }}" class="btn btn-secondary">Volver al Historial</a>
@@ -302,7 +304,8 @@
         @elseif (isset($sessions))
             <!-- Lista de todos los estacionamientos (historial) -->
             <form method="GET" action="{{ route('parking.show') }}" class="search-form">
-                <input type="text" name="search" placeholder="Buscar por patente, zona o calle..." value="{{ request('search') }}">
+                <input type="text" name="search" placeholder="Buscar por patente, zona o calle..."
+                    value="{{ request('search') }}">
                 <button type="submit">Buscar</button>
             </form>
 
@@ -317,12 +320,11 @@
                         <th>Duración</th>
                         <th>Monto</th>
                         <th>Estado</th>
-                        
+
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($sessions as $session)
-                
+                    @foreach ($sessions as $session)
                         <tr>
                             <td>{{ $session->id }}</td>
                             <td>{{ $session->license_plate }}</td>
@@ -340,26 +342,23 @@
                                     <span class="badge bg-secondary">Pendiente</span>
                                 @endif
                             </td>
-                          
-                            
                     @endforeach
                 </tbody>
             </table>
-
-            @php
-                $total = $sessions->sum('amount');
-                $grouped = $sessions->groupBy('license_plate');
-            @endphp
-
+            <div class="d-flex justify-content-center mt-4">
+                {{ $sessions->links('pagination::bootstrap-5') }}
+            </div>
             <div class="totals-section">
                 <h3>Totales por Patente</h3>
                 <ul>
-                    @foreach($grouped as $plate => $group)
-                        <li>{{ $plate }}: ${{ number_format($group->sum('amount'), 2) }}</li>
-                    @endforeach
+                    @forelse($totalsByPlate as $plate => $amount)
+                        <li>{{ $plate }}: ${{ number_format($amount, 2) }}</li>
+                    @empty
+                        <li>No hay registros para mostrar totales.</li>
+                    @endforelse
                 </ul>
                 <div class="grand-total">
-                    Total General: ${{ number_format($total, 2) }}
+                    Total General: ${{ number_format($grandTotal, 2) }}
                 </div>
             </div>
 

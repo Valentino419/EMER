@@ -525,7 +525,7 @@
             </div>
         </div>
     @endforeach
-
+         
     {{-- resources/views/partials/_edit_parking_modal.blade.php --}}
     @foreach ($user->cars->flatMap(fn($car) => $car->parkingSessions ?? []) as $session)
         <div class="modal fade" id="editSession{{ $session->id }}" tabindex="-1" aria-hidden="true">

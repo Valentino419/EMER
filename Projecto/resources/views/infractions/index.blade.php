@@ -223,7 +223,7 @@
                         @elseif (Auth::user()->role->name === 'user')
                             <td>
                                 @if ($infraction->status === 'pending')
-                                    <form action="{{ route('infractions.index', $infraction) }}" method="GET"
+                                    <form action="{{ route('infractions.payment', $infraction) }}" method="GET"
                                         class="d-inline">
                                         @csrf
                                         <button type="submit" class="btn btn-sm btn-success">Pagar</button>
@@ -351,7 +351,9 @@
                 @endforelse
             </tbody>
         </table>
-
+        <div class="d-flex justify-content-center mt-4">
+            {{ $infractions->links('pagination::bootstrap-5') }}
+        </div>
         <div class="mt-4">
             {{ $infractions->links() }}
         </div>

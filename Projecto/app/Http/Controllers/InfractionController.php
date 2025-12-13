@@ -99,7 +99,7 @@ class InfractionController extends Controller
             'carStatus'
         ));
     }
-
+   
     public function store(Request $request)
     {
         if (! in_array(Auth::user()->role->name, ['admin', 'inspector'])) {
@@ -201,4 +201,28 @@ class InfractionController extends Controller
 
         return redirect()->route('infractions.index')->with('success', 'Infracción eliminada');
     }
+
+    public function payment(Infraction $infraction)
+{
+    
+    if (auth()->user()->role->name === 'user') {
+        if ($infraction->car->user_id !== auth()->id()) {
+            abort(403, 'No tienes permiso para pagar esta infracción.');
+        }
+    }
+
+    // Only allow payment if it's still pending
+    if ($infraction->status !== 'pending') {
+        return redirect()->route('infractions.index')
+            ->with('error', 'Esta infracción ya ha sido pagada o cancelada.');
+    }
+
+    // Update the status
+    $infraction->status = 'paid'; // or 'pagada' if you prefer Spanish
+    $infraction->paid_at = now(); // optional: store payment timestamp
+    $infraction->save();
+
+    return redirect()->route('infractions.index')
+        ->with('success', 'Infracción pagada correctamente. ¡Gracias!');
+}
 }

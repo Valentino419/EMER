@@ -167,10 +167,36 @@ class ParkingSessionController extends Controller
 
     public function show(Request $request)
     {
-        $search = $request->query('search');
+        $search = $request->query('search'); // Base query for the authenticated user's sessions
+        $baseQuery = ParkingSession::where('user_id', auth()->id())
+            ->with(['car', 'zone', 'street']); // Keep relations if needed elsewhere
 
-        $sessions = ParkingSession::where('user_id', auth()->id())
-            ->with(['car', 'zone', 'street'])
+        // Apply search filter to a cloned query for totals (no extra select needed here)
+        $totalsQuery = clone $baseQuery;
+
+        if ($search) {
+            $totalsQuery->where(function ($q) use ($search) {
+                $q->where('license_plate', 'like', "%{$search}%")
+                    ->orWhereHas('zone', function ($z) use ($search) {
+                        $z->where('name', 'like', "%{$search}%");
+                    })
+                    ->orWhereHas('street', function ($s) use ($search) {
+                        $s->where('name', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        // 1. Grand Total (across all matching records)
+        $grandTotal = $baseQuery->sum('amount');
+
+        // 2. Totals grouped by license plate
+        $totalsByPlate = (clone $totalsQuery)
+            ->selectRaw('license_plate, SUM(amount) as total_amount')
+            ->groupBy('license_plate')
+            ->pluck('total_amount', 'license_plate');
+
+        // 3. Paginated sessions for the table (with full relations loaded)
+        $sessions = (clone $baseQuery)
             ->when($search, function ($query) use ($search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('license_plate', 'like', "%{$search}%")
@@ -185,10 +211,15 @@ class ParkingSessionController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
-        return view('parking.show', compact('sessions'));
-    }
+        // Preserve search term in pagination links
+        $sessions->appends(['search' => $search]);
 
-   
+        return view('parking.show', compact(
+            'sessions',
+            'grandTotal',
+            'totalsByPlate'
+        ));
+    }
 
     // EDIT - Formulario para editar
     public function edit(ParkingSession $parkingSession)
@@ -346,7 +377,7 @@ class ParkingSessionController extends Controller
     public function extend(Request $request, ParkingSession $session)
     {
         $request->validate([
-            'extra_minutes' => 'required|integer|in:60,120,180'
+            'extra_minutes' => 'required|integer|in:60,120,180',
         ]);
 
         $extra = $request->extra_minutes;
@@ -360,7 +391,7 @@ class ParkingSessionController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Tiempo extendido correctamente',
-            'redirect' => route('payment.initiate') // o null si no pagas
+            'redirect' => route('payment.initiate'), // o null si no pagas
         ]);
     }
 

@@ -228,10 +228,10 @@
                     @endforeach
                 </tbody>
             </table>
-
-            <div class="d-flex justify-content-center mt-3">
-                {{ $cars->links() }}
+             <div class="d-flex justify-content-center mt-4">
+                {{ $cars->links('pagination::bootstrap-5') }}
             </div>
+            
         @endif
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous">

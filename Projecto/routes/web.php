@@ -156,6 +156,9 @@ Route::put('/infractions/{infraction}', [InfractionController::class, 'update'])
 Route::delete('/infractions/{infraction}', [InfractionController::class, 'destroy'])
     ->middleware(['auth'])
     ->name('infractions.destroy');
+Route::get('/infractions/{infraction}/payment', [InfractionController::class, 'payment'])
+    ->name('infractions.payment')
+    ->middleware(['auth']);
 
 // Inspectors (admin only)
 Route::get('/inspectors', [InspectorController::class, 'index'])
