@@ -77,7 +77,7 @@
                     </div>
                 </a>
             </div>
-            <div class="col-md-6"> 
+            <div class="col-md-4 mb-4"> 
                 <div class="card card-menu">
                     <div class="card-body">
                         <span class="emoji">🌍</span> 
@@ -86,8 +86,16 @@
                     </div>
                 </div>
             </div>
-          
-    <div class="col-md-6">
+         <div class="col-md-4 mb-4">
+        <div class="card card-menu">
+            <div class="card-body">
+                <span class="emoji">👥</span>
+                <h5 class="card-title">Usuarios</h5>
+                <a href="{{ route('user.index') }}" class="btn btn-primary">Ver Usuarios</a>
+            </div>
+        </div>
+    </div> 
+    <div class="col-md-4 mb-4">
         <div class="card card-menu">
             <div class="card-body">
                 <span class="emoji">👥</span>
