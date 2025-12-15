@@ -75,7 +75,9 @@
         @if (session('success'))
             <div class="alert alert-success">{{ session('success') }}</div>
         @endif
-
+        @if (session('error'))
+            <div class="alert alert-danger">{{ session('error') }}</div>
+        @endif
         @if ($errors->any())
             <div class="alert alert-danger">
                 <ul>
@@ -157,30 +159,7 @@
                 </div>
 
                 <!-- Toast de éxito -->
-                @if (session('success'))
-                    <div class="toast-container position-fixed bottom-0 end-0 p-3">
-                        <div id="successToast" class="toast align-items-center text-white bg-success border-0"
-                            role="alert" aria-live="assertive" aria-atomic="true">
-                            <div class="d-flex">
-                                <div class="toast-body">
-                                    {{ session('success') }}
-                                </div>
-                                <button type="button" class="btn-close btn-close-white me-2 m-auto"
-                                    data-bs-dismiss="toast" aria-label="Close"></button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <script>
-                        document.addEventListener('DOMContentLoaded', function() {
-                            var toastEl = document.getElementById('successToast');
-                            var toast = new bootstrap.Toast(toastEl, {
-                                delay: 5000
-                            });
-                            toast.show();
-                        });
-                    </script>
-                @endif
+             
 
                 <div class="modal-body">
                     <form action="{{ route('infractions.store') }}" method="POST" id="infraccionForm">

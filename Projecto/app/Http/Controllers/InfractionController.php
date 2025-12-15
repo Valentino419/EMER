@@ -142,7 +142,7 @@ class InfractionController extends Controller
         $infraction = Infraction::create([
             'user_id' => auth()->id(),
             'car_id' => $car->id,
-            'fine' => 5000,
+            'fine' => $request->fine ?? 5000,
             'date' => $today,
             'status' => 'pending',
         ]);
