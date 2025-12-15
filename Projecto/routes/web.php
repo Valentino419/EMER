@@ -267,7 +267,6 @@ Route::post('/admin/notifications/user/{userId}/send', [NotificationController::
 Route::get('/zones/{zone}/rate', function (Zone $zone) {
     return Zone::where('id', $zone->id)->get(['rate']);
 })->middleware(['auth']);
-Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login')->middleware('cache.headers:no_store:no_cache');
 
 // Fallback
 Route::fallback(function () {
