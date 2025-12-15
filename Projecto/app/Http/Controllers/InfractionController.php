@@ -4,13 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\Car;
 use App\Models\Infraction;
-use App\Models\User;
 use App\Models\ParkingSession;
+use App\Models\User;
 use App\Notifications\InfraccionNotification;
 use App\Traits\LicensePlateValidator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-
 
 class InfractionController extends Controller
 {
@@ -32,8 +31,13 @@ class InfractionController extends Controller
         // === 1. FILTRO POR PATENTE DESDE AUTOS ===
         if ($carPlateFilter) {
             $plate = $this->validateAndCleanLicensePlate($carPlateFilter);
+
+            // If plate is invalid or car not found, we create an empty Paginator.
+            $infractions = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 10); // <-- Initialize as an empty Paginator
+
             if ($plate['valid']) {
                 $car = Car::where('car_plate', $plate['cleaned'])->first();
+
                 if ($car) {
                     $infractions = Infraction::where('car_id', $car->id)
                         ->with('car')
@@ -42,10 +46,12 @@ class InfractionController extends Controller
                     $infractions->appends(['car_plate' => $carPlateFilter]); // mantener filtro
                 }
             }
+
             // Mostrar solo infracciones de esta patente
             $deudaPending = null;
+
             return view('infractions.index', compact(
-                'infractions',
+                'infractions', 
                 'car',
                 'deudaPending'
             ));
@@ -79,7 +85,7 @@ class InfractionController extends Controller
             // === 3. LISTA NORMAL (según rol) ===
             $query = Infraction::with('car');
             if ($user->role->name !== 'admin' && $user->role->name !== 'inspector') {
-                $query->whereHas('car', fn($q) => $q->where('user_id', Auth::id()));
+                $query->whereHas('car', fn ($q) => $q->where('user_id', Auth::id()));
             }
             $infractions = $query->latest()->paginate(10);
         }
@@ -99,7 +105,7 @@ class InfractionController extends Controller
             'carStatus'
         ));
     }
-   
+
     public function store(Request $request)
     {
         if (! in_array(Auth::user()->role->name, ['admin', 'inspector'])) {
@@ -118,7 +124,7 @@ class InfractionController extends Controller
 
         $car = Car::firstOrCreate(
             ['car_plate' => $plate['cleaned']],
-            ['user_id' => null] // Inspector no asigna dueño aún
+            ['user_id' => 0] // Inspector no asigna dueño aún
         );
 
         // === EVITAR DUPLICADOS POR DÍA ===
@@ -203,26 +209,26 @@ class InfractionController extends Controller
     }
 
     public function payment(Infraction $infraction)
-{
-    
-    if (auth()->user()->role->name === 'user') {
-        if ($infraction->car->user_id !== auth()->id()) {
-            abort(403, 'No tienes permiso para pagar esta infracción.');
+    {
+
+        if (auth()->user()->role->name === 'user') {
+            if ($infraction->car->user_id !== auth()->id()) {
+                abort(403, 'No tienes permiso para pagar esta infracción.');
+            }
         }
-    }
 
-    // Only allow payment if it's still pending
-    if ($infraction->status !== 'pending') {
+        // Only allow payment if it's still pending
+        if ($infraction->status !== 'pending') {
+            return redirect()->route('infractions.index')
+                ->with('error', 'Esta infracción ya ha sido pagada o cancelada.');
+        }
+
+        // Update the status
+        $infraction->status = 'paid'; // or 'pagada' if you prefer Spanish
+        $infraction->paid_at = now(); // optional: store payment timestamp
+        $infraction->save();
+
         return redirect()->route('infractions.index')
-            ->with('error', 'Esta infracción ya ha sido pagada o cancelada.');
+            ->with('success', 'Infracción pagada correctamente. ¡Gracias!');
     }
-
-    // Update the status
-    $infraction->status = 'paid'; // or 'pagada' if you prefer Spanish
-    $infraction->paid_at = now(); // optional: store payment timestamp
-    $infraction->save();
-
-    return redirect()->route('infractions.index')
-        ->with('success', 'Infracción pagada correctamente. ¡Gracias!');
-}
 }

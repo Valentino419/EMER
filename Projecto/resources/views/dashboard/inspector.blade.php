@@ -70,12 +70,7 @@
                     <button class="btn btn-outline-secondary" type="submit">Buscar</button>
                 </div>
             </form>
-            @if (Auth::user()->role->name === 'admin' || Auth::user()->role->name === 'inspector')
-                {{-- Botón que abre el modal --}}
-                <button class="btn btn-primary btn-new" data-bs-toggle="modal" data-bs-target="#infraccionModal">
-                    Nueva Infracción
-                </button>
-            @endif
+
         </div>
         @if (request('search'))
             <div class="row justify-content-center mb-4">
@@ -111,13 +106,27 @@
                 </div>
             </div>
         @endif
-        {{-- Botones grandes --}}
+        {{-- Botones grandes en tarjetas --}}
         <div class="row g-4 justify-content-center">
+
+            @if (Auth::user()->role->name === 'admin' || Auth::user()->role->name === 'inspector')
+                <div class="col-md-4">
+                    <button type="button" class="text-decoration-none text-dark w-100 border-0 bg-transparent p-0"
+                        data-bs-toggle="modal" data-bs-target="#infraccionModal">
+                        <div class="card card-option text-center p-4 h-100 shadow-sm hover-shadow border-primary">
+                            <div class="icon fs-1 text-primary">➕</div>
+                            <h5 class="mt-3 text-primary">Nueva Infracción</h5>
+                            <p class="text-muted small">Registrar una nueva multa por patente</p>
+                        </div>
+                    </button>
+                </div>
+            @endif
             <div class="col-md-4">
                 <a href="{{ route('infractions.index') }}" class="text-decoration-none text-dark">
-                    <div class="card card-option text-center p-4">
-                        <div class="icon">⚠️</div>
+                    <div class="card card-option text-center p-4 h-100 shadow-sm hover-shadow">
+                        <div class="icon fs-1">⚠️</div>
                         <h5 class="mt-3">Gestionar Infracciones</h5>
+                        <p class="text-muted small">Ver, editar y gestionar todas las multas</p>
                     </div>
                 </a>
             </div>
@@ -183,7 +192,7 @@
                 </div>
 
                 @if (session('success'))
-   |            <!-- Toast de éxito -->
+                    | <!-- Toast de éxito -->
                 @endif
 
             </div>
@@ -192,4 +201,5 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>
