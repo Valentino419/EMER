@@ -48,62 +48,69 @@
         </form>
     </nav>
 
-    <div class="container mt-5">
-        <h1 class="mb-4 text-center">Dashboard Administrador</h1>
-        <p class="text-center">Selecciona una opción para gestionar el sistema:</p>
+   <div class="container mt-5">
+    <h1 class="mb-4 text-center">Dashboard Administrador</h1>
+    <p class="text-center">Selecciona una opción para gestionar el sistema:</p>
 
-        <div class="row mt-4">
-            <div class="col-md-4 mb-4">
-                <a href="{{ route('cars.index') }}" class="text-decoration-none text-dark">
-                    <div class="card shadow-sm card-menu">
-                        <i>🚗</i>
-                        <h5>Autos</h5>
-                    </div>
-                </a>
-            </div>
-            <div class="col-md-4 mb-4">
-                <a href="{{ route('inspectors.index') }}" class="text-decoration-none text-dark">
-                    <div class="card shadow-sm card-menu">
-                        <i>🕵️</i>
-                        <h5>Inspectores</h5>
-                    </div>
-                </a>
-            </div>
-            <div class="col-md-4 mb-4">
-                <a href="{{ route('infractions.index') }}" class="text-decoration-none text-dark">
-                    <div class="card shadow-sm card-menu">
-                        <i>⚠️</i>
-                        <h5>Infracciones</h5>
-                    </div>
-                </a>
-            </div>
-            <div class="col-md-4 mb-4"> 
-                <div class="card card-menu">
-                    <div class="card-body">
-                        <span class="emoji">🌍</span> 
-                        <h5 class="card-title">Zonas</h5>
-                        <a href="{{ route('zones.index') }}" class="btn btn-primary">Gestionar Zonas</a>
-                    </div>
+    <div class="row mt-4">
+        <!-- Autos -->
+        <div class="col-md-4 mb-4">
+            <a href="{{ route('cars.index') }}" class="text-decoration-none text-dark">
+                <div class="card shadow-sm card-menu text-center py-4">
+                    <div class="emoji fs-1 mb-3">🚗</div>
+                    <h5 class="mb-0">Autos</h5>
                 </div>
-            </div>
-         <div class="col-md-4 mb-4">
-        <div class="card card-menu">
-            <div class="card-body">
-                <span class="emoji">👥</span>
-                <h5 class="card-title">Usuarios</h5>
-                <a href="{{ route('user.index') }}" class="btn btn-primary">Ver Usuarios</a>
-            </div>
+            </a>
         </div>
-    </div> 
-    <div class="col-md-4 mb-4">
-        <div class="card card-menu">
-            <div class="card-body">
-                <span class="emoji">👥</span>
-                <h5 class="card-title">Usuarios Logueados</h5>
-                <a href="{{ route('user.logged') }}" class="btn btn-primary">Ver Usuarios Logueados</a>
-            </div>
+
+        <!-- Inspectores -->
+        <div class="col-md-4 mb-4">
+            <a href="{{ route('inspectors.index') }}" class="text-decoration-none text-dark">
+                <div class="card shadow-sm card-menu text-center py-4">
+                    <div class="emoji fs-1 mb-3">🕵️</div>
+                    <h5 class="mb-0">Inspectores</h5>
+                </div>
+            </a>
+        </div>
+
+        <!-- Usuarios -->
+        <div class="col-md-4 mb-4">
+            <a href="{{ route('user.index') }}" class="text-decoration-none text-dark">
+                <div class="card shadow-sm card-menu text-center py-4">
+                    <div class="emoji fs-1 mb-3">👤</div>
+                    <h5 class="mb-0">Usuarios</h5>
+                </div>
+            </a>
+        </div>
+gi
+        <!-- Infracciones -->
+        <div class="col-md-4 mb-4">
+            <a href="{{ route('infractions.index') }}" class="text-decoration-none text-dark">
+                <div class="card shadow-sm card-menu text-center py-4">
+                    <div class="emoji fs-1 mb-3">⚠️</div>
+                    <h5 class="mb-0">Infracciones</h5>
+                </div>
+            </a>
+        </div>
+
+        <!-- Zonas -->
+        <div class="col-md-4 mb-4">
+            <a href="{{ route('zones.index') }}" class="text-decoration-none text-dark">
+                <div class="card shadow-sm card-menu text-center py-4">
+                    <div class="emoji fs-1 mb-3">🌍</div>
+                    <h5 class="mb-0">Zonas</h5>
+                </div>
+            </a>
+        </div>
+
+        <!-- Usuarios Logueados -->
+        <div class="col-md-4 mb-4">
+            <a href="{{ route('user.logged') }}" class="text-decoration-none text-dark">
+                <div class="card shadow-sm card-menu text-center py-4">
+                    <div class="emoji fs-1 mb-3">👥</div>
+                    <h5 class="mb-0">Usuarios Logueados</h5>
+                </div>
+            </a>
         </div>
     </div>
-
-          
-       
+</div>
