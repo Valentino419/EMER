@@ -20,7 +20,7 @@ class UpdateUserActivity
         if (Auth::check()) {
             $userId = Auth::id();
             $cacheKey = 'user-online-' . $userId;
-\Log::info('Activity Middleware Running for User:', ['user_id' => $userId, 'key' => $cacheKey]); // <-- ADD THIS LINE
+//\//Log::info('Activity Middleware Running for User:', ['user_id' => $userId, 'key' => $cacheKey]); // <-- ADD THIS LINE
             // Refactored: Use the timeout in minutes directly instead of a Carbon instance.
             // This is more concise for simple time limits.
             Cache::put($cacheKey, true, $this->onlineTimeoutMinutes);

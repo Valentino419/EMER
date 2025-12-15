@@ -110,7 +110,7 @@ class InspectorController extends Controller
             return redirect()->route('inspectors.index')->with('success', 'Inspector actualizado con éxito.');
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Error updating inspector: '.$e->getMessage(), ['exception' => $e]);
+            //Log::error('Error updating inspector: '.$e->getMessage(), ['exception' => $e]);
 
             return back()->withErrors(['error' => 'Error al actualizar el inspector. Por favor, intenta de nuevo.'])->withInput();
         }

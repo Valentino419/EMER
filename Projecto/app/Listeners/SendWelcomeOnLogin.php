@@ -42,9 +42,9 @@ class SendWelcomeOnLogin
     curl_close($ch);
 
     if ($error) {
-        \Log::error("cURL Error: $error");
+        //\//Log::error("cURL Error: $error");
     } else {
-        \Log::info("EMAIL ENVIADO A {$user->email} → VE A MAILTRAP");
+        //\//Log::info("EMAIL ENVIADO A {$user->email} → VE A MAILTRAP");
     }
 }
 }

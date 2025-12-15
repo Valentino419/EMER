@@ -516,7 +516,7 @@
             btn.textContent = 'Procesando...';
 
             try {
-                const res = await fetch(`/parking/${currentSessionId}/extend`, {
+              const res = await fetch(`/parking/${currentSessionId}/extend`, {
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,

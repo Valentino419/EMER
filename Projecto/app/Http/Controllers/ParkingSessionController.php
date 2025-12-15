@@ -70,7 +70,7 @@ class ParkingSessionController extends Controller
     // STORE - Guardar nuevo estacionamiento
     public function store(Request $request)
     {
-        Log::info('Entrando a store', ['request' => $request->all()]);
+        //Log::info('Entrando a store', ['request' => $request->all()]);
 
         if (! auth()->check()) {
             return back()->withErrors(['error' => 'Debes iniciar sesión.']);
@@ -134,7 +134,7 @@ class ParkingSessionController extends Controller
                 'license_plate' => $car->license_plate ?? strtoupper($car->car_plate ?? 'N/A'),
             ]);
 
-            Log::info('Sesión activada SIN pago', ['session_id' => $parkingSession->id]);
+            //Log::info('Sesión activada SIN pago', ['session_id' => $parkingSession->id]);
 
             return back()->with('success', '¡Estacionamiento activado');
         }
@@ -352,10 +352,7 @@ class ParkingSessionController extends Controller
                     'payment_status' => 'paid',
                 ]);
 
-                Log::info('Estacionamiento activado después del pago', [
-                    'session_id' => $parkingSession->id,
-                    'user_id' => auth()->id(),
-                ]);
+                //Log::info('Estacionamiento activado después del pago', ['session_id' => $parkingSession->id,'user_id' => auth()->id(),]);
             });
 
             // Limpiar sesión
@@ -364,10 +361,7 @@ class ParkingSessionController extends Controller
             return redirect()->route('parking.create')
                 ->with('success', '¡Estacionamiento activado! Contador iniciado.');
         } catch (\Exception $e) {
-            Log::error('Error al activar estacionamiento después del pago', [
-                'error' => $e->getMessage(),
-                'user_id' => auth()->id(),
-            ]);
+            //Log::error('Error al activar estacionamiento después del pago', ['error' => $e->getMessage(), 'user_id' => auth()->id(),      ]);
 
             return redirect()->route('parking.create')
                 ->withErrors(['error' => 'Error al activar el estacionamiento: '.$e->getMessage()]);
@@ -410,7 +404,7 @@ class ParkingSessionController extends Controller
         }
 
         $session->update(['status' => 'expired']);
-        Log::info('Sesión expirada automáticamente', ['session_id' => $id]);
+        //Log::info('Sesión expirada automáticamente', ['session_id' => $id]);
 
         return response()->json([
             'success' => true,
@@ -438,17 +432,14 @@ class ParkingSessionController extends Controller
                 'end_time' => now(), // Actualiza el fin real
             ]);
 
-            Log::info('Estacionamiento finalizado manualmente', ['session_id' => $id]);
+            //Log::info('Estacionamiento finalizado manualmente', ['session_id' => $id]);
 
             return response()->json([
                 'success' => true,
                 'message' => 'Estacionamiento finalizado correctamente.',
             ]);
         } catch (\Exception $e) {
-            Log::error('Error al finalizar estacionamiento', [
-                'session_id' => $id,
-                'error' => $e->getMessage(),
-            ]);
+            //Log::error('Error al finalizar estacionamiento', [ 'session_id' => $id, 'error' => $e->getMessage(),  ]);
 
             return response()->json([
                 'success' => false,
@@ -469,7 +460,7 @@ class ParkingSessionController extends Controller
 
             return response()->json(['active' => $active]);
         } catch (\Exception $e) {
-            \Log::error('Error en checkActive', ['error' => $e->getMessage()]);
+            //\//Log::error('Error en checkActive', ['error' => $e->getMessage()]);
 
             return response()->json(['error' => 'Error interno'], 500);
         }
