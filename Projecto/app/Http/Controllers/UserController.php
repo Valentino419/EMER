@@ -79,11 +79,44 @@ class UserController extends Controller
         return view('user.logged', compact('loggedUsers', 'roles'));
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::paginate(10);
+        // Start with a query builder, not a collection
+        $query = User::query()
+            ->with(['role' => fn ($q) => $q->select('id', 'name')])
+            ->select('id', 'name', 'surname', 'dni', 'email', 'role_id'); // Select only needed columns
 
-        return view('user.index', compact('users'));
+        // Apply search filter if provided
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $lowerSearch = strtolower($search);
+
+            $query->where(function ($q) use ($search, $lowerSearch) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('surname', 'like', "%{$search}%")
+                    ->orWhere('dni', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhereHas('role', function ($r) use ($lowerSearch) {
+                        $r->whereRaw('LOWER(name) LIKE ?', ["%{$lowerSearch}%"]);
+                    });
+            });
+        }
+
+        // Order results (recommended for consistent pagination)
+        $query->orderBy('surname')->orderBy('name');
+
+        // Execute query with pagination
+        $users = $query->paginate(10);
+        $users->getCollection()->transform(function ($user) {
+            $user->role_name = $user->role?->name ?? 'Sin rol';
+         return $user;
+        });
+        // Optional: Append query parameters to pagination links (so search persists)
+        $users->appends($request->only('search'));
+
+        $roles = Role::pluck('name', 'id');
+
+        return view('user.index', compact('users', 'roles'));
     }
 
     public function show(User $user)
@@ -99,6 +132,11 @@ class UserController extends Controller
         $zones = Zone::pluck('name', 'id');
 
         return view('user.show', compact('user', 'roles', 'zones'));
+    }
+
+    public function create()
+    {
+        return view('user.create');
     }
 
     public function store(Request $request)
