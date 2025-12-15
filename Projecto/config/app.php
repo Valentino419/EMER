@@ -1,5 +1,7 @@
 <?php
+
 use Illuminate\Support\ServiceProvider;
+
 return [
 
     /*
@@ -78,9 +80,9 @@ return [
     |
     */
 
-    'locale' => env('APP_LOCALE', 'en'),
+    'locale' => env('APP_LOCALE', 'es'),
 
-    'fallback_locale' => env('APP_FALLBACK_LOCALE', 'en'),
+    'fallback_locale' => env('APP_FALLBACK_LOCALE', 'es'),
 
     'faker_locale' => env('APP_FAKER_LOCALE', 'en_US'),
 
@@ -123,12 +125,13 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
     'providers' => ServiceProvider::defaultProviders()->merge([
-    // ... other providers
-    App\Providers\AppServiceProvider::class,
-])->toArray(),
-'stripe' => [
-    'secret' => env('STRIPE_SECRET'),
-    'publishable_key' => env('STRIPE_PUBLISHABLE_KEY'),
-],
+        // ... other providers
+        App\Providers\AppServiceProvider::class,
+    ])->toArray(),
+    'stripe' => [
+        'secret' => env('STRIPE_SECRET'),
+        'publishable_key' => env('STRIPE_PUBLISHABLE_KEY'),
+    ],
+    'timezone' => 'America/Argentina/Buenos_Aires',
 
 ];

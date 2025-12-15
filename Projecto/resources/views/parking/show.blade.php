@@ -75,17 +75,6 @@
             transition: background-color 0.3s ease, transform 0.2s ease;
         }
 
-        }
-
-        .btn-danger {
-            background-color: #dc3545;
-            border: none;
-            padding: 8px 18px;
-            font-weight: 500;
-            border-radius: 6px;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-        }
-
         .btn-danger:hover {
             background-color: #b02a37;
             transform: translateY(-2px);
@@ -106,6 +95,7 @@
             background-color: #f8d7da;
             color: #721c24;
         }
+
         .back-arrow {
             display: inline-block;
             font-size: 32px;
@@ -126,6 +116,72 @@
             transform: scale(1.1);
         }
 
+        .search-form {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .search-form input[type="text"] {
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid #ced4da;
+            border-radius: 6px 0 0 6px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .search-form input[type="text"]:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+
+        .search-form button {
+            padding: 10px 20px;
+            border-radius: 0 6px 6px 0;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            font-weight: 500;
+            transition: background-color 0.3s ease;
+        }
+
+        .search-form button:hover {
+            background-color: #0056b3;
+        }
+
+        .totals-section {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f8fafc;
+            border-radius: 8px;
+            border: 1px solid #e0e4e8;
+        }
+
+        .totals-section h3 {
+            color: #1a3c6d;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .totals-section ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .totals-section li {
+            font-size: 16px;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .grand-total {
+            font-size: 18px;
+            font-weight: bold;
+            color: #007bff;
+            margin-top: 20px;
+        }
+
         @media (max-width: 768px) {
             .container {
                 padding: 15px;
@@ -140,6 +196,20 @@
             .table th,
             .table td {
                 min-width: 120px;
+            }
+
+            .search-form {
+                flex-direction: column;
+            }
+
+            .search-form input[type="text"] {
+                border-radius: 6px;
+                margin-bottom: 10px;
+            }
+
+            .search-form button {
+                border-radius: 6px;
+                width: 100%;
             }
         }
     </style>
@@ -179,8 +249,7 @@
                         <th>Zona</th>
                         <td>{{ $session->street->zone->name }}</td>
                     </tr>
-                   
-                    <tr>
+
                     <tr>
                         <th>Calle</th>
                         <td>{{ $session->street->name }}</td>
@@ -227,12 +296,19 @@
                     @endif
                 </tbody>
             </table>
+
             <div class="mt-3">
                 <a href="{{ route('parking.create') }}" class="btn btn-primary">Registrar otro</a>
                 <a href="{{ route('parking.show') }}" class="btn btn-secondary">Volver al Historial</a>
             </div>
         @elseif (isset($sessions))
             <!-- Lista de todos los estacionamientos (historial) -->
+            <form method="GET" action="{{ route('parking.show') }}" class="search-form">
+                <input type="text" name="search" placeholder="Buscar por patente, zona o calle..."
+                    value="{{ request('search') }}">
+                <button type="submit">Buscar</button>
+            </form>
+
             <table class="table table-striped table-hover">
                 <thead>
                     <tr>
@@ -244,12 +320,11 @@
                         <th>Duración</th>
                         <th>Monto</th>
                         <th>Estado</th>
-                        
+
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($sessions as $session)
-                
+                    @foreach ($sessions as $session)
                         <tr>
                             <td>{{ $session->id }}</td>
                             <td>{{ $session->license_plate }}</td>
@@ -267,11 +342,26 @@
                                     <span class="badge bg-secondary">Pendiente</span>
                                 @endif
                             </td>
-                          
-                            
                     @endforeach
                 </tbody>
             </table>
+            <div class="d-flex justify-content-center mt-4">
+                {{ $sessions->links('pagination::bootstrap-5') }}
+            </div>
+            <div class="totals-section">
+                <h3>Totales por Patente</h3>
+                <ul>
+                    @forelse($totalsByPlate as $plate => $amount)
+                        <li>{{ $plate }}: ${{ number_format($amount, 2) }}</li>
+                    @empty
+                        <li>No hay registros para mostrar totales.</li>
+                    @endforelse
+                </ul>
+                <div class="grand-total">
+                    Total General: ${{ number_format($grandTotal, 2) }}
+                </div>
+            </div>
+
             <div class="mt-3">
                 <a href="{{ route('parking.create') }}" class="btn btn-primary">Registrar nuevo</a>
             </div>

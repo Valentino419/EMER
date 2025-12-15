@@ -4,45 +4,75 @@ namespace App\Http\Controllers;
 
 use App\Models\Role;
 use App\Models\User;
+use App\Models\Zone;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 
 class UserController extends Controller
 {
     public function logged(Request $request)
     {
+        // 1. Autorización: Solo Admin puede acceder
         if (! Auth::check() || strtolower(Auth::user()->role->name ?? '') !== 'admin') {
             abort(403, 'No tienes acceso a esta funcionalidad.');
         }
 
-        $query = User::with(['role' => fn ($q) => $q->select('id', 'name')])
-            ->whereHas('role', fn ($q) => $q->whereIn(DB::raw('LOWER(name)'), ['user', 'inspector', 'admin']))
-            ->where('id', '!=', auth()->id())
-            ->select('id', 'name', 'surname', 'dni', 'email', 'role_id');
+        $rolesPermitidos = ['user', 'inspector', 'admin'];
 
+        // 2. Consulta Base (Excluye al usuario logueado)
+        $query = User::with(['role' => fn ($q) => $q->select('id', 'name')])
+            ->whereHas('role', fn ($q) => $q->whereIn('name', $rolesPermitidos))
+            ->where('id', '!=', Auth::id())
+            ->select('id', 'name', 'surname', 'dni', 'email', 'role_id')
+            ->orderBy('surname')
+            ->orderBy('name');
+
+        // --- 3. Filtro de Usuarios Online (Optimizado) ---
+        // A. Obtener IDs de TODOS los usuarios relevantes (sin paginación)
+        $usersToCheckIds = User::whereHas('role', fn ($r) => $r->whereIn('name', $rolesPermitidos))
+            ->where('id', '!=', Auth::id())
+            ->pluck('id');
+
+        $onlineUserIds = [];
+
+        // B. Buscar en caché SOLO los IDs que están online
+        foreach ($usersToCheckIds as $userId) {
+            if (Cache::has('user-online-'.$userId)) {
+                $onlineUserIds[] = $userId;
+            }
+        }
+
+        // C. Aplicar el filtro a la consulta principal con WHERE IN (mucho más eficiente)
+        $query->whereIn('id', $onlineUserIds);
+
+        // ----------------------------------------------------
+
+        // 4. Filtro de Búsqueda (Search)
         if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
+            $search = $request->input('search');
+            $lowerSearch = strtolower($search);
+
+            $query->where(function ($q) use ($search, $lowerSearch) {
                 $q->where('name', 'like', "%{$search}%")
                     ->orWhere('surname', 'like', "%{$search}%")
                     ->orWhere('dni', 'like', "%{$search}%")
                     ->orWhere('email', 'like', "%{$search}%")
-                    ->orWhereHas('role', fn ($r) => $r->where(DB::raw('LOWER(name)'), 'like', '%'.strtolower($search).'%'));
+                    ->orWhereHas('role', fn ($r) => $r->whereRaw('LOWER(name) LIKE ?', "%{$lowerSearch}%"));
             });
         }
 
-        \Log::debug('SQL Query:', ['sql' => $query->toSql(), 'bindings' => $query->getBindings()]);
+        // 5. Ejecución y Paginación
+        $loggedUsers = $query->paginate(10);
 
-        $loggedUsers = $query->paginate(25);
-
+        // 6. Post-procesamiento (Añadir nombre de rol e indicador online)
         $loggedUsers->getCollection()->transform(function ($user) {
             $user->role_name = $user->role?->name ?? 'Sin rol';
+            // El indicador is_online sigue siendo útil para la vista
+            $user->is_online = Cache::has('user-online-'.$user->id);
 
             return $user;
         });
-
-        \Log::info('Usuarios encontrados por rol:', ['roles' => $loggedUsers->pluck('role_name')->countBy()]);
 
         $roles = Role::pluck('name', 'id');
 
@@ -66,8 +96,9 @@ class UserController extends Controller
             'cars.parkingSessions.zone',
             'cars.parkingSessions.street',
         ]);
+        $zones = Zone::pluck('name', 'id');
 
-        return view('user.show', compact('user', 'roles'));
+        return view('user.show', compact('user', 'roles', 'zones'));
     }
 
     public function store(Request $request)

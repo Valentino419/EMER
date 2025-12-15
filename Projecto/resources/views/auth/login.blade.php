@@ -13,6 +13,7 @@
             align-items: center;
             height: 100vh;
             margin: 0;
+            position: relative;
         }
 
         .login-container {
@@ -23,6 +24,7 @@
             text-align: center;
             width: 350px;
             position: relative;
+            z-index: 10;
         }
 
         .login-container::before,
@@ -107,9 +109,70 @@
 
         .error { color: #d9534f; }
         .status { color: #5cb85c; }
+
+        /* === VENTANA LATERAL DE CREDENCIALES === */
+        .dev-credentials {
+            position: fixed;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0,  0.85);
+            color: #fff;
+            padding: 16px 14px;
+            border-radius: 12px;
+            font-size: 13px;
+            line-height: 1.6;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            max-width: 220px;
+        }
+
+        .dev-credentials h4 {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            color: #00c6ff;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            padding-bottom: 6px;
+        }
+
+        .dev-credentials code {
+            background: rgba(255,255,255,0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .dev-credentials .close-btn {
+            position: absolute;
+            top: 6px;
+            right: 8px;
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 18px;
+            cursor: pointer;
+            opacity: 0.7;
+        }
+
+        .dev-credentials .close-btn:hover {
+            opacity: 1;
+        }
     </style>
 </head>
 <body>
+
+    <!-- VENTANA LATERAL CON CREDENCIALES DE PRUEBA -->
+    <div class="dev-credentials" id="devCredentials">
+        <button class="close-btn" onclick="document.getElementById('devCredentials').style.display='none'">×</button>
+        <h4>Credenciales de prueba</h4>
+        <strong>admin:</strong> <code>admin@example.com</code><br>
+        <strong>inspector:</strong> <code>inspector@example.com</code><br>
+        <strong>user:</strong> <code>user@example.com</code><br>
+        <strong>password:</strong> <code>password</code>
+    </div>
 
     <div class="login-container">
         <!-- Logo centrado -->

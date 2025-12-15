@@ -65,19 +65,52 @@
         <div class="d-flex justify-content-center align-items-center mb-4 search-new-container gap-2">
             <form method="GET" action="{{ route('infractions.index') }}" class="flex-grow-1">
                 <div class="input-group">
-                    <input type="text" name="search" class="form-control" placeholder="Buscar por patente..."
-                        value="{{ request('search') }}">
+                    <input type="text" name="search" class="form-control" placeholder="Buscar patente (ej: AA123BB)"
+                        value="{{ request('search') }}" maxlength="7" style="text-transform: uppercase;">
                     <button class="btn btn-outline-secondary" type="submit">Buscar</button>
                 </div>
             </form>
-            @if(Auth::user()->role->name === 'admin' || Auth::user()->role->name === 'inspector')
+            @if (Auth::user()->role->name === 'admin' || Auth::user()->role->name === 'inspector')
                 {{-- Botón que abre el modal --}}
                 <button class="btn btn-primary btn-new" data-bs-toggle="modal" data-bs-target="#infraccionModal">
                     Nueva Infracción
                 </button>
             @endif
         </div>
-
+        @if (request('search'))
+            <div class="row justify-content-center mb-4">
+                <div class="col-md-8">
+                    @if ($carStatus === 'activo')
+                        <div class="alert alert-success d-flex align-items-center gap-2">
+                            <i class="bi bi-check-circle-fill"></i>
+                            <div>
+                                <strong>Patente {{ $car->car_plate }}</strong> está <strong>ACTIVA</strong>.
+                                @if ($hasTodayInfraction)
+                                    <br><span class="text-danger">Ya tiene una multa PENDIENTE HOY.</span>
+                                @else
+                                    <br><span class="text-success">Listo para registrar infracción.</span>
+                                @endif
+                            </div>
+                        </div>
+                    @elseif ($carStatus === 'no_encontrado')
+                        <div class="alert alert-warning d-flex align-items-center gap-2">
+                            <i class="bi bi-exclamation-triangle-fill"></i>
+                            <div>
+                                <strong>Patente {{ request('search') }}</strong> no está registrada.
+                                <br><small>Se creará automáticamente al registrar la infracción.</small>
+                            </div>
+                        </div>
+                    @elseif ($carStatus === 'formato_invalido')
+                        <div class="alert alert-danger d-flex align-items-center gap-2">
+                            <i class="bi bi-x-circle-fill"></i>
+                            <div>
+                                Formato de patente inválido. Use: <strong>AA123BB</strong> o <strong>ABC123</strong>.
+                            </div>
+                        </div>
+                    @endif
+                </div>
+            </div>
+        @endif
         {{-- Botones grandes --}}
         <div class="row g-4 justify-content-center">
             <div class="col-md-4">
@@ -100,6 +133,33 @@
                     <h5 class="modal-title" id="infraccionModalLabel">Registrar Nueva Infracción</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
+
+                <!-- Toast de éxito -->
+                @if (session('success'))
+                    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+                        <div id="successToast" class="toast align-items-center text-white bg-success border-0"
+                            role="alert" aria-live="assertive" aria-atomic="true">
+                            <div class="d-flex">
+                                <div class="toast-body">
+                                    {{ session('success') }}
+                                </div>
+                                <button type="button" class="btn-close btn-close-white me-2 m-auto"
+                                    data-bs-dismiss="toast" aria-label="Close"></button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            var toastEl = document.getElementById('successToast');
+                            var toast = new bootstrap.Toast(toastEl, {
+                                delay: 5000
+                            });
+                            toast.show();
+                        });
+                    </script>
+                @endif
+
                 <div class="modal-body">
                     <form action="{{ route('infractions.store') }}" method="POST" id="infraccionForm">
                         @csrf
@@ -112,7 +172,8 @@
 
                         <div class="mb-3">
                             <label for="fine" class="form-label">Monto de la Multa</label>
-                            <input type="number" class="form-control" id="fine" name="fine" value="5000" readonly>
+                            <input type="number" class="form-control" id="fine" name="fine" value="5000"
+                                readonly>
                         </div>
                     </form>
                 </div>
@@ -120,11 +181,15 @@
                     <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                     <button type="submit" form="infraccionForm" class="btn btn-primary">Registrar</button>
                 </div>
+
+                @if (session('success'))
+   |            <!-- Toast de éxito -->
+                @endif
+
             </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-
 </html>
