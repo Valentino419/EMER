@@ -162,8 +162,7 @@ class InfractionController extends Controller
             }
         }
 
-        return redirect()->route('infractions.index')
-            ->with('success', "¡Multa registrada por $5000 a la patente {$car->car_plate}!");
+        return back()->with('success', "¡Multa registrada por $5000 a la patente {$car->car_plate}!");
     }
 
     public function edit(Infraction $infraction)
