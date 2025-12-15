@@ -168,10 +168,9 @@
     <div class="dev-credentials" id="devCredentials">
         <button class="close-btn" onclick="document.getElementById('devCredentials').style.display='none'">×</button>
         <h4>Credenciales de prueba</h4>
-        <strong>admin:</strong> <code>admin@example.com</code><br>
-        <strong>inspector:</strong> <code>inspector@example.com</code><br>
-        <strong>user:</strong> <code>user@example.com</code><br>
-        <strong>password:</strong> <code>password</code>
+        <strong> <button type="button" onclick="autocompletarFormulario('admin@example.com')">admin</button>
+        <strong> <button type="button" onclick="autocompletarFormulario('inspector@example.com')">inspector</button>
+        <strong> <button type="button" onclick="autocompletarFormulario('user@example.com')">user</button>
     </div>
 
     <div class="login-container">
@@ -196,8 +195,8 @@
 
         <form method="POST" action="{{ route('login') }}">
             @csrf
-            <input type="email" name="email" placeholder="Email Address" value="{{ old('email') }}" required>
-            <input type="password" name="password" placeholder="Password" required>
+            <input type="email" name="email" id="email" placeholder="Email Address" value="{{ old('email') }}" required>
+            <input type="password" name="password" id="password" placeholder="Password" required>
 
             <div class="remember">
                 <input type="checkbox" id="remember" name="remember" style="margin-right: 8px;">
@@ -222,4 +221,16 @@
     </div>
 
 </body>
+
+ <script>
+        function autocompletarFormulario(mail) {
+           
+            
+            // Valores predefinidos que quieres rellenar
+            document.getElementById('password').value = 'password';
+            document.getElementById('email').value = mail ;
+           
+        }
+    </script>
 </html>
+

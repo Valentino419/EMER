@@ -380,15 +380,9 @@
                         </div>
                         <div class="mb-3">
                             <label for="fine" class="form-label">Multa</label>
-                            <input type="number" name="fine" id="fine" class="form-control"
-                                value="{{ old('fine', 5000) }}" min="0">
+                            <input type="number" class="form-control" id="fine" name="fine" value="5000"
+                                readonly>
                         </div>
-                        <div class="mb-3">
-                            <label for="date" class="form-label">Fecha</label>
-                            <input type="date" name="date" id="date" class="form-control"
-                                value="{{ old('date', now()->format('Y-m-d')) }}" readonly>
-                        </div>
-
                     </form>
                 </div>
 
