@@ -136,7 +136,7 @@ class ParkingSessionController extends Controller
 
             Log::info('Sesión activada SIN pago', ['session_id' => $parkingSession->id]);
 
-            return back()->with('success', '¡Estacionamiento activado sin pago! (modo prueba)');
+            return back()->with('success', '¡Estacionamiento activado');
         }
 
         // MODO CON PAGO
