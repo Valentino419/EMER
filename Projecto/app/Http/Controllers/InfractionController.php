@@ -136,8 +136,7 @@ class InfractionController extends Controller
 
         if ($existing) {
             return back()
-                ->with('error', "Ya existe una infracción pendiente HOY para la patente {$car->car_plate}.")
-                ->withInput();
+                ->with('error', "Ya existe una infracción pendiente HOY para la patente {$car->car_plate}.");
         }
 
         $infraction = Infraction::create([
