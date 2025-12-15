@@ -82,7 +82,6 @@
                 </div>
             </a>
         </div>
-gi
         <!-- Infracciones -->
         <div class="col-md-4 mb-4">
             <a href="{{ route('infractions.index') }}" class="text-decoration-none text-dark">
