@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Route;
 
 // Dashboard
 Route::get('/dashboard', [DashboardController::class, 'index'])
-    ->middleware(['auth' ])
+    ->middleware(['auth'])
     ->name('dashboard');
 
 // Schedule (admin only)
@@ -67,7 +67,7 @@ Route::delete('/street/{street}', [StreetController::class, 'destroy'])
 
 // Zones
 Route::get('/zones', [ZoneController::class, 'index'])
-    ->middleware(['auth' ])
+    ->middleware(['auth'])
     ->name('zones.index');
 Route::get('/zones/create', [ZoneController::class, 'create'])
     ->middleware(['auth'])
@@ -76,7 +76,7 @@ Route::post('/zones', [ZoneController::class, 'store'])
     ->middleware(['auth'])
     ->name('zones.store');
 Route::get('/zones/{zone}', [ZoneController::class, 'show'])
-    ->middleware(['auth' ])
+    ->middleware(['auth'])
     ->name('zones.show');
 Route::get('/zones/{zone}/edit', [ZoneController::class, 'edit'])
     ->middleware(['auth'])
@@ -136,7 +136,7 @@ Route::delete('/cars/{car}', [CarController::class, 'destroy'])
 
 // Infractions
 Route::get('/infractions', [InfractionController::class, 'index'])
-    ->middleware(['auth' ])
+    ->middleware(['auth'])
     ->name('infractions.index');
 Route::get('/infractions/create', [InfractionController::class, 'create'])
     ->middleware(['auth'])
@@ -156,6 +156,9 @@ Route::put('/infractions/{infraction}', [InfractionController::class, 'update'])
 Route::delete('/infractions/{infraction}', [InfractionController::class, 'destroy'])
     ->middleware(['auth'])
     ->name('infractions.destroy');
+Route::get('/infractions/{infraction}/payment', [InfractionController::class, 'payment'])
+    ->name('infractions.payment')
+    ->middleware(['auth']);
 
 // Inspectors (admin only)
 Route::get('/inspectors', [InspectorController::class, 'index'])
@@ -182,7 +185,7 @@ Route::delete('/inspectors/{inspector}', [InspectorController::class, 'destroy']
 
 // Custom user routes
 Route::get('/user/logged', [UserController::class, 'logged'])
-    ->middleware(['auth' ])
+    ->middleware(['auth'])
     ->name('user.logged');
 
 // Check zone (GET + POST)
@@ -192,7 +195,7 @@ Route::match(['get', 'post'], '/check-zone', [ZoneController::class, 'checkZone'
 // Parking sessions
 Route::get('/parking', [ParkingSessionController::class, 'index'])
     ->middleware(['auth'])
-    ->name('parking.index'); 
+    ->name('parking.index');
 Route::get('/parking/create', [ParkingSessionController::class, 'create'])
     ->middleware(['auth'])
     ->name('parking.create');
@@ -202,8 +205,8 @@ Route::post('/parking/{id}/end', [ParkingSessionController::class, 'end'])
 Route::post('/parking', [ParkingSessionController::class, 'store'])
     ->middleware(['auth'])
     ->name('parking.store');
-Route::get('/parking/{parkingSession?}', [ParkingSessionController::class, 'show'])
-    ->middleware(['auth' ])
+Route::get('/parking', [ParkingSessionController::class, 'show'])
+    ->middleware(['auth'])
     ->name('parking.show');
 Route::post('/parking/{session}/extend', [ParkingSessionController::class, 'extend'])
     ->name('parking.extend');
@@ -212,8 +215,7 @@ Route::delete('/parking/{parkingSession}', [ParkingSessionController::class, 'de
     ->middleware(['auth'])
     ->name('parking.destroy');
 
-
-    Route::put('/parking/{parkingSession}', [ParkingSessionController::class, 'update'])
+Route::put('/parking/{parkingSession}', [ParkingSessionController::class, 'update'])
     ->middleware(['auth'])
     ->name('parking.update');
 // API parking check

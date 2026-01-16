@@ -22,7 +22,7 @@ Route::get('/zones/{zone}/streets', function (Zone $zone) {
     $currentTime = Carbon::now()->format('H:i:s'); // e.g., "19:47:00"
 
     // Log request details for debugging
-    Log::info('API /zones/{zone}/rate called', [
+    //Log::info('API /zones/{zone}/rate called', [
         'zone_id' => $zone->id,
         'current_day' => $currentDay,
         'current_time' => $currentTime,
@@ -37,13 +37,13 @@ Route::get('/zones/{zone}/streets', function (Zone $zone) {
 
     // Log schedule result
     if (!$schedule) {
-        Log::warning('No schedule found for zone', [
+        //Log::warning('No schedule found for zone', [
             'zone_id' => $zone->id,
             'current_day' => $currentDay,
             'current_time' => $currentTime,
         ]);
     } else {
-        Log::info('Schedule found', [
+        //Log::info('Schedule found', [
             'schedule_id' => $schedule->id,
             'days_of_week' => $schedule->days_of_week,
             'start_hour' => $schedule->start_hour,

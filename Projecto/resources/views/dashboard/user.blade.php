@@ -239,6 +239,7 @@
                 margin-right: auto;
             }
         }
+
         /* MODAL FIJO Y OCULTO */
         .extend-modal {
             position: fixed;
@@ -331,13 +332,13 @@
         <div class="row g-4 justify-content-center">
             @foreach ($data['widgets'] as $widget)
                 <div class="col-md-4">
-                    <div class="card card-menu">
-                        <div class="card-body">
-                            <span class="emoji">
+                    <a href="{{ $widget['link'] }}" class="text-decoration-none text-dark">
+                        <div class="card shadow-sm card-menu text-center py-4 h-100">
+                            <div class="emoji fs-1 mb-3">
                                 @if ($widget['name'] == 'Mis Autos')
                                     🚗
                                 @elseif ($widget['name'] == 'Iniciar Estacionamiento')
-                                    🅿️
+                                   🅿️
                                 @elseif ($widget['name'] == 'Multas')
                                     ⚠️
                                 @elseif ($widget['name'] == 'Zonas')
@@ -347,12 +348,13 @@
                                 @else
                                     🛠️
                                 @endif
-                            </span>
-                            <h5 class="card-title">{{ $widget['name'] }}</h5>
-                            <a href="{{ $widget['link'] }}"
-                                class="btn {{ $widget['name'] == 'Iniciar Estacionamiento' ? 'btn-success' : 'btn-primary' }}">Ir</a>
+                            </div>
+                            <h5 class="mb-0">{{ $widget['name'] }}</h5>
+
+                            <!-- Optional: small "Ir" text at the bottom for better UX -->
+                            <!--small class="text-muted mt-2 d-block">Ir →</small-->
                         </div>
-                    </div>
+                    </a>
                 </div>
             @endforeach
         </div>
@@ -415,153 +417,157 @@
         </div>
     </div>
 
-<script>
-    // === DATOS DE SESIONES (100% SEGURO) ===
-    @php
-        $sessionsData = $data['activeSessions']->map(function ($s) {
-            return [
-                'id' => $s->id,
-                'start' => $s->start_time->timestamp * 1000,
-                'duration' => $s->duration,
-                'amount' => $s->amount,
-                'car' => $s->car->license_plate ?? $s->car->car_plate,
-                'rate' => $s->street->zone->rate ?? 100,
-            ];
-        })->toArray();
-    @endphp
+    <script>
+        // === DATOS DE SESIONES (100% SEGURO) ===
+        @php
+            $sessionsData = $data['activeSessions']
+                ->map(function ($s) {
+                    return [
+                        'id' => $s->id,
+                        'start' => $s->start_time->timestamp * 1000,
+                        'duration' => $s->duration,
+                        'amount' => $s->amount,
+                        'car' => $s->car->license_plate ?? $s->car->car_plate,
+                        'rate' => $s->street->zone->rate ?? 100,
+                    ];
+                })
+                ->toArray();
+        @endphp
 
-    const sessions = @json($sessionsData);
+        const sessions = @json($sessionsData);
 
-    let currentSessionId = null;
+        let currentSessionId = null;
 
-    document.addEventListener('DOMContentLoaded', () => {
-        sessions.forEach(s => {
-            let endTime = s.start + (s.duration * 60 * 1000);
-            let warned = false;
+        document.addEventListener('DOMContentLoaded', () => {
+            sessions.forEach(s => {
+                let endTime = s.start + (s.duration * 60 * 1000);
+                let warned = false;
 
-            const timerEl = document.getElementById(`dashboard-timer-${s.id}`);
-            const btn = document.getElementById(`extend-btn-${s.id}`);
-            const widget = document.getElementById(`active-parking-widget-${s.id}`);
+                const timerEl = document.getElementById(`dashboard-timer-${s.id}`);
+                const btn = document.getElementById(`extend-btn-${s.id}`);
+                const widget = document.getElementById(`active-parking-widget-${s.id}`);
 
-            const update = () => {
-                const left = Math.max(0, Math.floor((endTime - Date.now()) / 1000));
-                if (left === 0) {
-                    timerEl.textContent = 'Finalizado';
-                    timerEl.classList.add('text-red-600');
-                    btn.classList.add('hidden');
-                    widget.style.opacity = '0.6';
-                    setTimeout(() => location.reload(), 3000);
-                    return;
-                }
-                const h = String(Math.floor(left / 3600)).padStart(2, '0');
-                const m = String(Math.floor((left % 3600) / 60)).padStart(2, '0');
-                const s = String(left % 60).padStart(2, '0');
-                timerEl.textContent = `${h}:${m}:${s} restantes`;
+                const update = () => {
+                    const left = Math.max(0, Math.floor((endTime - Date.now()) / 1000));
+                    if (left === 0) {
+                        timerEl.textContent = 'Finalizado';
+                        timerEl.classList.add('text-red-600');
+                        btn.classList.add('hidden');
+                        widget.style.opacity = '0.6';
+                        setTimeout(() => location.reload(), 3000);
+                        return;
+                    }
+                    const h = String(Math.floor(left / 3600)).padStart(2, '0');
+                    const m = String(Math.floor((left % 3600) / 60)).padStart(2, '0');
+                    const s = String(left % 60).padStart(2, '0');
+                    timerEl.textContent = `${h}:${m}:${s} restantes`;
 
-                if (left <= 300 && !warned) {
-                    btn.classList.remove('hidden');
-                    warned = true;
-                }
-            };
-            update();
-            setInterval(update, 1000);
-        });
-    });
-
-    function number_format(n) {
-        return Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '');
-    }
-
-    function openModal(id) {
-        const s = sessions.find(x => x.id == id);
-        currentSessionId = id;
-        document.getElementById('modal-car').textContent = s.car;
-
-        const select = document.getElementById('extra-duration');
-        select.innerHTML = '';
-        const rate = s.rate;
-        const opts = [
-            [60, rate, `1 hora - $${number_format(rate)}`],
-            [120, rate * 2, `2 horas - $${number_format(rate * 2)}`],
-            [180, rate * 3, `3 horas - $${number_format(rate * 3)}`]
-        ];
-        opts.forEach(o => {
-            const opt = new Option(o[2], o[0]);
-            opt.dataset.cost = o[1];
-            select.add(opt);
-        });
-
-        document.getElementById('extend-cost').textContent = `$${number_format(opts[0][1])}`;
-        document.getElementById('extend-modal').classList.add('show');
-    }
-
-    function closeModal() {
-        document.getElementById('extend-modal').classList.remove('show');
-    }
-
-    document.getElementById('extra-duration').addEventListener('change', () => {
-        const cost = document.getElementById('extra-duration').selectedOptions[0].dataset.cost;
-        document.getElementById('extend-cost').textContent = `$${number_format(cost)}`;
-    });
-
-    document.getElementById('confirm-extend').onclick = async () => {
-        const extra = parseInt(document.getElementById('extra-duration').value);
-        const btn = document.getElementById('confirm-extend');
-        const txt = btn.textContent;
-        btn.disabled = true;
-        btn.textContent = 'Procesando...';
-
-        try {
-            const res = await fetch(`/parking/${currentSessionId}/extend`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify({ extra_minutes: extra })
+                    if (left <= 300 && !warned) {
+                        btn.classList.remove('hidden');
+                        warned = true;
+                    }
+                };
+                update();
+                setInterval(update, 1000);
             });
-            const data = await res.json();
+        });
 
-            if (data.success) {
-                alert('¡Tiempo extendido con éxito!');
-                closeModal();
-                location.reload();
-            } else {
-                alert(data.message || 'Error al extender');
-            }
-        } catch (e) {
-            alert('Error de conexión');
-        } finally {
-            btn.disabled = false;
-            btn.textContent = txt;
+        function number_format(n) {
+            return Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '');
         }
-    };
 
-    // Finalizar estacionamiento
-    document.querySelectorAll('[id^="end-parking-form-"]').forEach(form => {
-        form.addEventListener('submit', async function (e) {
-            e.preventDefault();
-            if (!confirm('¿Finalizar este estacionamiento?')) return;
+        function openModal(id) {
+            const s = sessions.find(x => x.id == id);
+            currentSessionId = id;
+            document.getElementById('modal-car').textContent = s.car;
 
-            const res = await fetch(this.action, {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                },
-                body: new FormData(this)
+            const select = document.getElementById('extra-duration');
+            select.innerHTML = '';
+            const rate = s.rate;
+            const opts = [
+                [60, rate, `1 hora - $${number_format(rate)}`],
+                [120, rate * 2, `2 horas - $${number_format(rate * 2)}`],
+                [180, rate * 3, `3 horas - $${number_format(rate * 3)}`]
+            ];
+            opts.forEach(o => {
+                const opt = new Option(o[2], o[0]);
+                opt.dataset.cost = o[1];
+                select.add(opt);
             });
-            const data = await res.json();
-            if (res.ok && data.success) {
-                alert(data.message);
-                document.getElementById('active-parking-widget-' + this.id.split('-')[3]).remove();
-            } else {
-                alert(data.message || 'Error');
-            }
+
+            document.getElementById('extend-cost').textContent = `$${number_format(opts[0][1])}`;
+            document.getElementById('extend-modal').classList.add('show');
+        }
+
+        function closeModal() {
+            document.getElementById('extend-modal').classList.remove('show');
+        }
+
+        document.getElementById('extra-duration').addEventListener('change', () => {
+            const cost = document.getElementById('extra-duration').selectedOptions[0].dataset.cost;
+            document.getElementById('extend-cost').textContent = `$${number_format(cost)}`;
         });
-    });
-    
-</script>
+
+        document.getElementById('confirm-extend').onclick = async () => {
+            const extra = parseInt(document.getElementById('extra-duration').value);
+            const btn = document.getElementById('confirm-extend');
+            const txt = btn.textContent;
+            btn.disabled = true;
+            btn.textContent = 'Procesando...';
+
+            try {
+              const res = await fetch(`/parking/${currentSessionId}/extend`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        extra_minutes: extra
+                    })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    alert('¡Tiempo extendido con éxito!');
+                    closeModal();
+                    location.reload();
+                } else {
+                    alert(data.message || 'Error al extender');
+                }
+            } catch (e) {
+                alert('Error de conexión');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = txt;
+            }
+        };
+
+        // Finalizar estacionamiento
+        document.querySelectorAll('[id^="end-parking-form-"]').forEach(form => {
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                if (!confirm('¿Finalizar este estacionamiento?')) return;
+
+                const res = await fetch(this.action, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
+                            .content
+                    },
+                    body: new FormData(this)
+                });
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    alert(data.message);
+                    document.getElementById('active-parking-widget-' + this.id.split('-')[3]).remove();
+                } else {
+                    alert(data.message || 'Error');
+                }
+            });
+        });
+    </script>
 </body>
 
 </html>

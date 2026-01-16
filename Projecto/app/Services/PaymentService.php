@@ -22,11 +22,7 @@ class PaymentService
             ]
         );
 
-        Log::info('Pago registrado en tabla payments', [
-            'payment_id' => $paymentId,
-            'model' => get_class($model),
-            'model_id' => $model->id
-        ]);
+        //Log::info('Pago registrado en tabla payments', [ 'payment_id' => $paymentId,'model' => get_class($model), 'model_id' => $model->id ]);
 
         return $payment;
     }

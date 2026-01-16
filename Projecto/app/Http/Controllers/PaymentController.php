@@ -10,16 +10,13 @@ class PaymentController extends Controller
 {
     public function initiate()
     {
-        Log::info('INICIANDO PAGO MP', [
-            'session_id' => session('parking_session_id'),
-            'amount' => session('parking_amount'),
-        ]);
+        //Log::info('INICIANDO PAGO MP', ['session_id' => session('parking_session_id'),'amount' => session('parking_amount'), ]);
 
         $sessionId = session('parking_session_id');
         $amount = session('parking_amount');
 
         if (! $sessionId || ! $amount) {
-            Log::error('FALTAN DATOS DE SESIÓN');
+            //Log::error('FALTAN DATOS DE SESIÓN');
 
             return redirect()->route('parking.create')
                 ->with('error', 'No se pudo iniciar el pago. Intenta de nuevo.');
@@ -49,17 +46,10 @@ class PaymentController extends Controller
                 'notification_url' => env('MERCADOPAGO_NOTIFICATION_URL'),
             ]);
 
-        Log::info('RESPONSE MP', [
-            'status' => $response->status(),
-            'body' => $response->body(),
-            'json' => $response->json(),
-        ]);
+        //Log::info('RESPONSE MP', ['status' => $response->status(),'body' => $response->body(), 'json' => $response->json(), ]);
 
         if ($response->failed()) {
-            Log::error('ERROR API MP', [
-                'status' => $response->status(),
-                'body' => $response->body(),
-            ]);
+            //Log::error('ERROR API MP', ['status' => $response->status(),'body' => $response->body(),]);
 
             return redirect()->route('parking.create')
                 ->with('error', 'Error de Mercado Pago. Intenta más tarde.');
@@ -69,13 +59,13 @@ class PaymentController extends Controller
         // $initPoint = $preference['init_point'] ?? null;
         $initPoint = $preference['init_point'] ?? null;
         if (! $initPoint) {
-            Log::error('NO HAY INIT_POINT', $preference);
+            //Log::error('NO HAY INIT_POINT', $preference);
 
             return redirect()->route('parking.create')
                 ->with('error', 'No se pudo generar el enlace de pago.');
         }
 
-        Log::info('REDIRIGIENDO A MP', ['init_point' => $initPoint]);
+        //Log::info('REDIRIGIENDO A MP', ['init_point' => $initPoint]);
 
         session()->forget(['parking_session_id', 'parking_amount']);
 
@@ -88,7 +78,7 @@ class PaymentController extends Controller
         $externalReference = $request->query('external_reference'); // Tu $sessionId
 
         if (! $paymentId || ! $externalReference) {
-            Log::error('FALTAN PARAMS EN SUCCESS', $request->all());
+            //Log::error('FALTAN PARAMS EN SUCCESS', $request->all());
 
             return redirect()->route('parking.create')->with('error', 'Error en verificación de pago.');
         }
@@ -97,7 +87,7 @@ class PaymentController extends Controller
         $response = Http::withToken(env('MERCADOPAGO_ACCESS_TOKEN'))
             ->get("https://api.mercadopago.com/v1/payments/$paymentId");
 
-        Log::info('VERIFICACION PAGO', ['status' => $response->status(), 'json' => $response->json()]);
+       // //Log::info('VERIFICACION PAGO', ['status' => $response->status(), 'json' => $response->json()]);
 
         if ($response->successful()) {
             $payment = $response->json();
@@ -109,7 +99,7 @@ class PaymentController extends Controller
                         'status' => 'active',
                         'payment_status' => 'paid',
                     ]);
-                    Log::info('Pago verificado y sesión activada', ['session_id' => $externalReference]);
+                    //Log::info('Pago verificado y sesión activada', ['session_id' => $externalReference]);
 
                     return redirect()->route('parking.create')->with('success', '¡Pago exitoso! Estacionamiento activado.');
                 }
@@ -133,7 +123,7 @@ class PaymentController extends Controller
 
     public function webhook(Request $request)
     {
-        Log::info('WEBHOOK MP RECIBIDO', $request->all());
+        //Log::info('WEBHOOK MP RECIBIDO', $request->all());
 
         $type = $request->input('type');
         $dataId = $request->input('data.id');
@@ -152,7 +142,7 @@ class PaymentController extends Controller
                             'status' => 'active',
                             'payment_status' => 'paid',
                         ]);
-                        Log::info('Pago confirmado via webhook', ['session_id' => $sessionId]);
+                        //Log::info('Pago confirmado via webhook', ['session_id' => $sessionId]);
                     }
                 }
             }

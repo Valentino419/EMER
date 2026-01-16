@@ -15,13 +15,9 @@ class InspectorController extends Controller
     {
         $search = $request->query('search');
 
-        $query = User::with('role') // Eager-load the role relationship
-            ->whereHas('role', function ($q) {
-                $q->where('name', 'inspector');
-
-            })->orWhereHas('role', function ($q) {
-                $q->where('name', 'admin');
-            })->orderBy('name');
+        $query = User::with('role')
+            ->whereHas('role', fn ($q) => $q->whereIn('name', ['inspector', 'admin']))
+            ->orderBy('name');
 
         if ($search) {
             $query->where(function ($q) use ($search) {
@@ -114,7 +110,8 @@ class InspectorController extends Controller
             return redirect()->route('inspectors.index')->with('success', 'Inspector actualizado con éxito.');
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Error updating inspector: '.$e->getMessage(), ['exception' => $e]);
+            //Log::error('Error updating inspector: '.$e->getMessage(), ['exception' => $e]);
+
             return back()->withErrors(['error' => 'Error al actualizar el inspector. Por favor, intenta de nuevo.'])->withInput();
         }
     }

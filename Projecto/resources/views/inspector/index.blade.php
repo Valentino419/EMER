@@ -245,27 +245,28 @@
         color: #6c757d;
         cursor: not-allowed;
     }
+
     .back-arrow {
-            display: inline-block;
-            font-size: 32px;
-            font-weight: bold;
-            color: #1a3c6d;
-            text-decoration: none;
-            margin-bottom: 15px;
-            background: #fff;
-            border-radius: 50%;
-            padding: 8px 14px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-            transition: all 0.3s ease;
-        }
+        display: inline-block;
+        font-size: 32px;
+        font-weight: bold;
+        color: #1a3c6d;
+        text-decoration: none;
+        margin-bottom: 15px;
+        background: #fff;
+        border-radius: 50%;
+        padding: 8px 14px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        transition: all 0.3s ease;
+    }
 
-        .back-arrow:hover {
-            background: #007bff;
-            color: #fff;
-            transform: scale(1.1);
-        }
+    .back-arrow:hover {
+        background: #007bff;
+        color: #fff;
+        transform: scale(1.1);
+    }
 
-        @media (max-width: 768px) {
+    @media (max-width: 768px) {
         .container {
             padding: 15px;
         }
@@ -307,7 +308,8 @@
 
         <!-- Search Form -->
         <form action="{{ route('inspectors.index') }}" method="GET" class="search-form">
-            <input type="text" name="search" value="{{ request('search') }}" placeholder="Buscar por nombre, apellido, DNI o email">
+            <input type="text" name="search" value="{{ request('search') }}"
+                placeholder="Buscar por nombre, apellido, DNI o email">
             <button type="submit" class="btn btn-primary">Buscar</button>
         </form>
 
@@ -352,17 +354,20 @@
                 @endforelse
             </tbody>
         </table>
+        <div class="d-flex justify-content-center mt-4">
+            {{ $inspectors->links('pagination::bootstrap-5') }}
+        </div>
 
-        <!-- modal editar -->
-        {{ $inspectors->appends(request()->query())->links('pagination::bootstrap-5') }}
     </div>
-
+    <!-- modal editar -->
     @foreach ($inspectors as $inspector)
-        <div class="modal fade" id="modalEditarInspector{{ $inspector->id }}" tabindex="-1" aria-labelledby="modalEditarInspectorLabel{{ $inspector->id }}" aria-hidden="true">
+        <div class="modal fade" id="modalEditarInspector{{ $inspector->id }}" tabindex="-1"
+            aria-labelledby="modalEditarInspectorLabel{{ $inspector->id }}" aria-hidden="true">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="modalEditarInspectorLabel{{ $inspector->id }}">Editar Inspector #{{ $inspector->id }}</h5>
+                        <h5 class="modal-title" id="modalEditarInspectorLabel{{ $inspector->id }}">Editar Inspector
+                            #{{ $inspector->id }}</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                     </div>
                     <div class="modal-body">
@@ -371,28 +376,32 @@
                             @method('PUT')
                             <div>
                                 <label for="name">Nombre</label>
-                                <input type="text" name="name" value="{{ old('name', $inspector->name) }}" required>
+                                <input type="text" name="name" value="{{ old('name', $inspector->name) }}"
+                                    required>
                                 @error('name')
                                     <span class="error">{{ $message }}</span>
                                 @enderror
                             </div>
                             <div>
                                 <label for="surname">Apellido</label>
-                                <input type="text" name="surname" value="{{ old('surname', $inspector->surname) }}" required>
+                                <input type="text" name="surname" value="{{ old('surname', $inspector->surname) }}"
+                                    required>
                                 @error('surname')
                                     <span class="error">{{ $message }}</span>
                                 @enderror
                             </div>
                             <div>
                                 <label for="dni">DNI</label>
-                                <input type="text" name="dni" value="{{ old('dni', $inspector->dni) }}" required>
+                                <input type="text" name="dni" value="{{ old('dni', $inspector->dni) }}"
+                                    required>
                                 @error('dni')
                                     <span class="error">{{ $message }}</span>
                                 @enderror
                             </div>
                             <div>
                                 <label for="email">Correo</label>
-                                <input type="email" name="email" value="{{ old('email', $inspector->email) }}" required>
+                                <input type="email" name="email" value="{{ old('email', $inspector->email) }}"
+                                    required>
                                 @error('email')
                                     <span class="error">{{ $message }}</span>
                                 @enderror

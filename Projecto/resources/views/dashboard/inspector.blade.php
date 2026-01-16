@@ -70,13 +70,23 @@
                     <button class="btn btn-outline-secondary" type="submit">Buscar</button>
                 </div>
             </form>
-            @if (Auth::user()->role->name === 'admin' || Auth::user()->role->name === 'inspector')
-                {{-- Botón que abre el modal --}}
-                <button class="btn btn-primary btn-new" data-bs-toggle="modal" data-bs-target="#infraccionModal">
-                    Nueva Infracción
-                </button>
-            @endif
+
         </div>
+        @if (session('success'))
+            <div class="alert alert-success">{{ session('success') }}</div>
+        @endif
+        @if (session('error'))
+            <div class="alert alert-danger">{{ session('error') }}</div>
+        @endif
+        @if ($errors->any())
+            <div class="alert alert-danger">
+                <ul>
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
         @if (request('search'))
             <div class="row justify-content-center mb-4">
                 <div class="col-md-8">
@@ -111,13 +121,27 @@
                 </div>
             </div>
         @endif
-        {{-- Botones grandes --}}
+        {{-- Botones grandes en tarjetas --}}
         <div class="row g-4 justify-content-center">
+
+            @if (Auth::user()->role->name === 'admin' || Auth::user()->role->name === 'inspector')
+                <div class="col-md-4">
+                    <button type="button" class="text-decoration-none text-dark w-100 border-0 bg-transparent p-0"
+                        data-bs-toggle="modal" data-bs-target="#infraccionModal">
+                        <div class="card card-option text-center p-4 h-100 shadow-sm hover-shadow border-primary">
+                            <div class="icon fs-1 text-primary">➕</div>
+                            <h5 class="mt-3 text-primary">Nueva Infracción</h5>
+                            <p class="text-muted small">Registrar una nueva multa por patente</p>
+                        </div>
+                    </button>
+                </div>
+            @endif
             <div class="col-md-4">
                 <a href="{{ route('infractions.index') }}" class="text-decoration-none text-dark">
-                    <div class="card card-option text-center p-4">
-                        <div class="icon">⚠️</div>
+                    <div class="card card-option text-center p-4 h-100 shadow-sm hover-shadow">
+                        <div class="icon fs-1">⚠️</div>
                         <h5 class="mt-3">Gestionar Infracciones</h5>
+                        <p class="text-muted small">Ver, editar y gestionar todas las multas</p>
                     </div>
                 </a>
             </div>
@@ -135,30 +159,7 @@
                 </div>
 
                 <!-- Toast de éxito -->
-                @if (session('success'))
-                    <div class="toast-container position-fixed bottom-0 end-0 p-3">
-                        <div id="successToast" class="toast align-items-center text-white bg-success border-0"
-                            role="alert" aria-live="assertive" aria-atomic="true">
-                            <div class="d-flex">
-                                <div class="toast-body">
-                                    {{ session('success') }}
-                                </div>
-                                <button type="button" class="btn-close btn-close-white me-2 m-auto"
-                                    data-bs-dismiss="toast" aria-label="Close"></button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <script>
-                        document.addEventListener('DOMContentLoaded', function() {
-                            var toastEl = document.getElementById('successToast');
-                            var toast = new bootstrap.Toast(toastEl, {
-                                delay: 5000
-                            });
-                            toast.show();
-                        });
-                    </script>
-                @endif
+             
 
                 <div class="modal-body">
                     <form action="{{ route('infractions.store') }}" method="POST" id="infraccionForm">
@@ -183,7 +184,7 @@
                 </div>
 
                 @if (session('success'))
-   |            <!-- Toast de éxito -->
+                    | <!-- Toast de éxito -->
                 @endif
 
             </div>
@@ -192,4 +193,5 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>

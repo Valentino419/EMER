@@ -113,6 +113,6 @@ class CarController extends Controller
     {
         $car->delete();
 
-        return redirect()->route('cars.index')->with('success', 'Auto eliminado correctamente.');
+        return redirect()->back()->with('success', 'Auto eliminado correctamente.');
     }
 }
